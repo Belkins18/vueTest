@@ -56,14 +56,14 @@
                 message: ''
             }
         },
-        // mounted() {
-        //     this.$store.dispatch('initFirebase');
-        // },
-        // methods: {
-        //     enterUser() {
-        //         this.$store.dispatch('firebaseAuth', this.user);
-        //     }
-        // }
+        mounted() {
+            this.$store.dispatch('initFirebase');
+        },
+        methods: {
+            enterUser() {
+                this.$store.dispatch('firebaseAuth', this.user);
+            }
+        }
     }
 </script>
 

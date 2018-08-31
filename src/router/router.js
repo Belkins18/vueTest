@@ -13,6 +13,14 @@ Vue.use(Router)
 
 const routes = [
   {
+    path: `/`,
+    redirect: `/${PageNames.HOME}`,
+    component: Home, 
+    meta: {
+      auth: true
+    },
+  },
+  {
     path: `${PageNames.MAIN}:id`,
     name: `${PageNames.MAIN}/`,
     component: Main,
