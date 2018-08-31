@@ -15,6 +15,8 @@ Vue.config.productionTip = false
 router.beforeEach((to, from, next) => {
   try {
     console.log(store.state.isLoggedIn)
+    console.log(store.state.localStorage)
+    console.log(store.state.dbFirebase)
 //     console.log(to)
 //     console.log(from)
 //     if (to.name !== PageNames.SIGN_IN) {
