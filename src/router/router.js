@@ -1,7 +1,7 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Main from '../components/Main'
+import MainLayout from '../components/MainLayout'
 import Home from '../views/Home'
 import Products from '../views/Products'
 import Orders from '../views/Orders'
@@ -9,56 +9,44 @@ import SignIn from '../views/SignIn'
 
 import PageNames from '../pageNames'
 
-Vue.use(Router)
+Vue.use(Router);
 
 const routes = [
-  {
-    path: `/`,
-    redirect: `/${PageNames.HOME}`,
-    component: Home, 
-    meta: {
-      auth: true
+    {
+        path: PageNames.MAIN_LAYOUT,
+        component: MainLayout,
+        meta: {
+            requiresAuth: true
+        },
+        redirect: PageNames.HOME,
+
+        children: [
+            {
+                path: PageNames.HOME,
+                name: PageNames.HOME,
+                component: Home,
+            },
+            {
+                path: PageNames.PRODUCTS,
+                name: PageNames.PRODUCTS,
+                component: Products,
+            },
+            {
+                path: PageNames.ORDERS,
+                name: PageNames.ORDERS,
+                component: Orders,
+            },
+        ]
     },
-  },
-  {
-    path: `${PageNames.MAIN}:id`,
-    name: `${PageNames.MAIN}/`,
-    component: Main,
-    meta: {
-      auth: true
-    },
-    children: [
-      {
-        path: `/${PageNames.HOME}`,
-        name: PageNames.HOME,
-        component: Home,
-        // component: () => import('./views/Products.vue')
-      },
-      {
-        path: `/${PageNames.PRODUCTS}`,
-        name: PageNames.PRODUCTS,
-        component: Products
-        // component: () => import('./views/Products.vue')
-      },
-      {
-        path: `/${PageNames.ORDERS}`,
-        name: PageNames.ORDERS,
-        component: Orders,
-        // component: () => import('./views/Products.vue')
-      },
-    ]
-  },
-  {
-    path: `/${PageNames.SIGN_IN}`,
-    name: PageNames.SIGN_IN,
-    // route level code-splitting
-    // this generates a separate chunk (about.[hash].js) for this route
-    // which is lazy-loaded when the route is visited.
-    component: SignIn
-  }
-]
+    {
+        path: `/${PageNames.SIGN_IN}`,
+        name: PageNames.SIGN_IN,
+        component: SignIn,
+    }
+];
+
 export default new Router({
-  mode: 'history',
-  base: process.env.BASE_URL,
-  routes
+    mode: 'history',
+    base: process.env.BASE_URL,
+    routes
 })

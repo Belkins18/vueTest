@@ -38,7 +38,8 @@
 
 <script>
     // @ is an alias to /src
-    import HelloWorld from '@/components/HelloWorld.vue'
+    import HelloWorld from '@/components/HelloWorld.vue';
+    import PageNames from "../pageNames";
 
     export default {
         name: "signIn",
@@ -58,11 +59,23 @@
         },
         mounted() {
             this.$store.dispatch('initFirebase');
+            this.$store.dispatch('getLocalStorage');
+            if (this.$store.state.user) {
+                this.$router.push({path: PageNames.HOME})
+            }
         },
         methods: {
             enterUser() {
-                this.$store.dispatch('firebaseAuth', this.user);
+                this.$store.dispatch('firebaseAuth', this.user)
+                    .then(() => {
+                        console.log(this.$router);
+                        // debugger;
+                        this.$router.push({path: PageNames.HOME})
+                    });
             }
+        },
+        watch: {
+
         }
     }
 </script>
