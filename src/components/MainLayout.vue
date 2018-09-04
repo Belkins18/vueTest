@@ -21,3 +21,10 @@
         methods: {}
     };
 </script>
+
+
+<style scoped lang="scss">
+    .mainLayout {
+        min-height: 100vh;
+    }
+</style>

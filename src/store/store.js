@@ -37,6 +37,7 @@ const mutations = {
 };
 
 const actions = {
+    // Auth
     initFirebase() {
         firebase.initializeApp(apiConfig.firebase);
     },
@@ -66,6 +67,12 @@ const actions = {
     logout({commit}) {
         localStorage.removeItem("user");
         commit(LOGOUT);
+    },
+
+    // Database
+    initDataBase() {
+        let database = firebase.database();
+        console.log(database);
     }
 };
 
