@@ -57,26 +57,15 @@
                 message: ''
             }
         },
-        mounted() {
-            this.$store.dispatch('initFirebase');
-            this.$store.dispatch('getLocalStorage');
-            if (this.$store.state.user) {
-                this.$router.push({path: PageNames.HOME})
-            }
-        },
         methods: {
             enterUser() {
                 this.$store.dispatch('firebaseAuth', this.user)
-                    .then(() => {
-                        console.log(this.$router);
-                        // debugger;
-                        this.$router.push({path: PageNames.HOME})
+                    .then((data) => {
+                        console.log(data);
+                        this.$router.push({ path: PageNames.MAIN_LAYOUT });
                     });
             }
         },
-        watch: {
-
-        }
     }
 </script>
 

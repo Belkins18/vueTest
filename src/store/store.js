@@ -4,7 +4,8 @@ import {
     LOGIN,
     LOGIN_SUCCESS,
     LOGOUT,
-    USER_LS
+    USER_LS,
+    USER_STATE
 } from "./mutations";
 
 import apiConfig from '../apiConfig';
@@ -13,14 +14,8 @@ import firebase from 'firebase';
 Vue.use(Vuex);
 
 const state = {
-    dbFirebase: {
-        connect: {
-            apiConfig: false,
-            firebase: false
-        }
-    },
     isLoggedIn: !!localStorage.getItem(USER_LS),
-    user: null
+    user: JSON.parse(localStorage.getItem('user')) || null
 };
 
 const mutations = {
@@ -36,66 +31,36 @@ const mutations = {
         state.user = null;
         localStorage.clear();
     },
-    firebaseLoad(state) {
-        state.dbFirebase.connect.firebase = true;
-        state.dbFirebase.connect.apiConfig = true;
-    },
-    authenticateAttributes(state, {email, password}) {
-        console.log(email);
-        console.log(password);
-    },
-    setUser(state, payload) {
+    [USER_STATE](state, payload) {
         state.user = payload
     }
-
 };
 
 const actions = {
-    initFirebase({commit}) {
+    initFirebase() {
         firebase.initializeApp(apiConfig.firebase);
-        console.log(firebase);
-        commit('firebaseLoad');
-    },
-    getLocalStorage({commit}) {
-        let userData = JSON.parse(localStorage.getItem(USER_LS));
-        commit('setUser', userData);
     },
     firebaseAuth({commit}, payload) {
-        commit('authenticateAttributes', payload);
+        return new Promise((resolve, reject) => {
+            firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
+                .then((response) => {
+                    const settingUser = {
+                        email: response.user.email,
+                        uid: response.user.uid,
+                        status: (response.user.uid === apiConfig.adminKey) ? 'admin' : 'user'
+                    };
 
-        let userInputVal = {
-            email: payload.email,
-            password: payload.password
-        };
-
-        firebase.auth().signInWithEmailAndPassword(userInputVal.email, userInputVal.password)
-            .then(response => {
-                function getStatus() {
-                    return (response.user.uid === apiConfig.adminKey) ? 'admin' : 'user'
-                }
-
-                const settingUser = {
-                    email: response.user.email,
-                    uid: response.user.uid,
-                    status: getStatus()
-                };
-
-                commit('setUser', settingUser);
-                localStorage.setItem(USER_LS, JSON.stringify(settingUser));
-
-                commit(LOGIN); // show spinner
-                commit(LOGIN_SUCCESS);
-            })
-            .catch((error) => {
-                console.log(error.code);
-                console.log(error.message);
-            })
-    },
-    login({commit}) {
-        commit(LOGIN); // show spinner
-        return new Promise(resolve => {
-            commit(LOGIN_SUCCESS);
-            resolve();
+                    commit(USER_STATE, settingUser);
+                    localStorage.setItem(USER_LS, JSON.stringify(settingUser));
+                    commit(LOGIN); // show spinner
+                    commit(LOGIN_SUCCESS);
+                    resolve();
+                })
+                .catch((error) => {
+                    console.log(error.code);
+                    console.log(error.message);
+                    reject();
+                })
         });
     },
     logout({commit}) {

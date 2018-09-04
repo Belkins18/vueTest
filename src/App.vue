@@ -1,11 +1,5 @@
 <template>
     <div id="app">
-        <!-- <div id="nav">
-          <router-link to="home">Home</router-link> |
-          <router-link to="products">Products</router-link> |
-          <router-link to="orders">Orders</router-link> |
-          <router-link to="signIn">SignIn</router-link>
-        </div> -->
         <router-view/>
     </div>
 </template>
@@ -31,3 +25,16 @@
         }
     }
 </style>
+
+<script>
+    export default {
+        data() {
+            return {};
+        },
+        created() {
+            this.$store.dispatch('initFirebase');
+        },
+        watch: {},
+        methods: {}
+    };
+</script>
