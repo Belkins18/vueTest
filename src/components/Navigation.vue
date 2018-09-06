@@ -20,13 +20,10 @@
                     <li class="nav-item">
                         <router-link class="nav-link" to="orders">Orders</router-link>
                     </li>
+                    <li class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent="logout">LogOut</a>
+                    </li>
                 </ul>
-
-                <div class="mt-md-0">
-                    <div class="nav-item">
-                        <button class="nav-link" @click="logout">LogOut</button>
-                    </div>
-                </div>
             </div>
         </div>
     </nav>
@@ -59,5 +56,7 @@
 </script>
 
 <style scoped>
-
+    .fixed-top {
+        background: #FFFFFF;
+    }
 </style>

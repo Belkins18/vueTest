@@ -2,6 +2,7 @@ import 'bootstrap'
 import 'babel-polyfill'
 import './scss/style.scss'
 
+
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router/router'
@@ -10,7 +11,6 @@ import {sync} from 'vuex-router-sync';
 import './registerServiceWorker'
 import PageNames from "./pageNames";
 import {USER_LS} from "./store/mutations";
-
 
 // import PageNames from './pageNames'
 

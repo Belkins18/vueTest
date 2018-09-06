@@ -73,6 +73,7 @@ const actions = {
     initDataBase() {
         let database = firebase.database();
         console.log(database);
+        console.log(database.ref());
     }
 };
 

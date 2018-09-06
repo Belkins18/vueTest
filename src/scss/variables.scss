@@ -1,0 +1,12 @@
+$grid-breakpoints: (
+        xs: 0,
+        sm: 576px,
+        md: 768px,
+        lg: 992px,
+        xl: 1200px
+);
+
+// Modals
+$modal-lg:  800px !default;
+$modal-md:  500px !default;
+$modal-sm:  300px !default;
