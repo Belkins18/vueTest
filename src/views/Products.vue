@@ -1,66 +1,92 @@
 <template>
     <div class="products">
         <div class='container'>
-            <button type="button" class="btn btn-secondary createProduct" @click="showModal = true">Create New Product</button>
-            <table class="table">
-                <thead>
-                <tr>
-                    <th v-for="(item, index) in thead" :key='index'>{{item}}</th>
-                </tr>
-                </thead>
-                <tbody>
-                <tr v-for="(item, index) in tbody.items" :key='index'>
-                    <td>
-                        {{ item.id }}
-                    </td>
-                    <td>
-                        <img :src='item.img.src' :alt='item.img.alt' :width='item.img.size.w'>
-                    </td>
-                    <td>{{item.sku}}</td>
-                    <td>{{item.name}}</td>
-                    <td>{{item.purchasePrice}}</td>
-                    <td>{{item.price}}</td>
-                    <td>{{item.stock}}</td>
-                    <td>{{item.actions}}</td>
-                </tr>
-                </tbody>
-            </table>
+            <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal " @click="showModal = true">Create New Product
+            </button>
+            <div class="products__table table-responsive">
+                <table class="table table-hover">
+                    <thead>
+                    <tr>
+                        <th v-for="(item, index) in thead" :key='index'>{{item}}</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr v-for="(item, index) in tbody.items" :key='index'>
+                        <td>
+                            {{ item.id }}
+                        </td>
+                        <td>{{item.sku}}</td>
+                        <td>
+                            <img :src='item.img.src' :alt='item.img.alt' :width='item.img.size.w'>
+                        </td>
+                        <td>{{item.name}}</td>
+                        <td>{{item.purchasePrice}}</td>
+                        <td>{{item.price}}</td>
+                        <td>{{item.stock}}</td>
+                        <td>
+                            <button type="button" class="btn btn-primary btn-edit" @click="showModal = true">
+                                <span class="oi oi-pencil"></span>
+                            </button>
+                            <button type="button" class="btn btn-primary btn-edit" @click="showModal = true">
+                                <span class="oi oi-trash"></span>
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
             <Modal v-if="showModal" @close="showModal = false">
                 <span slot="modal-header">Create New Product</span>
                 <div slot="modal-body">
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemSKU" placeholder="SKU" class="form-control" id="product_sku" aria-describedby="product_skuHelp">
-                            <small id="product_skuHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                            <input type="text" v-model="tbody.itemElements.itemSKU" placeholder="SKU"
+                                   class="form-control" id="product_sku" aria-describedby="product_skuHelp">
+                            <small id="product_skuHelp" class="form-text text-muted">We'll never share your email with
+                                anyone else.
+                            </small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_name">Name</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemName" placeholder="Name" class="form-control" id="product_name" aria-describedby="product_nameHelp">
-                            <small id="product_nameHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                            <input type="text" v-model="tbody.itemElements.itemName" placeholder="Name"
+                                   class="form-control" id="product_name" aria-describedby="product_nameHelp">
+                            <small id="product_nameHelp" class="form-text text-muted">We'll never share your email with
+                                anyone else.
+                            </small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemStock" placeholder="Stock" class="form-control" id="product_stock" aria-describedby="product_stockHelp">
-                            <small id="product_stockHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                            <input type="text" v-model="tbody.itemElements.itemStock" placeholder="Stock"
+                                   class="form-control" id="product_stock" aria-describedby="product_stockHelp">
+                            <small id="product_stockHelp" class="form-text text-muted">We'll never share your email with
+                                anyone else.
+                            </small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemPurchasePrice" placeholder="Purchase Price" class="form-control" id="product_purprice" aria-describedby="product_purpriceHelp">
-                            <small id="product_purpriceHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                            <input type="text" v-model="tbody.itemElements.itemPurchasePrice"
+                                   placeholder="Purchase Price" class="form-control" id="product_purprice"
+                                   aria-describedby="product_purpriceHelp">
+                            <small id="product_purpriceHelp" class="form-text text-muted">We'll never share your email
+                                with anyone else.
+                            </small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_price">Price</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemPrice" placeholder="Price" class="form-control" id="product_price" aria-describedby="product_priceHelp">
-                            <small id="product_priceHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
+                            <input type="text" v-model="tbody.itemElements.itemPrice" placeholder="Price"
+                                   class="form-control" id="product_price" aria-describedby="product_priceHelp">
+                            <small id="product_priceHelp" class="form-text text-muted">We'll never share your email with
+                                anyone else.
+                            </small>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -77,57 +103,57 @@
             </Modal>
 
             <!--<div class="row">-->
-                <!--<div class="col-sm-6 col-xs-10 col-sm-offset-3 col-xs-offset-1">-->
-                    <!--<div class="modal-content">-->
-                        <!--<div class="modal-header">-->
-                            <!--<h4 class="modal-title text-center" id="myModalLabel">Create New Product</h4>-->
-                        <!--</div>-->
-                        <!--<div class="modal-body">-->
-                            <!--<form class="form-horizontal">-->
-                                <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">SKU</label>&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemSKU" placeholder="SKU">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Name</label>&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemName" placeholder="Name">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Stock</label>&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemStock" placeholder="Stock">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Purchase Price</label>&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemPurchasePrice"&ndash;&gt;-->
-                                               <!--&lt;!&ndash;placeholder="Purchase Price">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Price</label>&ndash;&gt;-->
-                                    <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-                                        <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemPrice" placeholder="Price">&ndash;&gt;-->
-                                    <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--&lt;!&ndash;</div>&ndash;&gt;-->
-                                <!--<div class="form-group">-->
-                                    <!--<div class="col-sm-offset-4 col-sm-8">-->
-                                        <!--<input-->
-                                                <!--type='submit'-->
-                                                <!--value='Save'-->
-                                                <!--@click.prevent='addItem'-->
-                                        <!--/>-->
-                                    <!--</div>-->
-                                <!--</div>-->
-                            <!--</form>-->
-                        <!--</div>-->
-                    <!--</div>-->
-                <!--</div>-->
+            <!--<div class="col-sm-6 col-xs-10 col-sm-offset-3 col-xs-offset-1">-->
+            <!--<div class="modal-content">-->
+            <!--<div class="modal-header">-->
+            <!--<h4 class="modal-title text-center" id="myModalLabel">Create New Product</h4>-->
+            <!--</div>-->
+            <!--<div class="modal-body">-->
+            <!--<form class="form-horizontal">-->
+            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">SKU</label>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
+            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemSKU" placeholder="SKU">&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Name</label>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
+            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemName" placeholder="Name">&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Stock</label>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
+            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemStock" placeholder="Stock">&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Purchase Price</label>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
+            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemPurchasePrice"&ndash;&gt;-->
+            <!--&lt;!&ndash;placeholder="Purchase Price">&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
+            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Price</label>&ndash;&gt;-->
+            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
+            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemPrice" placeholder="Price">&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--&lt;!&ndash;</div>&ndash;&gt;-->
+            <!--<div class="form-group">-->
+            <!--<div class="col-sm-offset-4 col-sm-8">-->
+            <!--<input-->
+            <!--type='submit'-->
+            <!--value='Save'-->
+            <!--@click.prevent='addItem'-->
+            <!--/>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</form>-->
+            <!--</div>-->
+            <!--</div>-->
+            <!--</div>-->
             <!--</div>-->
         </div>
     </div>
@@ -194,10 +220,30 @@
     .products {
         margin-top: 60px;
         padding-top: 50px;
+        &__btn {
+            &--showModal{
+                margin-bottom: 30px;
+            }
+        }
+        &__table {
+            table {
+                min-width: $table-min-width;
+                box-shadow: $el-box-shadow;
+            }
+        }
     }
-
-    .createProduct{
-        margin-bottom: 30px;
+    .btn-edit {
+        position: relative;
+        width: 2rem;
+        height: 2rem;
+        margin: 0.1rem;
+        .oi {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            font-size: 14px;
+            transform: translateX(-50%) translateY(-50%);
+        }
     }
 
 </style>

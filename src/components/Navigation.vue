@@ -3,12 +3,7 @@
     <nav class="navbar navbar-expand-lg navbar-light fixed-top" id="mainNav">
         <div class="container">
             <router-link class="navbar-brand" to="/">My Stock</router-link>
-            <button class="navbar-toggler navbar-toggler-right" type="button" data-toggle="collapse"
-                    data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                Menu
-                <i class="fas fa-bars"></i>
-            </button>
+            <Hamburger/>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ml-auto">
                     <li class="nav-item">
@@ -30,16 +25,21 @@
 </template>
 
 <script>
+    import Hamburger from '@/components/Hamburger.vue'
     export default {
         name: "Navigation",
+        components: {
+            Hamburger
+        },
         data() {
             return {};
         },
+
         watch: {},
         methods: {
             logout() {
                 this.$store.dispatch('logout');
-                this.$router.push({ path: 'signIn' });
+                this.$router.push({path: 'signIn'});
             }
         },
         // beforeMount() {
@@ -55,7 +55,11 @@
     }
 </script>
 
-<style scoped>
+<style scoped lang="scss">
+    .navbar{
+        box-shadow: $el-box-shadow;
+    }
+
     .fixed-top {
         background: #FFFFFF;
     }

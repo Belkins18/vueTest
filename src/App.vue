@@ -23,6 +23,10 @@
             }
         }
     }
+
+    * {
+        outline: none !important;
+    }
 </style>
 
 <script>
