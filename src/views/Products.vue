@@ -23,7 +23,7 @@
                                     width='20px'>
                         </td>
                         <td>{{item.name}}</td>
-                        <td>{{item.purchasePrice}}</td>
+                        <td>{{item.purPrice}}</td>
                         <td>{{item.price}}</td>
                         <td>{{item.stock}}</td>
                         <td>
@@ -125,17 +125,9 @@
                 showModal: false,
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 tbody: {
-
                     itemElements: {
                         itemId: Number,
                         itemSKU: '',
-                        itemImg: {
-                            src: "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png", //base64
-                            alt: "",
-                            size: {
-                                w: "20px"
-                            }
-                        },
                         itemName: '',
                         itemStock: '',
                         itemPurchasePrice: '',
@@ -151,45 +143,14 @@
         },
         methods: {
             dataTable() {
-                this.$store.dispatch('getProd').then((data) => {
-                    console.log(data);
-                });
+                this.$store.dispatch('getProductList');
+                    // .then((data) => {
+                    // console.log(data);
+                    // });
             }
         },
         created() {
             this.dataTable();
-            // this.$store.getters.getDBFirebaseProd.once("value")
-            //     .then((snapshot) => {
-            //         console.log(snapshot.val());
-            //     })
-            //     .catch((error) => {
-            //         console.log(error.message);
-            //     });
-
-            // console.log(this.dataTable().then((data) => console.log(data)));
-            // return new Promise((resolve, reject) => {
-            //     this.$store.getters.getDBFirebaseProd.once("value")
-            //         .then(function (snapshot) {
-            //             let value = snapshot.val();
-            //             let key = snapshot.key;
-            //             console.log(key);
-            //             console.log(value);
-            //             resolve(value);
-            //         })
-            //         .catch((error) => {
-            //             console.log(error.message);
-            //             reject();
-            //         });
-            // });
-            // this.$store.getters.getDBFirebaseProd.once("value")
-            //     .then( function (snapshot) {
-            //         let value = snapshot.val();
-            //         let key = snapshot.key;
-            //         console.log(key);
-            //         console.log(value);
-            //         return value;
-            //     });
-
 
             // this.$store.getters.getDBFirebaseUsers.once("value")
             //     .then(function (snapshot) {
