@@ -25,7 +25,7 @@
 </template>
 
 <script>
-    import Hamburger from '@/components/Hamburger.vue'
+    import Hamburger from '@/components/page-navigation/Hamburger.vue'
     export default {
         name: "Navigation",
         components: {

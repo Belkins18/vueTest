@@ -1,7 +1,8 @@
 <template>
     <div class="products">
         <div class='container'>
-            <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal " @click="showModal = true">Create New Product
+            <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
+                    @click="showModal = true">Create New Product
             </button>
             <div class="products__table table-responsive">
                 <table class="table table-hover">
@@ -11,13 +12,15 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(item, index) in tbody.items" :key='index'>
+                    <tr v-for="(item, index) in products" :key='index'>
+                        <td>{{ item.id }}</td>
+                        <td>{{ item.sku }}</td>
                         <td>
-                            {{ item.id }}
-                        </td>
-                        <td>{{item.sku}}</td>
-                        <td>
-                            <img :src='item.img.src' :alt='item.img.alt' :width='item.img.size.w'>
+                            <!--<img :src='item.img.src' :alt='item.img.alt' :width='item.img.size.w'>-->
+                            <img
+                                    src='https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png'
+                                    alt=''
+                                    width='20px'>
                         </td>
                         <td>{{item.name}}</td>
                         <td>{{item.purchasePrice}}</td>
@@ -35,6 +38,7 @@
                     </tbody>
                 </table>
             </div>
+
             <Modal v-if="showModal" @close="showModal = false">
                 <span slot="modal-header">Create New Product</span>
                 <div slot="modal-body">
@@ -102,59 +106,7 @@
                 </div>
             </Modal>
 
-            <!--<div class="row">-->
-            <!--<div class="col-sm-6 col-xs-10 col-sm-offset-3 col-xs-offset-1">-->
-            <!--<div class="modal-content">-->
-            <!--<div class="modal-header">-->
-            <!--<h4 class="modal-title text-center" id="myModalLabel">Create New Product</h4>-->
-            <!--</div>-->
-            <!--<div class="modal-body">-->
-            <!--<form class="form-horizontal">-->
-            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">SKU</label>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemSKU" placeholder="SKU">&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Name</label>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemName" placeholder="Name">&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Stock</label>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemStock" placeholder="Stock">&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Purchase Price</label>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemPurchasePrice"&ndash;&gt;-->
-            <!--&lt;!&ndash;placeholder="Purchase Price">&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="form-group">&ndash;&gt;-->
-            <!--&lt;!&ndash;<label for="login_username" class="col-sm-4 control-label">Price</label>&ndash;&gt;-->
-            <!--&lt;!&ndash;<div class="col-sm-8">&ndash;&gt;-->
-            <!--&lt;!&ndash;<input type="text" v-model="tbody.itemElements.itemPrice" placeholder="Price">&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--&lt;!&ndash;</div>&ndash;&gt;-->
-            <!--<div class="form-group">-->
-            <!--<div class="col-sm-offset-4 col-sm-8">-->
-            <!--<input-->
-            <!--type='submit'-->
-            <!--value='Save'-->
-            <!--@click.prevent='addItem'-->
-            <!--/>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--</form>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--</div>-->
-            <!--</div>-->
+
         </div>
     </div>
 </template>
@@ -173,24 +125,7 @@
                 showModal: false,
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 tbody: {
-                    items: [
-                        {
-                            id: 1,
-                            sku: "24-M-203",
-                            img: {
-                                src: "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png",
-                                alt: "",
-                                size: {
-                                    w: "20px"
-                                }
-                            },
-                            name: 'Кружка 320мл "Я Люблю С++"',
-                            purchasePrice: "20.00",
-                            price: "28.99",
-                            stock: 23,
-                            actions: "Actions"
-                        }
-                    ],
+
                     itemElements: {
                         itemId: Number,
                         itemSKU: '',
@@ -205,13 +140,68 @@
                         itemStock: '',
                         itemPurchasePrice: '',
                         itemPrice: '',
-                        itemActions: 'Actions'
                     }
                 }
             };
         },
+        computed: {
+            products() {
+                return this.$store.state.products;
+            }
+        },
+        methods: {
+            dataTable() {
+                this.$store.dispatch('getProd').then((data) => {
+                    console.log(data);
+                });
+            }
+        },
         created() {
-            this.$store.dispatch('initDataBase');
+            this.dataTable();
+            // this.$store.getters.getDBFirebaseProd.once("value")
+            //     .then((snapshot) => {
+            //         console.log(snapshot.val());
+            //     })
+            //     .catch((error) => {
+            //         console.log(error.message);
+            //     });
+
+            // console.log(this.dataTable().then((data) => console.log(data)));
+            // return new Promise((resolve, reject) => {
+            //     this.$store.getters.getDBFirebaseProd.once("value")
+            //         .then(function (snapshot) {
+            //             let value = snapshot.val();
+            //             let key = snapshot.key;
+            //             console.log(key);
+            //             console.log(value);
+            //             resolve(value);
+            //         })
+            //         .catch((error) => {
+            //             console.log(error.message);
+            //             reject();
+            //         });
+            // });
+            // this.$store.getters.getDBFirebaseProd.once("value")
+            //     .then( function (snapshot) {
+            //         let value = snapshot.val();
+            //         let key = snapshot.key;
+            //         console.log(key);
+            //         console.log(value);
+            //         return value;
+            //     });
+
+
+            // this.$store.getters.getDBFirebaseUsers.once("value")
+            //     .then(function (snapshot) {
+            //         let value = snapshot.val();
+            //         let key = snapshot.key;
+            //         console.log(key);
+            //         console.log(value);
+            //         console.log(snapshot.child('admin').val());
+            //     })
+            //     .catch((error) => {
+            //         console.log(error);
+            //     });
         },
     };
 </script>
@@ -221,7 +211,7 @@
         margin-top: 60px;
         padding-top: 50px;
         &__btn {
-            &--showModal{
+            &--showModal {
                 margin-bottom: 30px;
             }
         }
@@ -232,6 +222,7 @@
             }
         }
     }
+
     .btn-edit {
         position: relative;
         width: 2rem;
