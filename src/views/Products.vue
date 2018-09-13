@@ -100,7 +100,7 @@
                 </div>
 
                 <div slot="modal-btn">
-                    <button v-if="status === 'edit'" type="button" class="btn btn-primary" @submit.prevent="">Save changes</button>
+                    <button v-if="status === 'edit'" type="button" class="btn btn-primary" @click.prevent="editedProductField()">Save changes</button>
                     <button v-if="status === 'create'" type="button" class="btn btn-success" @submit.prevent="">Add product</button>
                 </div>
             </Modal>
@@ -149,6 +149,7 @@
                 this.showModal = true;
             },
             editProduct(product) {
+                console.log(product);
                 this.modalFields = cloneDeep(product);
                 this.status = 'edit';
                 this.showModal = true;
@@ -157,6 +158,11 @@
                 this.showModal = false;
                 this.modalFields = {};
                 this.status = '';
+            },
+            editedProductField() {
+                let editedResults = cloneDeep(this.modalFields);
+                console.log(editedResults);
+                return editedResults;
             },
             removeItem: function(product) {
                 // генерируем событие 'remove' и передаём id элемента

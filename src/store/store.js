@@ -41,7 +41,7 @@ const mutations = {
 
         localStorage.setItem(USER_LS, JSON.stringify(payload));
     },
-    [USER_LOGIN_FAILURE] (state, payload) {
+    [USER_LOGIN_FAILURE](state, payload) {
         state.loading = false;
 
         console.log(payload.code);
@@ -63,7 +63,7 @@ const mutations = {
     [DB_GET_PRODUCTLIST_SUCCESS](state, payload) {
         state.products = payload
     },
-    [DB_GET_PRODUCTLIST_FAILURE] (state, payload) {
+    [DB_GET_PRODUCTLIST_FAILURE](state, payload) {
         state.loading = false;
 
         console.log(payload.code);
@@ -76,7 +76,7 @@ const mutations = {
     [DB_GET_USERKEYS_SUCCESS](state, payload) {
         state.users = payload
     },
-    [DB_GET_USERKEYS_FAILURE] (state, payload) {
+    [DB_GET_USERKEYS_FAILURE](state, payload) {
         state.loading = false;
 
         console.log(payload.code);
@@ -89,6 +89,15 @@ const actions = {
     initFirebase() {
         firebase.initializeApp(apiConfig.firebase);
         let product = firebase.database().ref('/products');
+        product.push().set({
+            "id": 3,
+            "image": "",
+            "name": "kj,kjhlkjhkh",
+            "price": 654,
+            "purPrice": 468,
+            "sku": "24-L-000",
+            "stock": 500
+        });
         console.log(product);
         // var auth = firebase.auth();
         // auth.onAuthStateChanged(function (user) {

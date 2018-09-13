@@ -2,27 +2,31 @@
     <div class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">
-                        {{modalStatus}} <slot name="modal-header"></slot>
-                    </h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                            @click.prevent="$emit('close')">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <slot name="modal-body">
-                        Modal body
-                    </slot>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal"
-                            @click.prevent="$emit('close')">
-                        Close
-                    </button>
-                    <slot name="modal-btn" ></slot>
-                </div>
+                <form>
+                    <div class="modal-header">
+                        <h5 class="modal-title">
+                            {{modalStatus}} <slot name="modal-header"></slot>
+                        </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                @click.prevent="$emit('close')">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+
+                    <div class="modal-body">
+                        <slot name="modal-body">
+                            Modal body
+                        </slot>
+                    </div>
+
+                    <div class="modal-footer">
+                        <!--<button type="button" class="btn btn-secondary" data-dismiss="modal"-->
+                                <!--@click.prevent="$emit('close')">-->
+                            <!--Close-->
+                        <!--</button>-->
+                        <slot name="modal-btn" ></slot>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
