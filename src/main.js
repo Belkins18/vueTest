@@ -2,7 +2,6 @@ import 'bootstrap'
 import 'babel-polyfill'
 import './scss/style.scss'
 
-
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router/router'

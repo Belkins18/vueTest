@@ -88,16 +88,18 @@ const actions = {
     // Auth
     initFirebase() {
         firebase.initializeApp(apiConfig.firebase);
-        var auth = firebase.auth();
-        auth.onAuthStateChanged(function (user) {
-            if (user) {
-                // User signed in!
-                let uid = user.uid;
-                console.log(uid);
-            } else {
-                // User logged out
-            }
-        });
+        let product = firebase.database().ref('/products');
+        console.log(product);
+        // var auth = firebase.auth();
+        // auth.onAuthStateChanged(function (user) {
+        //     if (user) {
+        //         // User signed in!
+        //         let uid = user.uid;
+        //         console.log(uid);
+        //     } else {
+        //         // User logged out
+        //     }
+        // });
     },
 
     userAuth({dispatch, commit}, payload) {

@@ -2,7 +2,7 @@
     <div class="products">
         <div class='container'>
             <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
-                    @click="showModal = true">Create New Product
+                    @click="createProduct">Create New Product
             </button>
             <div class="products__table table-responsive">
                 <table class="table table-hover">
@@ -12,25 +12,19 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(item, index) in products" :key='index'>
-                        <td>{{ item.id }}</td>
-                        <td>{{ item.sku }}</td>
+                    <tr v-for="(product, index) in products" :key='index'>
+                        <td>{{ product.id }}</td>
+                        <td>{{ product.sku }}</td>
+                        <td><img :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"' alt='' width='20px'></td>
+                        <td>{{product.name}}</td>
+                        <td>{{product.purPrice}}</td>
+                        <td>{{product.price}}</td>
+                        <td>{{product.stock}}</td>
                         <td>
-                            <!--<img :src='item.img.src' :alt='item.img.alt' :width='item.img.size.w'>-->
-                            <img
-                                    src='https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png'
-                                    alt=''
-                                    width='20px'>
-                        </td>
-                        <td>{{item.name}}</td>
-                        <td>{{item.purPrice}}</td>
-                        <td>{{item.price}}</td>
-                        <td>{{item.stock}}</td>
-                        <td>
-                            <button type="button" class="btn btn-primary btn-edit" @click="showModal = true">
+                            <button type="button" class="btn btn-primary btn-edit" @click="editProduct(product)">
                                 <span class="oi oi-pencil"></span>
                             </button>
-                            <button type="button" class="btn btn-primary btn-edit" @click="showModal = true">
+                            <button type="button" class="btn btn-primary btn-edit" @click="removeItem(product)">
                                 <span class="oi oi-trash"></span>
                             </button>
                         </td>
@@ -39,15 +33,16 @@
                 </table>
             </div>
 
-            <Modal v-if="showModal" @close="showModal = false">
-                <span slot="modal-header">Create New Product</span>
+            <Modal v-if="showModal" @close="closeModal" :modalStatus="changeStatus()">
+                <span slot="modal-header">Product</span>
+
                 <div slot="modal-body">
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemSKU" placeholder="SKU"
+                            <input type="text" v-model="modalFields.sku" placeholder="SKU"
                                    class="form-control" id="product_sku" aria-describedby="product_skuHelp">
-                            <small id="product_skuHelp" class="form-text text-muted">We'll never share your email with
+                            <small id="product_skuHelp" class="invalid-feedback">We'll never share your email with
                                 anyone else.
                             </small>
                         </div>
@@ -55,9 +50,9 @@
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_name">Name</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemName" placeholder="Name"
+                            <input type="text" v-model="modalFields.name" placeholder="Name"
                                    class="form-control" id="product_name" aria-describedby="product_nameHelp">
-                            <small id="product_nameHelp" class="form-text text-muted">We'll never share your email with
+                            <small id="product_nameHelp" class="invalid-feedback">We'll never share your email with
                                 anyone else.
                             </small>
                         </div>
@@ -65,9 +60,9 @@
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemStock" placeholder="Stock"
-                                   class="form-control" id="product_stock" aria-describedby="product_stockHelp">
-                            <small id="product_stockHelp" class="form-text text-muted">We'll never share your email with
+                            <input type="text" v-model="modalFields.stock" placeholder="Stock"
+                                   class="form-control is-invalid" id="product_stock" aria-describedby="product_stockHelp">
+                            <small id="product_stockHelp" class="invalid-feedback">We'll never share your email with
                                 anyone else.
                             </small>
                         </div>
@@ -75,10 +70,10 @@
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemPurchasePrice"
-                                   placeholder="Purchase Price" class="form-control" id="product_purprice"
+                            <input type="text" v-model="modalFields.purPrice"
+                                   placeholder="Purchase Price" class="form-control is-valid" id="product_purprice"
                                    aria-describedby="product_purpriceHelp">
-                            <small id="product_purpriceHelp" class="form-text text-muted">We'll never share your email
+                            <small id="product_purpriceHelp" class="invalid-feedback">We'll never share your email
                                 with anyone else.
                             </small>
                         </div>
@@ -86,9 +81,9 @@
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_price">Price</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="tbody.itemElements.itemPrice" placeholder="Price"
+                            <input type="text" v-model="modalFields.price" placeholder="Price"
                                    class="form-control" id="product_price" aria-describedby="product_priceHelp">
-                            <small id="product_priceHelp" class="form-text text-muted">We'll never share your email with
+                            <small id="product_priceHelp" class="invalid-feedback">We'll never share your email with
                                 anyone else.
                             </small>
                         </div>
@@ -102,18 +97,20 @@
                             </div>
                         </div>
                     </div>
+                </div>
 
+                <div slot="modal-btn">
+                    <button v-if="status === 'edit'" type="button" class="btn btn-primary" @submit.prevent="">Save changes</button>
+                    <button v-if="status === 'create'" type="button" class="btn btn-success" @submit.prevent="">Add product</button>
                 </div>
             </Modal>
-
-
         </div>
     </div>
 </template>
 
 <script>
     import Modal from "@/components/Modal.vue";
-
+    import {cloneDeep} from "lodash"
 
     export default {
         name: "products",
@@ -123,17 +120,9 @@
         data() {
             return {
                 showModal: false,
+                status: '',
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
-                tbody: {
-                    itemElements: {
-                        itemId: Number,
-                        itemSKU: '',
-                        itemName: '',
-                        itemStock: '',
-                        itemPurchasePrice: '',
-                        itemPrice: '',
-                    }
-                }
+                modalFields: {},
             };
         },
         computed: {
@@ -144,9 +133,34 @@
         methods: {
             dataTable() {
                 this.$store.dispatch('getProductList');
-                    // .then((data) => {
-                    // console.log(data);
-                    // });
+                // .then((data) => {
+                // console.log(data);
+                // });
+            },
+            changeStatus() {
+              if (this.status === 'edit') {
+                  return 'Edit';
+              } else if (this.status === 'create') {
+                  return 'Create new';
+              }
+            },
+            createProduct() {
+                this.status = 'create';
+                this.showModal = true;
+            },
+            editProduct(product) {
+                this.modalFields = cloneDeep(product);
+                this.status = 'edit';
+                this.showModal = true;
+            },
+            closeModal() {
+                this.showModal = false;
+                this.modalFields = {};
+                this.status = '';
+            },
+            removeItem: function(product) {
+                // генерируем событие 'remove' и передаём id элемента
+                this.$emit('remove', product.id);
             }
         },
         created() {

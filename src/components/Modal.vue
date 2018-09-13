@@ -4,9 +4,7 @@
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title">
-                        <slot name="modal-header">
-                            Modal title
-                        </slot>
+                        {{modalStatus}} <slot name="modal-header"></slot>
                     </h5>
                     <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                             @click.prevent="$emit('close')">
@@ -23,7 +21,7 @@
                             @click.prevent="$emit('close')">
                         Close
                     </button>
-                    <button type="button" class="btn btn-primary">Save changes</button>
+                    <slot name="modal-btn" ></slot>
                 </div>
             </div>
         </div>
@@ -34,9 +32,12 @@
     export default {
         data() {
             return {
-                dialogVisible: false
+                dialogVisible: false,
             };
         },
+        props: {
+            modalStatus: String
+        }
     };
 </script>
 
