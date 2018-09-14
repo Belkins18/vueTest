@@ -21,10 +21,10 @@
                         <td>{{product.price}}</td>
                         <td>{{product.stock}}</td>
                         <td>
-                            <button type="button" class="btn btn-primary btn-edit" @click="editProduct(product)">
+                            <button type="button" class="btn btn-primary btn-edit" @click="editProduct(product, index)">
                                 <span class="oi oi-pencil"></span>
                             </button>
-                            <button type="button" class="btn btn-primary btn-edit" @click="removeItem(product)">
+                            <button type="button" class="btn btn-primary btn-edit" @click="removeProduct(index)">
                                 <span class="oi oi-trash"></span>
                             </button>
                         </td>
@@ -101,7 +101,7 @@
 
                 <div slot="modal-btn">
                     <button v-if="status === 'edit'" type="button" class="btn btn-primary" @click.prevent="editedProductField()">Save changes</button>
-                    <button v-if="status === 'create'" type="button" class="btn btn-success" @submit.prevent="">Add product</button>
+                    <button v-if="status === 'create'" type="button" class="btn btn-success" @click.prevent="onsubmitAddProduct()">Add product</button>
                 </div>
             </Modal>
         </div>
@@ -111,6 +111,7 @@
 <script>
     import Modal from "@/components/Modal.vue";
     import {cloneDeep} from "lodash"
+    import {Object_size} from '../helpers'
 
     export default {
         name: "products",
@@ -128,15 +129,9 @@
         computed: {
             products() {
                 return this.$store.state.products;
-            }
+            },
         },
         methods: {
-            dataTable() {
-                this.$store.dispatch('getProductList');
-                // .then((data) => {
-                // console.log(data);
-                // });
-            },
             changeStatus() {
               if (this.status === 'edit') {
                   return 'Edit';
@@ -149,28 +144,37 @@
                 this.showModal = true;
             },
             editProduct(product) {
-                console.log(product);
                 this.modalFields = cloneDeep(product);
                 this.status = 'edit';
                 this.showModal = true;
+                this.$store.dispatch('getProductList');
             },
             closeModal() {
                 this.showModal = false;
                 this.modalFields = {};
                 this.status = '';
             },
+            onsubmitAddProduct() {
+                this.modalFields.id = Object_size(this.products) + 1;
+                this.$store.dispatch('setProtuctToProductList', this.modalFields);
+                this.closeModal();
+                this.$store.dispatch('getProductList');
+
+            },
+            removeProduct(index) {
+                this.$store.dispatch('removeProtuctWithProductList', index);
+                this.closeModal();
+                this.$store.dispatch('getProductList');
+            },
             editedProductField() {
                 let editedResults = cloneDeep(this.modalFields);
-                console.log(editedResults);
-                return editedResults;
+                this.$store.dispatch('editProtuctWithProductList', editedResults);
+                this.closeModal();
+                this.$store.dispatch('getProductList');
             },
-            removeItem: function(product) {
-                // генерируем событие 'remove' и передаём id элемента
-                this.$emit('remove', product.id);
-            }
         },
         created() {
-            this.dataTable();
+            this.$store.dispatch('getProductList');
 
             // this.$store.getters.getDBFirebaseUsers.once("value")
             //     .then(function (snapshot) {

@@ -9,6 +9,10 @@ import {
     DB_GET_PRODUCTLIST_REQUEST,
     DB_GET_PRODUCTLIST_SUCCESS,
     DB_GET_PRODUCTLIST_FAILURE,
+    DB_SET_PRODUCT_REQUEST,
+    DB_SET_PRODUCT_SUCCESS,
+    DB_SET_PRODUCT_FAILURE,
+    DB_REMOVE_PRODUCT_SUCCESS,
     DB_GET_USERKEYS_REQUEST,
     DB_GET_USERKEYS_SUCCESS,
     DB_GET_USERKEYS_FAILURE,
@@ -70,7 +74,24 @@ const mutations = {
         console.log(payload.message);
     },
 
-    [DB_GET_USERKEYS_SUCCESS](state) {
+    [DB_SET_PRODUCT_REQUEST](state) {
+        state.loading = true;
+    },
+    [DB_SET_PRODUCT_SUCCESS](state, payload) {
+        state.products = payload
+    },
+    [DB_SET_PRODUCT_FAILURE](state, payload) {
+        state.loading = false;
+
+        console.log(payload.code);
+        console.log(payload.message);
+    },
+
+    [DB_REMOVE_PRODUCT_SUCCESS](payload) {
+        console.log('product: ' + payload + ' removed');
+    },
+
+    [DB_GET_USERKEYS_REQUEST](state) {
         state.loading = true;
     },
     [DB_GET_USERKEYS_SUCCESS](state, payload) {
@@ -89,16 +110,7 @@ const actions = {
     initFirebase() {
         firebase.initializeApp(apiConfig.firebase);
         let product = firebase.database().ref('/products');
-        product.push().set({
-            "id": 3,
-            "image": "",
-            "name": "kj,kjhlkjhkh",
-            "price": 654,
-            "purPrice": 468,
-            "sku": "24-L-000",
-            "stock": 500
-        });
-        console.log(product);
+        console.log(product.child('0'));
         // var auth = firebase.auth();
         // auth.onAuthStateChanged(function (user) {
         //     if (user) {
@@ -143,7 +155,14 @@ const actions = {
     logout({commit}) {
         commit(USER_LOGOUT);
     },
-
+    getDBListCountElements({commit}) {
+        firebase.database().ref(`/products`)
+            .on("value", function(snapshot) {
+                console.log("There are "+snapshot.numChildren()+" messages");
+                commit(DB_REMOVE_PRODUCT_SUCCESS);
+                return snapshot.numChildren();
+            });
+    },
     getProductList({commit}) {
         // PRODUCTLIST_REQUEST
         commit(DB_GET_PRODUCTLIST_REQUEST);
@@ -161,6 +180,28 @@ const actions = {
                 });
         });
     },
+
+    setProtuctToProductList({commit}, payload) {
+        commit(DB_SET_PRODUCT_REQUEST);
+        firebase.database().ref('/products')
+            .push()
+            .set(payload);
+        commit(DB_SET_PRODUCT_SUCCESS, payload);
+    },
+
+    editProtuctWithProductList({commit}, payload) {
+        commit(DB_SET_PRODUCT_REQUEST);
+        firebase.database().ref('/products/-LMNUGUAgWrW1eEnqz84')
+            .update(payload);
+        commit(DB_SET_PRODUCT_SUCCESS, payload);
+    },
+
+    removeProtuctWithProductList({commit}, index) {
+        firebase.database().ref('/products')
+            .child(index).remove();
+        commit(DB_REMOVE_PRODUCT_SUCCESS);
+    },
+
     getUsersList({commit}) {
         // USERKEYS_REQUEST
         commit(DB_GET_USERKEYS_REQUEST);
@@ -172,6 +213,7 @@ const actions = {
                     resolve(snapshot.val());
                 })
                 .catch((error) => {
+                    // USERKEYS_FAILURE
                     commit(DB_GET_USERKEYS_FAILURE, error);
                     reject();
                 });
