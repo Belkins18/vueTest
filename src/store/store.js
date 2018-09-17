@@ -1,28 +1,29 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import {
-    USER_LS,
-    USER_LOGIN_REQUEST,
-    USER_LOGIN_SUCCESS,
-    USER_LOGIN_FAILURE,
-    USER_LOGOUT,
-    DB_GET_PRODUCTLIST_REQUEST,
-    DB_GET_PRODUCTLIST_SUCCESS,
-    DB_GET_PRODUCTLIST_FAILURE,
-    DB_SET_PRODUCT_REQUEST,
-    DB_SET_PRODUCT_SUCCESS,
-    DB_SET_PRODUCT_FAILURE,
-    DB_REMOVE_PRODUCT_SUCCESS,
-    DB_GET_USERKEYS_REQUEST,
-    DB_GET_USERKEYS_SUCCESS,
-    DB_GET_USERKEYS_FAILURE,
-} from "./mutations";
 
 import apiConfig from '../apiConfig';
 import firebase from 'firebase';
 import 'firebase/firestore';
 
 Vue.use(Vuex);
+
+const USER_LS = "user";
+const STATE_LOAD= 'STATE_LOAD';
+
+const USER_LOGIN_REQUEST = 'USER_LOGIN_REQUEST';
+const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
+const USER_LOGIN_FAILURE = 'USER_LOGIN_FAILURE';
+const USER_LOGOUT = "LOGOUT";
+const DB_GET_USERKEYS_REQUEST = "DB_GET_USERKEYS_REQUEST";
+const DB_GET_USERKEYS_SUCCESS = "DB_GET_USERKEYS_SUCCESS";
+const DB_GET_USERKEYS_FAILURE = "DB_GET_USERKEYS_FAILURE";
+const DB_GET_PRODUCTLIST_REQUEST = "DB_GET_PRODUCTLIST_REQUEST";
+const DB_GET_PRODUCTLIST_SUCCESS = "DB_GET_PRODUCTLIST_SUCCESS";
+const DB_GET_PRODUCTLIST_FAILURE = "DB_GET_PRODUCTLIST_FAILURE";
+const DB_SET_PRODUCT_REQUEST = "DB_SET_PRODUCT_REQUEST";
+const DB_SET_PRODUCT_SUCCESS = "DB_SET_PRODUCT_SUCCESS";
+const DB_SET_PRODUCT_FAILURE = "DB_SET_PRODUCT_FAILURE";
+const DB_REMOVE_PRODUCT_SUCCESS = "DB_REMOVE_PRODUCT_SUCCESS";
 
 const state = {
     loading: false,
@@ -34,6 +35,9 @@ const state = {
 };
 
 const mutations = {
+    [STATE_LOAD](state) {
+        state.loading = true;
+    },
     [USER_LOGIN_REQUEST](state) {
         state.loading = true;
     },
@@ -124,41 +128,31 @@ const actions = {
     },
 
     userAuth({dispatch, commit}, payload) {
-        return new Promise((resolve, reject) => {
-            let auth = firebase.auth();
-            // LOGIN_REQUEST
-            commit(USER_LOGIN_REQUEST); // show spinner
+        return new firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
+            .then((response) => {
+                const settingUser = {
+                    email: response.user.email,
+                    uid: response.user.uid,
+                    status: (response.user.uid === apiConfig.adminKey) ? 'admin' : 'user',
+                };
 
-            auth.signInWithEmailAndPassword(payload.email, payload.password)
-                .then((response) => {
-                    const settingUser = {
-                        email: response.user.email,
-                        uid: response.user.uid,
-                        status: (response.user.uid === apiConfig.adminKey) ? 'admin' : 'user',
-                    };
-
-                    dispatch('getUsersList')
-                        .then((data) => {
-                            console.log(data);
-                        });
-                    // LOGIN_SUCCESS
-                    commit(USER_LOGIN_SUCCESS, settingUser);
-                    resolve(settingUser);
-                })
-                .catch((error) => {
-                    // LOGIN_FAILURE
-                    commit(USER_LOGIN_FAILURE, error);
-                    reject();
-                })
-        });
+                commit(USER_LOGIN_SUCCESS, settingUser);
+            })
+            .then(()=>{
+                dispatch('getUsersList')
+            })
+            .catch((error) => {
+                // LOGIN_FAILURE
+                commit(USER_LOGIN_FAILURE, error);
+            });
     },
     logout({commit}) {
         commit(USER_LOGOUT);
     },
     getDBListCountElements({commit}) {
         firebase.database().ref(`/products`)
-            .on("value", function(snapshot) {
-                console.log("There are "+snapshot.numChildren()+" messages");
+            .on("value", function (snapshot) {
+                console.log("There are " + snapshot.numChildren() + " messages");
                 commit(DB_REMOVE_PRODUCT_SUCCESS);
                 return snapshot.numChildren();
             });
