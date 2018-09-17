@@ -174,7 +174,6 @@
                 this.$store.dispatch('setProtuctToProductList', this.modalFields);
                 this.closeModal();
                 this.$store.dispatch('getProductList');
-
             },
             removeProduct(index) {
                 this.$store.dispatch('removeProtuctWithProductList', index);

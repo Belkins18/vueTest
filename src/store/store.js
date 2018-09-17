@@ -8,25 +8,15 @@ import 'firebase/firestore';
 Vue.use(Vuex);
 
 const USER_LS = "user";
-const STATE_LOAD = 'STATE_LOAD';
-
-const USER_LOGIN_REQUEST = 'USER_LOGIN_REQUEST';
 const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
-const USER_LOGIN_FAILURE = 'USER_LOGIN_FAILURE';
 const USER_LOGOUT = "LOGOUT";
-const DB_GET_USERKEYS_REQUEST = "DB_GET_USERKEYS_REQUEST";
 const DB_GET_USERKEYS_SUCCESS = "DB_GET_USERKEYS_SUCCESS";
-const DB_GET_USERKEYS_FAILURE = "DB_GET_USERKEYS_FAILURE";
-const DB_GET_PRODUCTLIST_REQUEST = "DB_GET_PRODUCTLIST_REQUEST";
 const DB_GET_PRODUCTLIST_SUCCESS = "DB_GET_PRODUCTLIST_SUCCESS";
-const DB_GET_PRODUCTLIST_FAILURE = "DB_GET_PRODUCTLIST_FAILURE";
 const DB_SET_PRODUCT_REQUEST = "DB_SET_PRODUCT_REQUEST";
 const DB_SET_PRODUCT_SUCCESS = "DB_SET_PRODUCT_SUCCESS";
-const DB_SET_PRODUCT_FAILURE = "DB_SET_PRODUCT_FAILURE";
 const DB_REMOVE_PRODUCT_SUCCESS = "DB_REMOVE_PRODUCT_SUCCESS";
 
 const state = {
-    loading: false,
     isLoggedIn: !!localStorage.getItem(USER_LS),
     user: JSON.parse(localStorage.getItem('user')) || null,
     products: [],
@@ -35,15 +25,6 @@ const state = {
 };
 
 const mutations = {
-    [STATE_LOAD](state) {
-        state.loading = true;
-    },
-    [USER_LOGIN_REQUEST](state) {
-        /**
-         * FIXME Безсмысленная конструкция, особенно если учесть что по проекту это нигде не используется
-         */
-        state.loading = true;
-    },
     [USER_LOGIN_SUCCESS](state, payload) {
         state.loading = false;
         state.isLoggedIn = true;
@@ -51,15 +32,6 @@ const mutations = {
         state.error = '';
 
         localStorage.setItem(USER_LS, JSON.stringify(payload));
-    },
-    [USER_LOGIN_FAILURE](state, payload) {
-        /**
-         * FIXME -/-
-         */
-        state.loading = false;
-
-        console.log(payload.code);
-        console.log(payload.message);
     },
     [USER_LOGOUT](state) {
         state.isLoggedIn = false;
@@ -71,66 +43,24 @@ const mutations = {
         localStorage.clear();
     },
 
-    [DB_GET_PRODUCTLIST_REQUEST](state) {
-        /**
-         * FIXME -/-
-         */
-        state.loading = true;
-    },
+
     [DB_GET_PRODUCTLIST_SUCCESS](state, payload) {
         state.products = payload
     },
-    [DB_GET_PRODUCTLIST_FAILURE](state, payload) {
-        /**
-         * FIXME -/-
-         */
-        state.loading = false;
 
-        console.log(payload.code);
-        console.log(payload.message);
-    },
-
-    [DB_SET_PRODUCT_REQUEST](state) {
-        /**
-         * FIXME -/-
-         */
-        state.loading = true;
-    },
-    [DB_SET_PRODUCT_SUCCESS](state, payload) {
-        state.products = payload
-    },
-    [DB_SET_PRODUCT_FAILURE](state, payload) {
-        /**
-         * FIXME -/-
-         */
-        state.loading = false;
-
-        console.log(payload.code);
-        console.log(payload.message);
+    [DB_SET_PRODUCT_SUCCESS](state) {
+        console.log('product: ' + state + ' removed');
+        // state.products = payload
     },
 
     [DB_REMOVE_PRODUCT_SUCCESS](payload) {
         console.log('product: ' + payload + ' removed');
     },
 
-    [DB_GET_USERKEYS_REQUEST](state) {
-        /**
-         * FIXME -/-
-         */
-        state.loading = true;
-    },
     [DB_GET_USERKEYS_SUCCESS](state, payload) {
         state.users = payload
     },
-    [DB_GET_USERKEYS_FAILURE](state, payload) {
-        /**
-         * FIXME -/-
-         */
-        state.loading = false;
 
-        console.log(payload.code);
-        console.log(payload.message);
-    },
 };
 
 const actions = {
@@ -161,14 +91,12 @@ const actions = {
                 };
 
                 commit(USER_LOGIN_SUCCESS, settingUser);
+                return settingUser;
             })
             .then(() => {
                 dispatch('getUsersList')
             })
-            .catch((error) => {
-                // LOGIN_FAILURE
-                commit(USER_LOGIN_FAILURE, error);
-            });
+            .catch((error) => error);
     },
     logout({commit}) {
         commit(USER_LOGOUT);
@@ -185,36 +113,32 @@ const actions = {
             });
     },
     getProductList({commit}) {
-        /**
-         * FIXME Не нужно оборачивать промис в промис, можно просто return firebase.dat...
-         */
-        // PRODUCTLIST_REQUEST
-        commit(DB_GET_PRODUCTLIST_REQUEST);
-        return new Promise((resolve, reject) => {
-            firebase.database().ref('/products').once("value")
-                .then((snapshot) => {
-                    // PRODUCTLIST_SUCCESS
-                    commit(DB_GET_PRODUCTLIST_SUCCESS, snapshot.val());
-                    resolve(snapshot.val());
-                })
-                .catch((error) => {
-                    // PRODUCTLIST_FAILURE
-                    commit(DB_GET_PRODUCTLIST_FAILURE, error);
-                    reject();
-                });
-        });
+        return new firebase.database().ref('/products').once("value")
+            .then((snapshot) => {
+
+                commit(DB_GET_PRODUCTLIST_SUCCESS, snapshot.val());
+                return snapshot.val();
+            })
+            .catch((error) => error);
     },
 
     setProtuctToProductList({commit}, payload) {
-        /**
-         * FIXME Я не уверен, но скорее всего ты получишь две мутации подряд, а вот запрос к firebase отработает асинхронно
-         * и собственно ты ничего не узнаешь о его результате
-         */
-        commit(DB_SET_PRODUCT_REQUEST);
-        firebase.database().ref('/products')
+        return new firebase.database().ref('/products')
             .push()
-            .set(payload);
-        commit(DB_SET_PRODUCT_SUCCESS, payload);
+            .set(payload)
+            .then(() => {
+                commit(DB_SET_PRODUCT_SUCCESS, payload);
+            })
+            .then(()=>{
+                console.log(this);
+                // this.once("value")
+                //     .then((snapshot) => {
+                //
+                //         commit(DB_GET_PRODUCTLIST_SUCCESS, snapshot.val());
+                //         return snapshot.val();
+                //     })
+            })
+            .catch((error) => error);
     },
 
     editProtuctWithProductList({commit}, payload) {
@@ -234,24 +158,13 @@ const actions = {
     },
 
     getUsersList({commit}) {
-        /**
-         * FIXME Не нужно оборачивать промис в промис, можно просто return firebase.dat...
-         */
-        // USERKEYS_REQUEST
-        commit(DB_GET_USERKEYS_REQUEST);
-        return new Promise((resolve, reject) => {
-            firebase.database().ref('/users').once("value")
-                .then((snapshot) => {
-                    // USERKEYS_SUCCESS
-                    commit(DB_GET_USERKEYS_SUCCESS, snapshot.val());
-                    resolve(snapshot.val());
-                })
-                .catch((error) => {
-                    // USERKEYS_FAILURE
-                    commit(DB_GET_USERKEYS_FAILURE, error);
-                    reject();
-                });
-        });
+        return new firebase.database().ref('/users').once("value")
+            .then((snapshot) => {
+
+                commit(DB_GET_USERKEYS_SUCCESS, snapshot.val());
+                return snapshot.val();
+            })
+            .catch((error) => error);
     },
 };
 
