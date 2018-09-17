@@ -1,5 +1,11 @@
 export const USER_LS = "user";
 
+/**
+ * FIXME Нет смысла делать по три мутации аля REQUEST/SUCCESS/FAILURE, это оверкилл на данном масштабе, просто юзай одну мутацию
+ * для сохранения данных, а за статусом экшна просто следи чере then/catch промиса, нет смысла выносить типы мутаций в отдельный
+ * файл т.к. мутации скорее всего ты не будешь из вызывать напрямую в компонентах
+ */
+
 export const USER_LOGIN_REQUEST = 'USER_LOGIN_REQUEST';
 export const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
 export const USER_LOGIN_FAILURE = 'USER_LOGIN_FAILURE';
