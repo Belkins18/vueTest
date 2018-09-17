@@ -11,7 +11,6 @@ import './registerServiceWorker'
 import PageNames from "./pageNames";
 import {USER_LS} from "./store/mutations";
 
-
 // import PageNames from './pageNames'
 
 Vue.config.productionTip = false;

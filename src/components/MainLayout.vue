@@ -7,7 +7,7 @@
 
 <script>
     // @ is an alias to /src
-    import Navigation from "@/components/Navigation.vue";
+    import Navigation from "@/components/page-navigation/Navigation.vue";
 
     export default {
         name: "mainLayout",
@@ -21,3 +21,10 @@
         methods: {}
     };
 </script>
+
+
+<style scoped lang="scss">
+    .mainLayout {
+        min-height: 100vh;
+    }
+</style>

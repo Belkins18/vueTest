@@ -59,7 +59,7 @@
         },
         methods: {
             enterUser() {
-                this.$store.dispatch('firebaseAuth', this.user)
+                this.$store.dispatch('userAuth', this.user)
                     .then((data) => {
                         console.log(data);
                         this.$router.push({ path: PageNames.MAIN_LAYOUT });
@@ -69,6 +69,18 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+    .card {
+        box-shadow: $el-box-shadow !important;
+    }
+    @media (min-width: map-get($grid-breakpoints, "sm")) {
+        .card {
+            position: absolute;
+            width: $modal-md;
+            margin: 0;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+        }
+    }
 </style>

@@ -1,0 +1,31 @@
+// open iconic
+$icon-font-path: '../../node_modules/open-iconic/font/fonts/';
+
+
+$grid-breakpoints: (
+        xs: 0,
+        sm: 576px,
+        md: 768px,
+        lg: 992px,
+        xl: 1200px
+);
+
+$container-max-widths: (
+        sm: 540px,
+        md: 720px,
+        lg: 960px,
+        xl: 1140px
+);
+
+$grid-columns:                12 !default;
+$grid-gutter-width:           30px !default;
+
+// Modals
+$modal-lg:  800px !default;
+$modal-md:  500px !default;
+$modal-sm:  300px !default;
+
+// Table min-width (custom variables)
+$table-min-width: map_get($container-max-widths, 'xl') - $grid-gutter-width;
+
+$el-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
