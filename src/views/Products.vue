@@ -40,8 +40,14 @@
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="modalFields.sku" placeholder="SKU"
-                                   class="form-control" id="product_sku" aria-describedby="product_skuHelp">
+                            <input
+                                    v-validate="{ required: true}"
+                                    v-model="modalFields.sku"
+                                    type="text"
+                                    id="product_sku"
+                                    class="form-control"
+                                    placeholder="SKU"
+                                    aria-describedby="product_skuHelp">
                             <small id="product_skuHelp" class="invalid-feedback">We'll never share your email with
                                 anyone else.
                             </small>
@@ -109,9 +115,14 @@
 </template>
 
 <script>
+    import Vue from 'vue';
+    import VeeValidate from 'vee-validate';
+
     import Modal from "@/components/Modal.vue";
     import {cloneDeep} from "lodash"
     import {Object_size} from '../helpers'
+
+    Vue.use(VeeValidate);
 
     export default {
         name: "products",
@@ -124,6 +135,7 @@
                 status: '',
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 modalFields: {},
+                editedEL: ''
             };
         },
         computed: {
@@ -143,9 +155,11 @@
                 this.status = 'create';
                 this.showModal = true;
             },
-            editProduct(product) {
+            editProduct(product, index) {
                 this.modalFields = cloneDeep(product);
+                console.log(index);
                 this.status = 'edit';
+                this.editedEL = index;
                 this.showModal = true;
                 this.$store.dispatch('getProductList');
             },
@@ -153,6 +167,7 @@
                 this.showModal = false;
                 this.modalFields = {};
                 this.status = '';
+                this.editedEL = '';
             },
             onsubmitAddProduct() {
                 this.modalFields.id = Object_size(this.products) + 1;
@@ -167,8 +182,11 @@
                 this.$store.dispatch('getProductList');
             },
             editedProductField() {
-                let editedResults = cloneDeep(this.modalFields);
-                this.$store.dispatch('editProtuctWithProductList', editedResults);
+                let payload = {
+                    editedResults: cloneDeep(this.modalFields),
+                    editElement: this.editedEL
+                };
+                this.$store.dispatch('editProtuctWithProductList', payload);
                 this.closeModal();
                 this.$store.dispatch('getProductList');
             },

@@ -191,8 +191,8 @@ const actions = {
 
     editProtuctWithProductList({commit}, payload) {
         commit(DB_SET_PRODUCT_REQUEST);
-        firebase.database().ref('/products/-LMNUGUAgWrW1eEnqz84')
-            .update(payload);
+        firebase.database().ref(`/products/${payload.editElement}`)
+            .set(payload.editedResults);
         commit(DB_SET_PRODUCT_SUCCESS, payload);
     },
 
