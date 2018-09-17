@@ -8,7 +8,7 @@ import 'firebase/firestore';
 Vue.use(Vuex);
 
 const USER_LS = "user";
-const STATE_LOAD= 'STATE_LOAD';
+const STATE_LOAD = 'STATE_LOAD';
 
 const USER_LOGIN_REQUEST = 'USER_LOGIN_REQUEST';
 const USER_LOGIN_SUCCESS = 'USER_LOGIN_SUCCESS';
@@ -39,6 +39,9 @@ const mutations = {
         state.loading = true;
     },
     [USER_LOGIN_REQUEST](state) {
+        /**
+         * FIXME Безсмысленная конструкция, особенно если учесть что по проекту это нигде не используется
+         */
         state.loading = true;
     },
     [USER_LOGIN_SUCCESS](state, payload) {
@@ -50,6 +53,9 @@ const mutations = {
         localStorage.setItem(USER_LS, JSON.stringify(payload));
     },
     [USER_LOGIN_FAILURE](state, payload) {
+        /**
+         * FIXME -/-
+         */
         state.loading = false;
 
         console.log(payload.code);
@@ -66,12 +72,18 @@ const mutations = {
     },
 
     [DB_GET_PRODUCTLIST_REQUEST](state) {
+        /**
+         * FIXME -/-
+         */
         state.loading = true;
     },
     [DB_GET_PRODUCTLIST_SUCCESS](state, payload) {
         state.products = payload
     },
     [DB_GET_PRODUCTLIST_FAILURE](state, payload) {
+        /**
+         * FIXME -/-
+         */
         state.loading = false;
 
         console.log(payload.code);
@@ -79,12 +91,18 @@ const mutations = {
     },
 
     [DB_SET_PRODUCT_REQUEST](state) {
+        /**
+         * FIXME -/-
+         */
         state.loading = true;
     },
     [DB_SET_PRODUCT_SUCCESS](state, payload) {
         state.products = payload
     },
     [DB_SET_PRODUCT_FAILURE](state, payload) {
+        /**
+         * FIXME -/-
+         */
         state.loading = false;
 
         console.log(payload.code);
@@ -96,12 +114,18 @@ const mutations = {
     },
 
     [DB_GET_USERKEYS_REQUEST](state) {
+        /**
+         * FIXME -/-
+         */
         state.loading = true;
     },
     [DB_GET_USERKEYS_SUCCESS](state, payload) {
         state.users = payload
     },
     [DB_GET_USERKEYS_FAILURE](state, payload) {
+        /**
+         * FIXME -/-
+         */
         state.loading = false;
 
         console.log(payload.code);
@@ -138,7 +162,7 @@ const actions = {
 
                 commit(USER_LOGIN_SUCCESS, settingUser);
             })
-            .then(()=>{
+            .then(() => {
                 dispatch('getUsersList')
             })
             .catch((error) => {
@@ -150,6 +174,9 @@ const actions = {
         commit(USER_LOGOUT);
     },
     getDBListCountElements({commit}) {
+        /**
+         * FIXME Всегда старайся возвращать промис
+         */
         firebase.database().ref(`/products`)
             .on("value", function (snapshot) {
                 console.log("There are " + snapshot.numChildren() + " messages");
@@ -158,6 +185,9 @@ const actions = {
             });
     },
     getProductList({commit}) {
+        /**
+         * FIXME Не нужно оборачивать промис в промис, можно просто return firebase.dat...
+         */
         // PRODUCTLIST_REQUEST
         commit(DB_GET_PRODUCTLIST_REQUEST);
         return new Promise((resolve, reject) => {
@@ -176,6 +206,10 @@ const actions = {
     },
 
     setProtuctToProductList({commit}, payload) {
+        /**
+         * FIXME Я не уверен, но скорее всего ты получишь две мутации подряд, а вот запрос к firebase отработает асинхронно
+         * и собственно ты ничего не узнаешь о его результате
+         */
         commit(DB_SET_PRODUCT_REQUEST);
         firebase.database().ref('/products')
             .push()
@@ -191,12 +225,18 @@ const actions = {
     },
 
     removeProtuctWithProductList({commit}, index) {
+        /**
+         * FIXME ?
+         */
         firebase.database().ref('/products')
             .child(index).remove();
         commit(DB_REMOVE_PRODUCT_SUCCESS);
     },
 
     getUsersList({commit}) {
+        /**
+         * FIXME Не нужно оборачивать промис в промис, можно просто return firebase.dat...
+         */
         // USERKEYS_REQUEST
         commit(DB_GET_USERKEYS_REQUEST);
         return new Promise((resolve, reject) => {
