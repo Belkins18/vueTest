@@ -2,10 +2,11 @@
     <div class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form @submit.prevent="$emit('validateBeforeSubmit')">
+                <form @submit.prevent="$emit('validate')">
                     <div class="modal-header">
                         <h5 class="modal-title">
-                            {{modalStatus}} <slot name="modal-header"></slot>
+                            {{modalStatus}}
+                            <slot name="modal-header"></slot>
                         </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                                 @click.prevent="$emit('close')">
@@ -13,18 +14,12 @@
                         </button>
                     </div>
 
-                    <div class="modal-body">
-                        <slot name="modal-body">
-                            Modal body
-                        </slot>
-                    </div>
+                    <slot name="modal-body">
+                        <div class="modal-body"></div>
+                    </slot>
 
                     <div class="modal-footer">
-                        <!--<button type="button" class="btn btn-secondary" data-dismiss="modal"-->
-                                <!--@click.prevent="$emit('close')">-->
-                            <!--Close-->
-                        <!--</button>-->
-                        <slot name="modal-btn" ></slot>
+                        <slot name="modal-btn"></slot>
                     </div>
                 </form>
             </div>
@@ -49,6 +44,24 @@
     .modal {
         background: rgba(0, 0, 0, 0.6);
         display: block;
+    }
+
+    @media screen and (orientation: portrait) {
+        .modal {
+            .modal-body {
+                max-height: 70vh;
+                overflow: auto;
+            }
+        }
+    }
+
+    @media screen and (orientation: landscape) {
+        .modal {
+            .modal-body {
+                max-height: 50vh;
+                overflow: auto;
+            }
+        }
     }
 
     @media (min-width: map-get($grid-breakpoints, "sm")) {

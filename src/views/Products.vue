@@ -4,6 +4,7 @@
             <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
                     @click="userHandlerCreateProduct">Create New Product
             </button>
+
             <div class="products__table table-responsive">
                 <table class="table table-hover">
                     <thead>
@@ -28,7 +29,8 @@
                                 <span class="oi oi-pencil"></span>
                             </button>
                             <button type="button" class="btn btn-primary btn-edit"
-                                    @click="onSubmitRemoveProduct(index)">
+                                    @click="userHandlerConfirmModal(index)">
+                                <!--@click="onSubmitRemoveProduct(index)">-->
                                 <span class="oi oi-trash"></span>
                             </button>
                         </td>
@@ -37,74 +39,90 @@
                 </table>
             </div>
 
+            <Modal v-if="showModalConfirm" @close="closeModalConfirm">
+                <span slot="modal-header">Remove this element?</span>
+                <div slot="modal-body" hidden></div>
+                <div slot="modal-btn">
+                    <button type="button" class="btn btn-success" @click.prevent="onSubmitRemoveProduct(editedEL)">
+                        Remove product
+                    </button>
+                </div>
+            </Modal>
+
             <Modal v-if="showModal" @close="closeModal" :modalStatus="changeStatus()">
                 <span slot="modal-header">Product</span>
 
                 <div slot="modal-body">
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
-                        <div class="col-sm-10">
-                            <input
-                                    name="sku" v-model="modalFields.sku" v-validate="'required|alpha_dash'"
-                                    :class="{'form-control': true, 'is-invalid': errors.has('sku') }"
-                                    id="product_sku" type="text" placeholder="SKU"
-                                    aria-describedby="product_skuHelp">
-                            <small id="product_skuHelp" class="invalid-feedback"> {{ errors.first('sku') }}</small>
+                    <div class="modal-body">
+
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
+                            <div class="col-sm-10">
+                                <input
+                                        name="sku" v-model="modalFields.sku" v-validate="'required|alpha_dash'"
+                                        :class="{'form-control': true, 'is-invalid': errors.has('sku') }"
+                                        id="product_sku" type="text" placeholder="SKU"
+                                        aria-describedby="product_skuHelp">
+                                <small id="product_skuHelp" class="invalid-feedback"> {{ errors.first('sku') }}</small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="product_name">Name</label>
-                        <div class="col-sm-10">
-                            <input
-                                    name="name" v-model="modalFields.name" v-validate="'required'"
-                                    :class="{'form-control': true, 'is-invalid': errors.has('name') }"
-                                    id="product_name" type="text" placeholder="Name"
-                                    aria-describedby="product_nameHelp">
-                            <small id="product_nameHelp" class="invalid-feedback"> {{ errors.first('name') }}</small>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="product_name">Name</label>
+                            <div class="col-sm-10">
+                                <input
+                                        name="name" v-model="modalFields.name" v-validate="'required'"
+                                        :class="{'form-control': true, 'is-invalid': errors.has('name') }"
+                                        id="product_name" type="text" placeholder="Name"
+                                        aria-describedby="product_nameHelp">
+                                <small id="product_nameHelp" class="invalid-feedback"> {{ errors.first('name') }}
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
-                        <div class="col-sm-10">
-                            <input
-                                    name="stock" v-model="modalFields.stock" v-validate="'required|numeric'"
-                                    :class="{'form-control': true, 'is-invalid': errors.has('stock') }"
-                                    id="product_stock" type="text" placeholder="Stock"
-                                    aria-describedby="product_stockHelp">
-                            <small id="product_stockHelp" class="invalid-feedback"> {{ errors.first('stock') }}</small>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
+                            <div class="col-sm-10">
+                                <input
+                                        name="stock" v-model="modalFields.stock" v-validate="'required|numeric'"
+                                        :class="{'form-control': true, 'is-invalid': errors.has('stock') }"
+                                        id="product_stock" type="text" placeholder="Stock"
+                                        aria-describedby="product_stockHelp">
+                                <small id="product_stockHelp" class="invalid-feedback"> {{ errors.first('stock') }}
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
-                        <div class="col-sm-10">
-                            <input
-                                    name="purPrice" v-model="modalFields.purPrice"
-                                    v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
-                                    :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
-                                    id="product_purprice" type="text" placeholder="__,__"
-                                    aria-describedby="product_purpriceHelp">
-                            <small id="product_purpriceHelp" class="invalid-feedback">{{ errors.first('purPrice') }}
-                            </small>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
+                            <div class="col-sm-10">
+                                <input
+                                        name="purPrice" v-model="modalFields.purPrice"
+                                        v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                        :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
+                                        id="product_purprice" type="text" placeholder="__,__"
+                                        aria-describedby="product_purpriceHelp">
+                                <small id="product_purpriceHelp" class="invalid-feedback">{{ errors.first('purPrice') }}
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="product_price">Price</label>
-                        <div class="col-sm-10">
-                            <input
-                                    name="price" v-model="modalFields.price"
-                                    v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
-                                    :class="{'form-control': true, 'is-invalid': errors.has('price') }"
-                                    id="product_price" type="text" placeholder="__,__"
-                                    aria-describedby="product_priceHelp">
-                            <small id="product_priceHelp" class="invalid-feedback"> {{ errors.first('price') }}</small>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="product_price">Price</label>
+                            <div class="col-sm-10">
+                                <input
+                                        name="price" v-model="modalFields.price"
+                                        v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                        :class="{'form-control': true, 'is-invalid': errors.has('price') }"
+                                        id="product_price" type="text" placeholder="__,__"
+                                        aria-describedby="product_priceHelp">
+                                <small id="product_priceHelp" class="invalid-feedback"> {{ errors.first('price') }}
+                                </small>
+                            </div>
                         </div>
-                    </div>
-                    <div class="form-group row">
-                        <label class="col-sm-2 col-form-label" for="product_price">Images</label>
-                        <div class="col-sm-10">
-                            <div class="custom-file">
-                                <input type="file" class="custom-file-input" id="customFile">
-                                <label class="custom-file-label" for="customFile">Choose file</label>
+                        <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="product_price">Images</label>
+                            <div class="col-sm-10">
+                                <div class="custom-file">
+                                    <input type="file" class="custom-file-input" id="customFile">
+                                    <label class="custom-file-label" for="customFile">Choose file</label>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -118,10 +136,10 @@
                         {{ changeStatus() }}
                     </button>
                     <!--<button v-if="status === 'edit'" type="button" class="btn btn-primary"-->
-                            <!--@click.prevent="onSubmitEditProduct()">Save changes-->
+                    <!--@click.prevent="onSubmitEditProduct()">Save changes-->
                     <!--</button>-->
                     <!--<button v-if="status === 'create'" type="button" class="btn btn-success"-->
-                            <!--@click.prevent="validateBeforeSubmit()">Add product-->
+                    <!--@click.prevent="validateBeforeSubmit()">Add product-->
                     <!--</button>-->
                 </div>
             </Modal>
@@ -134,7 +152,7 @@
     import {mapActions} from 'vuex'
     import VeeValidate from 'vee-validate';
 
-    import Modal from "@/components/Modal.vue";
+    import Modal from "@/components/modals/Modal.vue";
     import {cloneDeep} from "lodash"
 
     Vue.use(VeeValidate);
@@ -147,6 +165,7 @@
         data() {
             return {
                 showModal: false,
+                showModalConfirm: false,
                 status: '',
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 modalFields: {},
@@ -167,36 +186,51 @@
             ]),
             // Modal
             changeStatus() {
-                if (this.status === 'edit') { return 'Save changes' }
-                if (this.status === 'create') { return 'Add product'}
+                if (this.status === 'edit') {
+                    return 'Save changes'
+                }
+                if (this.status === 'create') {
+                    return 'Add product'
+                }
             },
             userHandlerCreateProduct() {
                 this.status = 'create';
                 this.showModal = true;
+            },
+            userHandlerConfirmModal(index) {
+                this.showModalConfirm = true;
+                this.editedEL = index;
             },
             userHandlerEditProduct(product, index) {
                 this.modalFields = cloneDeep(product);
                 this.status = 'edit';
                 this.editedEL = index;
                 this.showModal = true;
-                this.getProductList();
             },
             closeModal() {
                 this.showModal = false;
                 this.modalFields = {};
                 this.status = '';
                 this.editedEL = '';
-                this.getProductList();
+            },
+            closeModalConfirm() {
+                this.showModalConfirm = false;
+                this.editedEL = '';
             },
             // Product evt
             // Add product
             onSubmitAddProduct() {
-                this.modalFields.id = Object.keys(this.products).length + 1;
+                if(this.products) {
+                    console.log(Object.keys(this.products).length);
+                } else {
+                    alert('product not found')
+                }
+                // this.modalFields.id = Object.keys(this.products).length + 1;
                 this.addProduct(this.modalFields);
                 this.closeModal();
+                this.getProductList();
             },
             //Edit product
-
             onSubmitEditProduct() {
                 let data = {
                     editedResults: cloneDeep(this.modalFields),
@@ -204,19 +238,27 @@
                 };
                 this.editProduct(data);
                 this.closeModal();
+                this.getProductList();
             },
             //Remove product
             onSubmitRemoveProduct(index) {
                 this.removeProduct(index);
-                this.closeModal();
+                this.closeModalConfirm();
+                this.getProductList();
             },
             validateBeforeSubmit() {
                 this.$validator.validateAll()
                     .then((result) => {
-                        if (result && this.status === 'create') { this.onSubmitAddProduct(); return }
-                        if (result && this.status === 'edit') { this.onSubmitEditProduct(); return }
+                        if (result && this.status === 'create') {
+                            this.onSubmitAddProduct();
+                            return;
+                        }
+                        if (result && this.status === 'edit') {
+                            this.onSubmitEditProduct();
+                            return;
+                        }
                     })
-                    .catch((error) => { alert(error) });
+                    .catch((error) => error);
             }
         },
         created() {
@@ -239,7 +281,7 @@
 
 <style scoped lang="scss">
     .products {
-        margin-top: 60px;
+        margin-top: 56px;
         padding-top: 50px;
         &__btn {
             &--showModal {
@@ -250,6 +292,9 @@
             table {
                 min-width: $table-min-width;
                 box-shadow: $el-box-shadow;
+            }
+            tr > td {
+                vertical-align: middle;
             }
         }
     }

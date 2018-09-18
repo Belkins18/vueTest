@@ -6,9 +6,9 @@
             <Hamburger/>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ml-auto">
-                    <li class="nav-item">
-                        <router-link class="nav-link" to="home">Home</router-link>
-                    </li>
+                    <!--<li class="nav-item">-->
+                        <!--<router-link class="nav-link" to="home">Home</router-link>-->
+                    <!--</li>-->
                     <li class="nav-item">
                         <router-link class="nav-link" to="products">Products</router-link>
                     </li>

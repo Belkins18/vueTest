@@ -10,6 +10,9 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+    .orders {
+        margin-top: 56px;
+        padding-top: 50px;
+    }
 </style>
