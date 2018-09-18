@@ -2,7 +2,7 @@
     <div class="products">
         <div class='container'>
             <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
-                    @click="createProduct">Create New Product
+                    @click="openModal_createProduct">Create New Product
             </button>
             <div class="products__table table-responsive">
                 <table class="table table-hover">
@@ -21,10 +21,10 @@
                         <td>{{product.price}}</td>
                         <td>{{product.stock}}</td>
                         <td>
-                            <button type="button" class="btn btn-primary btn-edit" @click="editProduct(product, index)">
+                            <button type="button" class="btn btn-primary btn-edit" @click="openModal_editProduct(product, index)">
                                 <span class="oi oi-pencil"></span>
                             </button>
-                            <button type="button" class="btn btn-primary btn-edit" @click="removeProduct(index)">
+                            <button type="button" class="btn btn-primary btn-edit" @click="submit_removeProduct(index)">
                                 <span class="oi oi-trash"></span>
                             </button>
                         </td>
@@ -106,8 +106,8 @@
                 </div>
 
                 <div slot="modal-btn">
-                    <button v-if="status === 'edit'" type="button" class="btn btn-primary" @click.prevent="editedProductField()">Save changes</button>
-                    <button v-if="status === 'create'" type="button" class="btn btn-success" @click.prevent="onsubmitAddProduct()">Add product</button>
+                    <button v-if="status === 'edit'" type="button" class="btn btn-primary" @click.prevent="submit_editProduct()">Save changes</button>
+                    <button v-if="status === 'create'" type="button" class="btn btn-success" @click.prevent="submit_addProduct()">Add product</button>
                 </div>
             </Modal>
         </div>
@@ -151,13 +151,13 @@
                   return 'Create new';
               }
             },
-            createProduct() {
+            // Modal
+            openModal_createProduct() {
                 this.status = 'create';
                 this.showModal = true;
             },
-            editProduct(product, index) {
+            openModal_editProduct(product, index) {
                 this.modalFields = cloneDeep(product);
-                console.log(index);
                 this.status = 'edit';
                 this.editedEL = index;
                 this.showModal = true;
@@ -168,27 +168,30 @@
                 this.modalFields = {};
                 this.status = '';
                 this.editedEL = '';
+                this.$store.dispatch('getProductList');
             },
-            onsubmitAddProduct() {
+            // Product evt
+            // Add product
+            submit_addProduct() {
                 this.modalFields.id = Object_size(this.products) + 1;
-                this.$store.dispatch('setProtuctToProductList', this.modalFields);
+                this.$store.dispatch('action_addProduct', this.modalFields);
                 this.closeModal();
-                this.$store.dispatch('getProductList');
             },
-            removeProduct(index) {
-                this.$store.dispatch('removeProtuctWithProductList', index);
-                this.closeModal();
-                this.$store.dispatch('getProductList');
-            },
-            editedProductField() {
+            //Edit product
+            submit_editProduct() {
                 let payload = {
                     editedResults: cloneDeep(this.modalFields),
                     editElement: this.editedEL
                 };
-                this.$store.dispatch('editProtuctWithProductList', payload);
+                this.$store.dispatch('action_editProduct', payload);
                 this.closeModal();
-                this.$store.dispatch('getProductList');
             },
+            //Remove product
+            submit_removeProduct(index) {
+                this.$store.dispatch('action_removeProduct', index);
+                this.closeModal();
+            },
+
         },
         created() {
             this.$store.dispatch('getProductList');
