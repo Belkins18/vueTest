@@ -2,7 +2,7 @@
     <div class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <form>
+                <form @submit.prevent="$emit('validateBeforeSubmit')">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             {{modalStatus}} <slot name="modal-header"></slot>

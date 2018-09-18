@@ -2,7 +2,7 @@
     <div class="products">
         <div class='container'>
             <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
-                    @click="openModal_createProduct">Create New Product
+                    @click="userHandlerCreateProduct">Create New Product
             </button>
             <div class="products__table table-responsive">
                 <table class="table table-hover">
@@ -15,16 +15,20 @@
                     <tr v-for="(product, index) in products" :key='index'>
                         <td>{{ product.id }}</td>
                         <td>{{ product.sku }}</td>
-                        <td><img :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"' alt='' width='20px'></td>
+                        <td><img
+                                :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
+                                alt='' width='20px'></td>
                         <td>{{product.name}}</td>
                         <td>{{product.purPrice}}</td>
                         <td>{{product.price}}</td>
                         <td>{{product.stock}}</td>
                         <td>
-                            <button type="button" class="btn btn-primary btn-edit" @click="openModal_editProduct(product, index)">
+                            <button type="button" class="btn btn-primary btn-edit"
+                                    @click="userHandlerEditProduct(product, index)">
                                 <span class="oi oi-pencil"></span>
                             </button>
-                            <button type="button" class="btn btn-primary btn-edit" @click="submit_removeProduct(index)">
+                            <button type="button" class="btn btn-primary btn-edit"
+                                    @click="onSubmitRemoveProduct(index)">
                                 <span class="oi oi-trash"></span>
                             </button>
                         </td>
@@ -41,57 +45,58 @@
                         <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
                         <div class="col-sm-10">
                             <input
-                                    v-validate="{ required: true}"
-                                    v-model="modalFields.sku"
-                                    type="text"
-                                    id="product_sku"
-                                    class="form-control"
-                                    placeholder="SKU"
+                                    name="sku" v-model="modalFields.sku" v-validate="'required|alpha_dash'"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('sku') }"
+                                    id="product_sku" type="text" placeholder="SKU"
                                     aria-describedby="product_skuHelp">
-                            <small id="product_skuHelp" class="invalid-feedback">We'll never share your email with
-                                anyone else.
-                            </small>
+                            <small id="product_skuHelp" class="invalid-feedback"> {{ errors.first('sku') }}</small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_name">Name</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="modalFields.name" placeholder="Name"
-                                   class="form-control" id="product_name" aria-describedby="product_nameHelp">
-                            <small id="product_nameHelp" class="invalid-feedback">We'll never share your email with
-                                anyone else.
-                            </small>
+                            <input
+                                    name="name" v-model="modalFields.name" v-validate="'required'"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('name') }"
+                                    id="product_name" type="text" placeholder="Name"
+                                    aria-describedby="product_nameHelp">
+                            <small id="product_nameHelp" class="invalid-feedback"> {{ errors.first('name') }}</small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="modalFields.stock" placeholder="Stock"
-                                   class="form-control is-invalid" id="product_stock" aria-describedby="product_stockHelp">
-                            <small id="product_stockHelp" class="invalid-feedback">We'll never share your email with
-                                anyone else.
-                            </small>
+                            <input
+                                    name="stock" v-model="modalFields.stock" v-validate="'required|numeric'"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('stock') }"
+                                    id="product_stock" type="text" placeholder="Stock"
+                                    aria-describedby="product_stockHelp">
+                            <small id="product_stockHelp" class="invalid-feedback"> {{ errors.first('stock') }}</small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="modalFields.purPrice"
-                                   placeholder="Purchase Price" class="form-control is-valid" id="product_purprice"
-                                   aria-describedby="product_purpriceHelp">
-                            <small id="product_purpriceHelp" class="invalid-feedback">We'll never share your email
-                                with anyone else.
+                            <input
+                                    name="purPrice" v-model="modalFields.purPrice"
+                                    v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
+                                    id="product_purprice" type="text" placeholder="__,__"
+                                    aria-describedby="product_purpriceHelp">
+                            <small id="product_purpriceHelp" class="invalid-feedback">{{ errors.first('purPrice') }}
                             </small>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label" for="product_price">Price</label>
                         <div class="col-sm-10">
-                            <input type="text" v-model="modalFields.price" placeholder="Price"
-                                   class="form-control" id="product_price" aria-describedby="product_priceHelp">
-                            <small id="product_priceHelp" class="invalid-feedback">We'll never share your email with
-                                anyone else.
-                            </small>
+                            <input
+                                    name="price" v-model="modalFields.price"
+                                    v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('price') }"
+                                    id="product_price" type="text" placeholder="__,__"
+                                    aria-describedby="product_priceHelp">
+                            <small id="product_priceHelp" class="invalid-feedback"> {{ errors.first('price') }}</small>
                         </div>
                     </div>
                     <div class="form-group row">
@@ -106,8 +111,18 @@
                 </div>
 
                 <div slot="modal-btn">
-                    <button v-if="status === 'edit'" type="button" class="btn btn-primary" @click.prevent="submit_editProduct()">Save changes</button>
-                    <button v-if="status === 'create'" type="button" class="btn btn-success" @click.prevent="submit_addProduct()">Add product</button>
+                    <button
+                            type="button"
+                            :class="{'btn': true, 'btn-primary': status === 'edit', 'btn-success': status === 'create'}"
+                            @click.prevent="validateBeforeSubmit()">
+                        {{ changeStatus() }}
+                    </button>
+                    <!--<button v-if="status === 'edit'" type="button" class="btn btn-primary"-->
+                            <!--@click.prevent="onSubmitEditProduct()">Save changes-->
+                    <!--</button>-->
+                    <!--<button v-if="status === 'create'" type="button" class="btn btn-success"-->
+                            <!--@click.prevent="validateBeforeSubmit()">Add product-->
+                    <!--</button>-->
                 </div>
             </Modal>
         </div>
@@ -116,11 +131,11 @@
 
 <script>
     import Vue from 'vue';
+    import {mapActions} from 'vuex'
     import VeeValidate from 'vee-validate';
 
     import Modal from "@/components/Modal.vue";
     import {cloneDeep} from "lodash"
-    import {Object_size} from '../helpers'
 
     Vue.use(VeeValidate);
 
@@ -135,7 +150,7 @@
                 status: '',
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 modalFields: {},
-                editedEL: ''
+                editedEL: '',
             };
         },
         computed: {
@@ -144,57 +159,68 @@
             },
         },
         methods: {
-            changeStatus() {
-              if (this.status === 'edit') {
-                  return 'Edit';
-              } else if (this.status === 'create') {
-                  return 'Create new';
-              }
-            },
+            ...mapActions([
+                'addProduct',
+                'editProduct',
+                'removeProduct',
+                'getProductList'
+            ]),
             // Modal
-            openModal_createProduct() {
+            changeStatus() {
+                if (this.status === 'edit') { return 'Save changes' }
+                if (this.status === 'create') { return 'Add product'}
+            },
+            userHandlerCreateProduct() {
                 this.status = 'create';
                 this.showModal = true;
             },
-            openModal_editProduct(product, index) {
+            userHandlerEditProduct(product, index) {
                 this.modalFields = cloneDeep(product);
                 this.status = 'edit';
                 this.editedEL = index;
                 this.showModal = true;
-                this.$store.dispatch('getProductList');
+                this.getProductList();
             },
             closeModal() {
                 this.showModal = false;
                 this.modalFields = {};
                 this.status = '';
                 this.editedEL = '';
-                this.$store.dispatch('getProductList');
+                this.getProductList();
             },
             // Product evt
             // Add product
-            submit_addProduct() {
-                this.modalFields.id = Object_size(this.products) + 1;
-                this.$store.dispatch('action_addProduct', this.modalFields);
+            onSubmitAddProduct() {
+                this.modalFields.id = Object.keys(this.products).length + 1;
+                this.addProduct(this.modalFields);
                 this.closeModal();
             },
             //Edit product
-            submit_editProduct() {
-                let payload = {
+
+            onSubmitEditProduct() {
+                let data = {
                     editedResults: cloneDeep(this.modalFields),
                     editElement: this.editedEL
                 };
-                this.$store.dispatch('action_editProduct', payload);
+                this.editProduct(data);
                 this.closeModal();
             },
             //Remove product
-            submit_removeProduct(index) {
-                this.$store.dispatch('action_removeProduct', index);
+            onSubmitRemoveProduct(index) {
+                this.removeProduct(index);
                 this.closeModal();
             },
-
+            validateBeforeSubmit() {
+                this.$validator.validateAll()
+                    .then((result) => {
+                        if (result && this.status === 'create') { this.onSubmitAddProduct(); return }
+                        if (result && this.status === 'edit') { this.onSubmitEditProduct(); return }
+                    })
+                    .catch((error) => { alert(error) });
+            }
         },
         created() {
-            this.$store.dispatch('getProductList');
+            this.getProductList();
 
             // this.$store.getters.getDBFirebaseUsers.once("value")
             //     .then(function (snapshot) {
