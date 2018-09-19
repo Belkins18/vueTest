@@ -2,6 +2,7 @@
     <div class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
+                <!-- FIXME: Лучше $emit вынести в отедльную функцию onSubmit/submitHandler -->
                 <form @submit.prevent="$emit('validate')">
                     <div class="modal-header">
                         <h5 class="modal-title">
@@ -14,6 +15,7 @@
                         </button>
                     </div>
 
+                    <!-- FIXME: Почему в слоте уже есть див, ведь слот должен быть в оббертке а не наоборот -->
                     <slot name="modal-body">
                         <div class="modal-body"></div>
                     </slot>

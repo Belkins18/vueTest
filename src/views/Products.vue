@@ -1,6 +1,7 @@
 <template>
     <div class="products">
         <div class='container'>
+            <!-- FIXME: userHandler - странный префикс, выбери или onCreateProduct или CreateProductHandler, все остальное – не от мира сего)) -->
             <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
                     @click="userHandlerCreateProduct">Create New Product
             </button>
@@ -13,9 +14,11 @@
                     </tr>
                     </thead>
                     <tbody>
+                    <!-- FIXME: В данном случае index как ключ не подходит тк ты будешь изменять таблицу а не просто выводить данные -->
                     <tr v-for="(product, index) in products" :key='index'>
                         <td>{{ product.id }}</td>
                         <td>{{ product.sku }}</td>
+                        <!-- FIXME: Скобки в тернаром операторе не нужны, если бы это была конструкция вида (a && b) - тогда да, стоит -->
                         <td><img
                                 :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
                                 alt='' width='20px'></td>
