@@ -8,8 +8,8 @@ import 'firebase/firestore';
 Vue.use(Vuex);
 
 const USER_LS = "user";
-const SET_LOGGED_IN  = 'SET_LOGGED_IN ';
-const SET_LOGGED_OFF  = "SET_LOGGED_OFF";
+const SET_LOGGED_IN = 'SET_LOGGED_IN ';
+const SET_LOGGED_OFF = "SET_LOGGED_OFF";
 const SAVE_USERS = "SAVE_USERS";
 const SAVE_PRODUCTS = "SAVE_PRODUCTS";
 
@@ -69,26 +69,50 @@ const actions = {
             .then(() => {
                 dispatch('getUsersList')
             })
-            .catch((error) => error);
     },
 
     logout({commit}) {
         commit(SET_LOGGED_OFF);
     },
+    loadImages(_, dataImg) {
+        return new Promise((resolve) => {
+            let storageRef = firebase.storage().ref();
+            let basePath = 'images/';
+            let dirPath = `${basePath}${dataImg.dir}/`;
+            let uploadTask = storageRef.child(`${dirPath}${dataImg.file.name}`.toString()).put(dataImg.file);
+            uploadTask.on('state_changed',
+                (snapshot) => {
+                    let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+                    console.log('Upload is ' + progress + '% done');
+                    switch (snapshot.state) {
+                        case firebase.storage.TaskState.PAUSED: // or 'paused'
+                            break;
+                        case firebase.storage.TaskState.RUNNING: // or 'running'
+                            break;
+                    }
+                },
+                (error) => error,
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL()
+                        .then((downloadURL) => {
+                            resolve(downloadURL)
+                        });
+                }
+            );
+        });
 
+    },
     addProduct(_, payload) {
         return new firebase.database().ref('/products')
             .push()
             .set(payload)
             .then(() => payload)
-            .catch((error) => error);
     },
 
     editProduct(_, payload) {
         return new firebase.database().ref(`/products/${payload.editElement}`)
             .set(payload.editedResults)
             .then(() => payload.editedResults)
-            .catch((error) => error);
     },
 
     removeProduct(_, index) {
@@ -103,7 +127,6 @@ const actions = {
                 commit(SAVE_PRODUCTS, snapshot.val());
                 return snapshot.val();
             })
-            .catch((error) => error);
     },
 
     getUsersList({commit}) {
@@ -112,7 +135,6 @@ const actions = {
                 commit(SAVE_USERS, snapshot.val());
                 return snapshot.val();
             })
-            .catch((error) => error);
     },
 };
 

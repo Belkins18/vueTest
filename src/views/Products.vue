@@ -18,7 +18,7 @@
                         <td>{{ product.sku }}</td>
                         <td><img
                                 :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
-                                alt='' width='20px'></td>
+                                alt='' width='47px'></td>
                         <td>{{product.name}}</td>
                         <td>{{product.purPrice}}</td>
                         <td>{{product.price}}</td>
@@ -120,8 +120,10 @@
                             <label class="col-sm-2 col-form-label" for="product_price">Images</label>
                             <div class="col-sm-10">
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="customFile">
-                                    <label class="custom-file-label" for="customFile">Choose file</label>
+                                    <input type="file" class="custom-file-input" id="customFile"
+                                           @change="onFileChanged">
+                                    <label class="custom-file-label" for="customFile">
+                                        {{modalFields.selectedFile}} </label>
                                 </div>
                             </div>
                         </div>
@@ -149,11 +151,12 @@
 
 <script>
     import Vue from 'vue';
-    import {mapActions} from 'vuex'
+    import {mapActions} from 'vuex';
+    // import axios from 'axios';
     import VeeValidate from 'vee-validate';
 
     import Modal from "@/components/modals/Modal.vue";
-    import {cloneDeep} from "lodash"
+    import {cloneDeep} from "lodash";
 
     Vue.use(VeeValidate);
 
@@ -182,7 +185,8 @@
                 'addProduct',
                 'editProduct',
                 'removeProduct',
-                'getProductList'
+                'getProductList',
+                'loadImages'
             ]),
             // Modal
             changeStatus() {
@@ -217,15 +221,35 @@
                 this.showModalConfirm = false;
                 this.editedEL = '';
             },
+            onFileChanged(event) {
+                this.modalFields.selectedFile = event.target.files[0];
+                console.log(this.modalFields.selectedFile);
+                let fileData = {
+                    dir: this.$route.name,
+                    file: this.modalFields.selectedFile
+                };
+                this.loadImages(fileData)
+                    .then((url) => {
+                        console.log(url);
+                        this.modalFields.image = url;
+                    });
+                // axios.post('https://api.cloudinary.com/v1_1/belkins/image/upload', formData)
+                //     .then((response)=>{
+                //         alert(response);
+                //     })
+                //     .catch((error) => error)
+            },
             // Product evt
             // Add product
             onSubmitAddProduct() {
-                if(this.products) {
+                if (this.products) {
                     console.log(Object.keys(this.products).length);
                 } else {
                     alert('product not found')
                 }
                 // this.modalFields.id = Object.keys(this.products).length + 1;
+                // this.onFileChanged();
+                console.log(this.modalFields);
                 this.addProduct(this.modalFields);
                 this.closeModal();
                 this.getProductList();
