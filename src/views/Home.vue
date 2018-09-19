@@ -5,6 +5,7 @@
 </template>
 
 <script>
+  // FIXME: Компонент не используется, стоит выпилить
   export default {
     name: 'home',
   }

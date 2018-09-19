@@ -55,6 +55,7 @@ const actions = {
     },
 
     userAuth({dispatch, commit}, payload) {
+        // FIXME: .catch((error) => error); - эта конструкция не имеет смысла
         return new firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
             .then((response) => {
                 const settingUser = {

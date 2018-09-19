@@ -10,11 +10,17 @@
                         <!--<router-link class="nav-link" to="home">Home</router-link>-->
                     <!--</li>-->
                     <li class="nav-item">
+                        <!-- FIXME: у тебя же есть файл с константами где хранятся имена страниц, это хорошее место чтобы их юзать, например
+                             <router-link class="nav-link" :to="{ name: productPage }">Products</router-link>
+                             а в date сделать что-то вроде date() { return { productPage: PageNames.PRODUCTS } }
+                             либо сделать а-ля константу в created, created() { this.pageNames = { ...PageNames }; }
+                        -->
                         <router-link class="nav-link" to="products">Products</router-link>
                     </li>
                     <li class="nav-item">
                         <router-link class="nav-link" to="orders">Orders</router-link>
                     </li>
+                    <!-- FIXME: Стоит вынести в сторону чтобы случайно не нажать при переходе между страницами -->
                     <li class="nav-item">
                         <a href="#" class="nav-link" @click.prevent="logout">LogOut</a>
                     </li>
@@ -39,6 +45,8 @@
         methods: {
             logout() {
                 this.$store.dispatch('logout');
+
+                // FIXME: Вполне можно перенести в action, к тому же опять место где стоит юзать данные из файла PageNames
                 this.$router.push({path: 'signIn'});
             }
         },

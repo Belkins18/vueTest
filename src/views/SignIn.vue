@@ -38,6 +38,7 @@
 
 <script>
     // @ is an alias to /src
+    // FIXME: Компонент нигде не используется, стоит выпилить
     import HelloWorld from '@/components/HelloWorld.vue';
     import PageNames from "../pageNames";
 
