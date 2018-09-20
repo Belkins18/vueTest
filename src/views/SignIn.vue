@@ -6,6 +6,7 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col">
+                    <!-- FIXME: значение в for должно совпадать c ID а не с name -->
                     <label for="signIn_email">Email</label>
                 </div>
                 <div class="col-sm-9">
@@ -15,6 +16,7 @@
             </div>
             <div class="row align-items-center mt-4">
                 <div class="col">
+                    <!-- FIXME: значение в for должно совпадать c ID а не с name -->
                     <label for="signIn_password">Password</label>
                 </div>
                 <div class="col-sm-9">
