@@ -3,22 +3,22 @@
         <div class="modal-dialog" role="document">
             <div class="modal-content">
                 <!-- FIXME: Лучше $emit вынести в отедльную функцию onSubmit/submitHandler -->
-                <form @submit.prevent="$emit('validate')">
+                <form @submit.prevent="onSubmit()">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             {{modalStatus}}
                             <slot name="modal-header"></slot>
                         </h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                @click.prevent="$emit('close')">
+                                @click.prevent="close()">
                             <span aria-hidden="true">&times;</span>
                         </button>
                     </div>
 
-                    <!-- FIXME: Почему в слоте уже есть див, ведь слот должен быть в оббертке а не наоборот -->
-                    <slot name="modal-body">
-                        <div class="modal-body"></div>
-                    </slot>
+                    <div v-if="hasContent" class="modal-body">
+                        <slot name="modal-body">
+                        </slot>
+                    </div>
 
                     <div class="modal-footer">
                         <slot name="modal-btn"></slot>
@@ -37,7 +37,16 @@
             };
         },
         props: {
-            modalStatus: String
+            modalStatus: String,
+            hasContent: Boolean
+        },
+        methods: {
+            onSubmit() {
+                this.$emit('validate');
+            },
+            close() {
+                this.$emit('close');
+            }
         }
     };
 </script>

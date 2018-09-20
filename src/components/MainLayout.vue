@@ -6,7 +6,6 @@
 </template>
 
 <script>
-    // @ is an alias to /src
     import Navigation from "@/components/page-navigation/Navigation.vue";
 
     export default {

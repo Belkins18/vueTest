@@ -14,14 +14,14 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <!-- FIXME: В данном случае index как ключ не подходит тк ты будешь изменять таблицу а не просто выводить данные -->
                     <tr v-for="(product, index) in products" :key='index'>
                         <td>{{ product.id }}</td>
                         <td>{{ product.sku }}</td>
-                        <!-- FIXME: Скобки в тернаром операторе не нужны, если бы это была конструкция вида (a && b) - тогда да, стоит -->
-                        <td><img
+                        <td>
+                            <img
                                 :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
-                                alt='' width='47px'></td>
+                                alt='' width='47px'>
+                        </td>
                         <td>{{product.name}}</td>
                         <td>{{product.purPrice}}</td>
                         <td>{{product.price}}</td>
@@ -52,7 +52,7 @@
                 </div>
             </Modal>
 
-            <Modal v-if="showModal" @close="closeModal" :modalStatus="changeStatus()">
+            <Modal v-if="showModal" @close="closeModal" @validate="validate()" :modalStatus="changeStatus()" :hasContent="true">
                 <span slot="modal-header">Product</span>
 
                 <div slot="modal-body">
@@ -191,6 +191,9 @@
                 'getProductList',
                 'loadImages'
             ]),
+            validate(){
+                alert("onsubmit")
+            },
             // Modal
             changeStatus() {
                 if (this.status === 'edit') {
@@ -246,6 +249,7 @@
             // Add product
             onSubmitAddProduct() {
                 if (this.products) {
+                    console.log(Object.keys(this.products));
                     console.log(Object.keys(this.products).length);
                 } else {
                     alert('product not found')

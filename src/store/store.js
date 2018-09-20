@@ -1,9 +1,11 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
+import router from '../router/router'
 
 import apiConfig from '../apiConfig';
 import firebase from 'firebase';
 import 'firebase/firestore';
+
 
 Vue.use(Vuex);
 
@@ -55,7 +57,6 @@ const actions = {
     },
 
     userAuth({dispatch, commit}, payload) {
-        // FIXME: .catch((error) => error); - эта конструкция не имеет смысла
         return new firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
             .then((response) => {
                 const settingUser = {
@@ -65,7 +66,6 @@ const actions = {
                 };
 
                 commit(SET_LOGGED_IN, settingUser);
-                return settingUser;
             })
             .then(() => {
                 dispatch('getUsersList')
@@ -74,6 +74,8 @@ const actions = {
 
     logout({commit}) {
         commit(SET_LOGGED_OFF);
+        console.log(router.push('/signIn'));
+        // this.$router.push({name: this.signInPage});
     },
     loadImages(_, dataImg) {
         return new Promise((resolve) => {

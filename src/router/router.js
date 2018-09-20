@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import MainLayout from '../components/MainLayout'
-// import Home from '../views/Home'
 import Products from '../views/Products'
 import Orders from '../views/Orders'
 import SignIn from '../views/SignIn'
@@ -14,7 +13,7 @@ Vue.use(Router);
 // FIXME: Долго писать, спроси
 const routes = [
     {
-        path: PageNames.MAIN_LAYOUT,
+        path: '/',
         component: MainLayout,
         meta: {
             requiresAuth: true

@@ -9,13 +9,12 @@ import store from './store/store'
 import {sync} from 'vuex-router-sync';
 import './registerServiceWorker'
 import PageNames from "./pageNames";
-import {USER_LS} from "./store/mutations";
-
-// import PageNames from './pageNames'
 
 Vue.config.productionTip = false;
 
 sync(store, router);
+
+const USER_LS = 'user';
 
 function checkRole(role) {
     let user = store.state.user || JSON.parse(localStorage.getItem(USER_LS));
@@ -40,7 +39,7 @@ router.beforeEach((to, from, next) => {
             if (!checkRole()) { return next({ name: PageNames.SIGN_IN }) }
             next();
         } else {
-            if (JSON.parse(localStorage.getItem(USER_LS)) !== null) { next({path: `/${PageNames.HOME}`}) }
+            if (JSON.parse(localStorage.getItem(USER_LS)) !== null) { next({name: PageNames.PRODUCTS}) }
             next();
         }
     }

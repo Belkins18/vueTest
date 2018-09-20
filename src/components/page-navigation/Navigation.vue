@@ -6,19 +6,17 @@
             <Hamburger/>
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav ml-auto">
-                    <!--<li class="nav-item">-->
-                        <!--<router-link class="nav-link" to="home">Home</router-link>-->
-                    <!--</li>-->
                     <li class="nav-item">
                         <!-- FIXME: у тебя же есть файл с константами где хранятся имена страниц, это хорошее место чтобы их юзать, например
                              <router-link class="nav-link" :to="{ name: productPage }">Products</router-link>
                              а в date сделать что-то вроде date() { return { productPage: PageNames.PRODUCTS } }
                              либо сделать а-ля константу в created, created() { this.pageNames = { ...PageNames }; }
                         -->
-                        <router-link class="nav-link" to="products">Products</router-link>
+                        <router-link class="nav-link" :to="{ name: productPage }">Products</router-link>
+                        <!--<router-link class="nav-link" to="products">Products</router-link>-->
                     </li>
                     <li class="nav-item">
-                        <router-link class="nav-link" to="orders">Orders</router-link>
+                        <router-link class="nav-link" :to="{ name: orderPage }">Orders</router-link>
                     </li>
                     <!-- FIXME: Стоит вынести в сторону чтобы случайно не нажать при переходе между страницами -->
                     <li class="nav-item">
@@ -31,35 +29,28 @@
 </template>
 
 <script>
-    import Hamburger from '@/components/page-navigation/Hamburger.vue'
+    import Hamburger from '@/components/page-navigation/Hamburger.vue';
+    import PageNames from '../../pageNames';
+
     export default {
         name: "Navigation",
         components: {
             Hamburger
         },
         data() {
-            return {};
+            return {
+                productPage: PageNames.PRODUCTS,
+                orderPage: PageNames.ORDERS,
+                signInPage: PageNames.SIGN_IN
+            };
         },
 
         watch: {},
         methods: {
             logout() {
                 this.$store.dispatch('logout');
-
-                // FIXME: Вполне можно перенести в action, к тому же опять место где стоит юзать данные из файла PageNames
-                this.$router.push({path: 'signIn'});
             }
-        },
-        // beforeMount() {
-        //     console.log(`beforeMount`);
-        //     console.log(`status: ${this.$store.state.isLoggedIn}`);
-        //     return new Promise((resolve) => {
-        //         if (this.$store.state.isLoggedIn === false) {
-        //             this.$router.push({ path: 'signIn' });
-        //             resolve();
-        //         }
-        //     })
-        // },
+        }
     }
 </script>
 

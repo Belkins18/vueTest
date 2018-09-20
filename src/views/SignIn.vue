@@ -37,16 +37,8 @@
 </template>
 
 <script>
-    // @ is an alias to /src
-    // FIXME: Компонент нигде не используется, стоит выпилить
-    import HelloWorld from '@/components/HelloWorld.vue';
-    import PageNames from "../pageNames";
-
     export default {
         name: "signIn",
-        components: {
-            HelloWorld
-        },
         data() {
             return {
                 user: {
@@ -61,9 +53,8 @@
         methods: {
             enterUser() {
                 this.$store.dispatch('userAuth', this.user)
-                    .then((data) => {
-                        console.log(data);
-                        this.$router.push({ path: PageNames.MAIN_LAYOUT });
+                    .then(() => {
+                        this.$router.push({ path: '/' });
                     });
             }
         },
