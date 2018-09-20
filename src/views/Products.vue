@@ -19,8 +19,8 @@
                         <td>{{ product.sku }}</td>
                         <td>
                             <img
-                                :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
-                                alt='' width='47px'>
+                                    :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
+                                    alt='' width='47px'>
                         </td>
                         <td>{{product.name}}</td>
                         <td>{{product.purPrice}}</td>
@@ -52,90 +52,89 @@
                 </div>
             </Modal>
 
-            <Modal v-if="showModal" @close="closeModal" @validate="validate()" :modalStatus="changeStatus()" :hasContent="true">
+            <Modal v-if="showModal" @close="closeModal" @validate="validate()" :modalStatus="changeStatus()"
+                   :hasContent="true">
                 <span slot="modal-header">Product</span>
 
                 <div slot="modal-body">
-                    <div class="modal-body">
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
+                        <div class="col-sm-10">
+                            <input
+                                    name="sku" v-model="modalFields.sku" v-validate="'required|alpha_dash'"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('sku') }"
+                                    id="product_sku" type="text" placeholder="SKU"
+                                    aria-describedby="product_skuHelp">
+                            <small id="product_skuHelp" class="invalid-feedback"> {{ errors.first('sku') }}</small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="product_name">Name</label>
+                        <div class="col-sm-10">
+                            <input
+                                    name="name" v-model="modalFields.name" v-validate="'required'"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('name') }"
+                                    id="product_name" type="text" placeholder="Name"
+                                    aria-describedby="product_nameHelp">
+                            <small id="product_nameHelp" class="invalid-feedback"> {{ errors.first('name') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
+                        <div class="col-sm-10">
+                            <input
+                                    name="stock" v-model="modalFields.stock" v-validate="'required|numeric'"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('stock') }"
+                                    id="product_stock" type="text" placeholder="Stock"
+                                    aria-describedby="product_stockHelp">
+                            <small id="product_stockHelp" class="invalid-feedback"> {{ errors.first('stock') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
+                        <div class="col-sm-10">
+                            <input
+                                    name="purPrice" v-model="modalFields.purPrice"
+                                    v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
+                                    id="product_purprice" type="text" placeholder="__,__"
+                                    aria-describedby="product_purpriceHelp">
+                            <small id="product_purpriceHelp" class="invalid-feedback">{{ errors.first('purPrice') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="product_price">Price</label>
+                        <div class="col-sm-10">
+                            <input
+                                    name="price" v-model="modalFields.price"
+                                    v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                    :class="{'form-control': true, 'is-invalid': errors.has('price') }"
+                                    id="product_price" type="text" placeholder="__,__"
+                                    aria-describedby="product_priceHelp">
+                            <small id="product_priceHelp" class="invalid-feedback"> {{ errors.first('price') }}
+                            </small>
+                        </div>
+                    </div>
+                    <div class="form-group row">
+                        <label class="col-sm-2 col-form-label" for="product_price">Images</label>
+                        <div class="col-sm-10">
+                            <div class="custom-file">
+                                <!--<input type="file" class="custom-file-input" id="customFile"-->
+                                <!--@change="onFileChange">-->
+                                <!--<label class="custom-file-label" for="customFile">{{ modalFields ? modalFields.selectedFile : ''}}</label>-->
 
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
-                            <div class="col-sm-10">
-                                <input
-                                        name="sku" v-model="modalFields.sku" v-validate="'required|alpha_dash'"
-                                        :class="{'form-control': true, 'is-invalid': errors.has('sku') }"
-                                        id="product_sku" type="text" placeholder="SKU"
-                                        aria-describedby="product_skuHelp">
-                                <small id="product_skuHelp" class="invalid-feedback"> {{ errors.first('sku') }}</small>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="product_name">Name</label>
-                            <div class="col-sm-10">
-                                <input
-                                        name="name" v-model="modalFields.name" v-validate="'required'"
-                                        :class="{'form-control': true, 'is-invalid': errors.has('name') }"
-                                        id="product_name" type="text" placeholder="Name"
-                                        aria-describedby="product_nameHelp">
-                                <small id="product_nameHelp" class="invalid-feedback"> {{ errors.first('name') }}
-                                </small>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
-                            <div class="col-sm-10">
-                                <input
-                                        name="stock" v-model="modalFields.stock" v-validate="'required|numeric'"
-                                        :class="{'form-control': true, 'is-invalid': errors.has('stock') }"
-                                        id="product_stock" type="text" placeholder="Stock"
-                                        aria-describedby="product_stockHelp">
-                                <small id="product_stockHelp" class="invalid-feedback"> {{ errors.first('stock') }}
-                                </small>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
-                            <div class="col-sm-10">
-                                <input
-                                        name="purPrice" v-model="modalFields.purPrice"
-                                        v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
-                                        :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
-                                        id="product_purprice" type="text" placeholder="__,__"
-                                        aria-describedby="product_purpriceHelp">
-                                <small id="product_purpriceHelp" class="invalid-feedback">{{ errors.first('purPrice') }}
-                                </small>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="product_price">Price</label>
-                            <div class="col-sm-10">
-                                <input
-                                        name="price" v-model="modalFields.price"
-                                        v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
-                                        :class="{'form-control': true, 'is-invalid': errors.has('price') }"
-                                        id="product_price" type="text" placeholder="__,__"
-                                        aria-describedby="product_priceHelp">
-                                <small id="product_priceHelp" class="invalid-feedback"> {{ errors.first('price') }}
-                                </small>
-                            </div>
-                        </div>
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="product_price">Images</label>
-                            <div class="col-sm-10">
-                                <div class="custom-file">
-                                    <!--<input type="file" class="custom-file-input" id="customFile"-->
-                                           <!--@change="onFileChange">-->
-                                    <!--<label class="custom-file-label" for="customFile">{{ modalFields ? modalFields.selectedFile : ''}}</label>-->
-
-                                    <div v-if="!image">
-                                        <input type="file" class="custom-file-input" id="customFile" @change="onFileChange">
-                                        <label class="custom-file-label" for="customFile">Select File</label>
-                                    </div>
-                                    <div v-else>
-                                        <div>
-                                            <img :src="image" />
-                                        </div>
-                                        <button @click="removeImage">Remove image</button>
+                                <div v-if="!image">
+                                    <input type="file" class="custom-file-input" id="customFile"
+                                           @change="onFileChange">
+                                    <label class="custom-file-label" for="customFile">Select File</label>
+                                </div>
+                                <div v-else>
+                                    <div class="preview-img">
+                                        <img :src="image" style="max-width: 150px"/>
+                                        <span @click.prevent="removeImage">&times;</span>
                                     </div>
                                 </div>
                             </div>
@@ -147,7 +146,7 @@
                     <button
                             type="button"
                             :class="{'btn': true, 'btn-primary': status === 'edit', 'btn-success': status === 'create'}"
-                            @click.prevent="validateBeforeSubmit()">
+                            @click="validateBeforeSubmit()">
                         {{ changeStatus() }}
                     </button>
                     <!--<button v-if="status === 'edit'" type="button" class="btn btn-primary"-->
@@ -186,7 +185,9 @@
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 modalFields: {},
                 editedEL: '',
-                image: ''
+                image: '',
+                uploadFile: null,
+                fileData: {}
             };
         },
         computed: {
@@ -202,7 +203,7 @@
                 'getProductList',
                 'loadImages'
             ]),
-            validate(){
+            validate() {
                 alert("onsubmit")
             },
             // Modal
@@ -233,6 +234,7 @@
                 this.modalFields = {};
                 this.status = '';
                 this.editedEL = '';
+                this.removeImage();
             },
             closeModalConfirm() {
                 this.showModalConfirm = false;
@@ -240,50 +242,82 @@
             },
             onFileChange(e) {
                 let files = e.target.files || e.dataTransfer.files;
+                this.uploadFile = files;
+                console.log(files);
                 if (!files.length)
                     return;
                 this.createImage(files[0]);
             },
             createImage(file) {
-                let image = new Image();
                 let reader = new FileReader();
-                let vm = this;
-
                 reader.onload = (e) => {
-                    vm.image = e.target.result;
+                    console.log(e.target);
+                    this.image = e.target.result;
+                    this.fileData = {
+                        dir: this.$route.name,
+                        fileList: this.uploadFile,
+                        fileReader: file
+                    };
                 };
                 reader.readAsDataURL(file);
             },
             removeImage: function () {
                 this.image = '';
+                this.uploadFile = null;
+                this.fileData = {};
             },
-            onFileChanged(event) {
-                this.modalFields.selectedFile = event.target.files[0];
-                console.log(this.modalFields.selectedFile);
-                let fileData = {
-                    dir: this.$route.name,
-                    file: this.modalFields.selectedFile
-                };
-                this.loadImages(fileData)
-                    .then((url) => {
-                        console.log(url);
-                        this.modalFields.image = url;
-                    });
-                // axios.post('https://api.cloudinary.com/v1_1/belkins/image/upload', formData)
-                //     .then((response)=>{
-                //         alert(response);
-                //     })
-                //     .catch((error) => error)
-            },
+            // onFileChanged(event) {
+            //     this.modalFields.selectedFile = event.target.files[0];
+            //     console.log(this.modalFields.selectedFile);
+            //     let fileData = {
+            //         dir: this.$route.name,
+            //         file: this.modalFields.selectedFile
+            //     };
+            //     this.loadImages(fileData)
+            //         .then((url) => {
+            //             console.log(url);
+            //             this.modalFields.image = url;
+            //         });
+            //     // axios.post('https://api.cloudinary.com/v1_1/belkins/image/upload', formData)
+            //     //     .then((response)=>{
+            //     //         alert(response);
+            //     //     })
+            //     //     .catch((error) => error)
+            // },
             // Product evt
             // Add product
             onSubmitAddProduct() {
                 this.modalFields.id = '_' + Math.random().toString(36).substr(2, 9);
                 // this.onFileChanged();
                 console.log(this.modalFields);
-                this.addProduct(this.modalFields);
-                this.closeModal();
-                this.getProductList();
+                this.addProduct(this.modalFields)
+                    .then((createObj) => {
+                        console.log(Object.keys(createObj)[0]);
+                        if (Object.keys(this.fileData).length > 0) {
+                            return (this.loadImages(this.fileData))
+                        } else {
+                            this.closeModal();
+                            this.getProductList();
+                        }
+                    })
+                    .then((url) => {
+                        if (url) {
+                            console.log(url);
+                            this.modalFields.image = url;
+                            return this.modalFields
+                        }
+                    })
+                    .then((newObj) => {
+                        console.log(newObj);
+                        this.onSubmitEditProduct();
+                    });
+                // .then(() => {
+                //     this.closeModal();
+                // })
+                // .then(() => {
+                //     this.getProductList();
+                // });
+
             },
             //Edit product
             onSubmitEditProduct() {
@@ -368,4 +402,32 @@
         }
     }
 
+    .preview-img {
+        position: relative;
+        display: inline-grid;
+        width: 150px;
+        height: auto;
+        &:hover {
+            span {
+                visibility: visible;
+                opacity: 1;
+            }
+        }
+        span {
+            visibility: hidden;
+            opacity: 0;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            width: 20px;
+            height: 20px;
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            color: red;
+            background: transparent;
+        }
+    }
 </style>

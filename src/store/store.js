@@ -78,11 +78,14 @@ const actions = {
         // this.$router.push({name: this.signInPage});
     },
     loadImages(_, dataImg) {
+        console.log(dataImg);
+        console.log(dataImg.fileList);
+        console.log(dataImg.fileList[0].name);
         return new Promise((resolve) => {
             let storageRef = firebase.storage().ref();
             let basePath = 'images/';
             let dirPath = `${basePath}${dataImg.dir}/`;
-            let uploadTask = storageRef.child(`${dirPath}${dataImg.file.name}`.toString()).put(dataImg.file);
+            let uploadTask = storageRef.child(`${dirPath}${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
             uploadTask.on('state_changed',
                 (snapshot) => {
                     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -96,23 +99,36 @@ const actions = {
                 },
                 (error) => error,
                 () => {
+                    // return new Promise((resolve) => {
                     uploadTask.snapshot.ref.getDownloadURL()
                         .then((downloadURL) => {
                             resolve(downloadURL)
                         });
+                    // });
                 }
             );
         });
 
     },
     addProduct(_, payload) {
+        let databaseRef = firebase.database().ref('/products');
         return new firebase.database().ref('/products')
             .push()
             .set(payload)
-            .then(() => payload)
+            .then(() => {
+                   databaseRef.on('value', function(snapshot) {
+                       const data = snapshot.val() || null;
+                       if (data) {
+                           return Object.keys(data)[0];
+                       }
+                   });
+                   return payload;
+            });
     },
 
     editProduct(_, payload) {
+        console.log(payload.editedResults);
+        console.log(payload.editElement);
         return new firebase.database().ref(`/products/${payload.editElement}`)
             .set(payload.editedResults)
             .then(() => payload.editedResults)
