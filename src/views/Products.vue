@@ -123,10 +123,20 @@
                             <label class="col-sm-2 col-form-label" for="product_price">Images</label>
                             <div class="col-sm-10">
                                 <div class="custom-file">
-                                    <input type="file" class="custom-file-input" id="customFile"
-                                           @change="onFileChanged">
-                                    <label class="custom-file-label" for="customFile">
-                                        {{modalFields.selectedFile}} </label>
+                                    <!--<input type="file" class="custom-file-input" id="customFile"-->
+                                           <!--@change="onFileChange">-->
+                                    <!--<label class="custom-file-label" for="customFile">{{ modalFields ? modalFields.selectedFile : ''}}</label>-->
+
+                                    <div v-if="!image">
+                                        <input type="file" class="custom-file-input" id="customFile" @change="onFileChange">
+                                        <label class="custom-file-label" for="customFile">Select File</label>
+                                    </div>
+                                    <div v-else>
+                                        <div>
+                                            <img :src="image" />
+                                        </div>
+                                        <button @click="removeImage">Remove image</button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -176,6 +186,7 @@
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 modalFields: {},
                 editedEL: '',
+                image: ''
             };
         },
         computed: {
@@ -227,6 +238,25 @@
                 this.showModalConfirm = false;
                 this.editedEL = '';
             },
+            onFileChange(e) {
+                let files = e.target.files || e.dataTransfer.files;
+                if (!files.length)
+                    return;
+                this.createImage(files[0]);
+            },
+            createImage(file) {
+                let image = new Image();
+                let reader = new FileReader();
+                let vm = this;
+
+                reader.onload = (e) => {
+                    vm.image = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+            removeImage: function () {
+                this.image = '';
+            },
             onFileChanged(event) {
                 this.modalFields.selectedFile = event.target.files[0];
                 console.log(this.modalFields.selectedFile);
@@ -248,13 +278,7 @@
             // Product evt
             // Add product
             onSubmitAddProduct() {
-                if (this.products) {
-                    console.log(Object.keys(this.products));
-                    console.log(Object.keys(this.products).length);
-                } else {
-                    alert('product not found')
-                }
-                // this.modalFields.id = Object.keys(this.products).length + 1;
+                this.modalFields.id = '_' + Math.random().toString(36).substr(2, 9);
                 // this.onFileChanged();
                 console.log(this.modalFields);
                 this.addProduct(this.modalFields);
