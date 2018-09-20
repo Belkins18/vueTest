@@ -2,13 +2,13 @@
     <div class="modal" tabindex="-1" role="dialog">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
-                <!-- FIXME: Лучше $emit вынести в отедльную функцию onSubmit/submitHandler -->
                 <form @submit.prevent="onSubmit()">
                     <div class="modal-header">
                         <h5 class="modal-title">
                             {{modalStatus}}
                             <slot name="modal-header"></slot>
                         </h5>
+                        <!-- FIXME: onSubmit => onClose -->
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close"
                                 @click.prevent="close()">
                             <span aria-hidden="true">&times;</span>

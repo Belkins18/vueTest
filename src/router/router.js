@@ -10,7 +10,6 @@ import PageNames from '../pageNames'
 
 Vue.use(Router);
 
-// FIXME: Долго писать, спроси
 const routes = [
     {
         path: '/',

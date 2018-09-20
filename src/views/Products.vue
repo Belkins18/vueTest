@@ -1,7 +1,6 @@
 <template>
     <div class="products">
         <div class='container'>
-            <!-- FIXME: userHandler - странный префикс, выбери или onCreateProduct или CreateProductHandler, все остальное – не от мира сего)) -->
             <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
                     @click="userHandlerCreateProduct">Create New Product
             </button>
@@ -27,6 +26,7 @@
                         <td>{{product.price}}</td>
                         <td>{{product.stock}}</td>
                         <td>
+                            <!-- FIXME: Все еще кривые префиксы -->
                             <button type="button" class="btn btn-primary btn-edit"
                                     @click="userHandlerEditProduct(product, index)">
                                 <span class="oi oi-pencil"></span>
