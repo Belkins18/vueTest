@@ -33,7 +33,6 @@
                             </button>
                             <button type="button" class="btn btn-primary btn-edit"
                                     @click="userHandlerConfirmModal(index)">
-                                <!--@click="onSubmitRemoveProduct(index)">-->
                                 <span class="oi oi-trash"></span>
                             </button>
                         </td>
@@ -164,7 +163,6 @@
 <script>
     import Vue from 'vue';
     import {mapActions} from 'vuex';
-    // import axios from 'axios';
     import VeeValidate from 'vee-validate';
 
     import Modal from "@/components/modals/Modal.vue";
@@ -187,7 +185,7 @@
                 editedEL: '',
                 image: '',
                 uploadFile: null,
-                fileData: {}
+                fileData: null
             };
         },
         computed: {
@@ -243,7 +241,7 @@
             onFileChange(e) {
                 let files = e.target.files || e.dataTransfer.files;
                 this.uploadFile = files;
-                console.log(files);
+                // console.log(files);
                 if (!files.length)
                     return;
                 this.createImage(files[0]);
@@ -251,7 +249,7 @@
             createImage(file) {
                 let reader = new FileReader();
                 reader.onload = (e) => {
-                    console.log(e.target);
+                    // console.log(e.target);
                     this.image = e.target.result;
                     this.fileData = {
                         dir: this.$route.name,
@@ -264,60 +262,37 @@
             removeImage: function () {
                 this.image = '';
                 this.uploadFile = null;
-                this.fileData = {};
+                this.fileData = null;
             },
-            // onFileChanged(event) {
-            //     this.modalFields.selectedFile = event.target.files[0];
-            //     console.log(this.modalFields.selectedFile);
-            //     let fileData = {
-            //         dir: this.$route.name,
-            //         file: this.modalFields.selectedFile
-            //     };
-            //     this.loadImages(fileData)
-            //         .then((url) => {
-            //             console.log(url);
-            //             this.modalFields.image = url;
-            //         });
-            //     // axios.post('https://api.cloudinary.com/v1_1/belkins/image/upload', formData)
-            //     //     .then((response)=>{
-            //     //         alert(response);
-            //     //     })
-            //     //     .catch((error) => error)
-            // },
             // Product evt
             // Add product
             onSubmitAddProduct() {
                 this.modalFields.id = '_' + Math.random().toString(36).substr(2, 9);
-                // this.onFileChanged();
-                console.log(this.modalFields);
                 this.addProduct(this.modalFields)
-                    .then((createObj) => {
-                        console.log(Object.keys(createObj)[0]);
-                        if (Object.keys(this.fileData).length > 0) {
-                            return (this.loadImages(this.fileData))
+                    .then((path) => {
+                        let routePath = `/${this.$route.name}/`;
+                        let startnum = path.indexOf(routePath) + routePath.length;
+                        let key = path.slice(startnum, path.length);
+                        return key;
+                    })
+                    .then((key) => {
+                        if (this.fileData !== null) {
+                            this.editedEL = key;
+                            return (this.loadImages(this.fileData));
+                        } else {
+                            return
+                        }
+                    })
+                    .then((url) => {
+                        if (url) {
+                            this.modalFields.image = url;
+                            this.fileData = null;
+                            this.onSubmitEditProduct();
                         } else {
                             this.closeModal();
                             this.getProductList();
                         }
                     })
-                    .then((url) => {
-                        if (url) {
-                            console.log(url);
-                            this.modalFields.image = url;
-                            return this.modalFields
-                        }
-                    })
-                    .then((newObj) => {
-                        console.log(newObj);
-                        this.onSubmitEditProduct();
-                    });
-                // .then(() => {
-                //     this.closeModal();
-                // })
-                // .then(() => {
-                //     this.getProductList();
-                // });
-
             },
             //Edit product
             onSubmitEditProduct() {
@@ -325,9 +300,24 @@
                     editedResults: cloneDeep(this.modalFields),
                     editElement: this.editedEL
                 };
-                this.editProduct(data);
-                this.closeModal();
-                this.getProductList();
+                this.editProduct(data)
+                    .then(() => {
+                        if (this.fileData !== null) {
+                            return (this.loadImages(this.fileData));
+                        } else {
+                            return
+                        }
+                    })
+                    .then((url) => {
+                        if (url) {
+                            this.modalFields.image = url;
+                            this.fileData = null;
+                            this.onSubmitEditProduct();
+                        } else {
+                            this.closeModal();
+                            this.getProductList();
+                        }
+                    });
             },
             //Remove product
             onSubmitRemoveProduct(index) {

@@ -74,13 +74,9 @@ const actions = {
 
     logout({commit}) {
         commit(SET_LOGGED_OFF);
-        console.log(router.push('/signIn'));
-        // this.$router.push({name: this.signInPage});
+        router.push('/signIn');
     },
     loadImages(_, dataImg) {
-        console.log(dataImg);
-        console.log(dataImg.fileList);
-        console.log(dataImg.fileList[0].name);
         return new Promise((resolve) => {
             let storageRef = firebase.storage().ref();
             let basePath = 'images/';
@@ -99,36 +95,28 @@ const actions = {
                 },
                 (error) => error,
                 () => {
-                    // return new Promise((resolve) => {
                     uploadTask.snapshot.ref.getDownloadURL()
                         .then((downloadURL) => {
                             resolve(downloadURL)
                         });
-                    // });
                 }
             );
         });
 
     },
     addProduct(_, payload) {
-        let databaseRef = firebase.database().ref('/products');
-        return new firebase.database().ref('/products')
-            .push()
-            .set(payload)
-            .then(() => {
-                   databaseRef.on('value', function(snapshot) {
-                       const data = snapshot.val() || null;
-                       if (data) {
-                           return Object.keys(data)[0];
-                       }
-                   });
-                   return payload;
-            });
+        return new Promise((resolve) => {
+            let databaseRef = firebase.database().ref('/products');
+            let newProductRef = databaseRef.push();
+            newProductRef.set(payload);
+            let path = newProductRef.toString();
+            resolve(path)
+        });
     },
 
     editProduct(_, payload) {
-        console.log(payload.editedResults);
-        console.log(payload.editElement);
+        // console.log(payload.editedResults);
+        // console.log(payload.editElement);
         return new firebase.database().ref(`/products/${payload.editElement}`)
             .set(payload.editedResults)
             .then(() => payload.editedResults)
