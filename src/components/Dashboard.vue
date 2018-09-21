@@ -6,10 +6,10 @@
 </template>
 
 <script>
-    import Navigation from "@/components/page-navigation/Navigation.vue";
+    import Navigation from "@/components/navigation/Navigation.vue";
 
     export default {
-        name: "mainLayout",
+        name: "dashboard",
         components: {
             Navigation
         },
@@ -20,7 +20,6 @@
         methods: {}
     };
 </script>
-
 
 <style scoped lang="scss">
     .mainLayout {

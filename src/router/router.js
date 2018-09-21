@@ -1,10 +1,10 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import MainLayout from '../components/MainLayout'
-import Products from '../views/Products'
-import Orders from '../views/Orders'
-import SignIn from '../views/SignIn'
+import Dashboard from '../components/Dashboard'
+import Products from '../components/product/Products'
+import Orders from '../components/order/Orders'
+import SignIn from '../components/SignIn'
 
 import PageNames from '../pageNames'
 
@@ -13,7 +13,7 @@ Vue.use(Router);
 const routes = [
     {
         path: '/',
-        component: MainLayout,
+        component: Dashboard,
         meta: {
             requiresAuth: true
         },

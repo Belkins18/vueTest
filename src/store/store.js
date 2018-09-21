@@ -77,6 +77,7 @@ const actions = {
         router.push('/signIn');
     },
     loadImages(_, dataImg) {
+        console.log(dataImg);
         return new Promise((resolve) => {
             let storageRef = firebase.storage().ref();
             let basePath = 'images/';

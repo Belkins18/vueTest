@@ -160,7 +160,7 @@
     import {mapActions} from 'vuex';
     import VeeValidate from 'vee-validate';
 
-    import Modal from "@/components/modals/Modal.vue";
+    import Modal from "@/components/modal/Modal.vue";
     import {cloneDeep} from "lodash";
 
     Vue.use(VeeValidate);
