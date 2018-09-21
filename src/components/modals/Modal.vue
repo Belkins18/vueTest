@@ -1,32 +1,33 @@
 <template>
-    <div class="modal" tabindex="-1" role="dialog">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <form @submit.prevent="onSubmit()">
-                    <div class="modal-header">
-                        <h5 class="modal-title">
-                            {{modalStatus}}
-                            <slot name="modal-header"></slot>
-                        </h5>
-                        <!-- FIXME: onSubmit => onClose -->
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                @click.prevent="close()">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
+    <transition name="fade">
+        <div class="modal" tabindex="-1" role="dialog">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <form @submit.prevent="onSubmit()">
+                        <div class="modal-header">
+                            <h5 class="modal-title">
+                                {{modalStatus}}
+                                <slot name="modal-header"></slot>
+                            </h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                    @click.prevent="onClose()">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
 
-                    <div v-if="hasContent" class="modal-body">
-                        <slot name="modal-body">
-                        </slot>
-                    </div>
+                        <div v-if="hasContent" class="modal-body">
+                            <slot name="modal-body">
+                            </slot>
+                        </div>
 
-                    <div class="modal-footer">
-                        <slot name="modal-btn"></slot>
-                    </div>
-                </form>
+                        <div class="modal-footer">
+                            <slot name="modal-btn"></slot>
+                        </div>
+                    </form>
+                </div>
             </div>
         </div>
-    </div>
+    </transition>
 </template>
 
 <script>
@@ -44,7 +45,7 @@
             onSubmit() {
                 this.$emit('validate');
             },
-            close() {
+            onClose() {
                 this.$emit('close');
             }
         }

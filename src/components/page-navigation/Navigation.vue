@@ -5,19 +5,19 @@
             <router-link class="navbar-brand" to="/">My Stock</router-link>
             <Hamburger/>
             <div class="collapse navbar-collapse" id="navbarResponsive">
-                <ul class="navbar-nav ml-auto">
+                <ul class="navbar-nav">
                     <li class="nav-item">
                         <router-link class="nav-link" :to="{ name: productPage }">Products</router-link>
                     </li>
                     <li class="nav-item">
                         <router-link class="nav-link" :to="{ name: orderPage }">Orders</router-link>
                     </li>
-                    <!-- FIXME: Стоит вынести в сторону чтобы случайно не нажать при переходе между страницами -->
-                    <li class="nav-item">
-                        <!-- FIXME: logout => onLogout -->
-                        <a href="#" class="nav-link" @click.prevent="logout">LogOut</a>
-                    </li>
                 </ul>
+                <div class="navbar-nav navbar-nav__logout ml-auto">
+                    <div class="nav-item">
+                        <a href="#" class="nav-link" @click.prevent="onLogout">LogOut</a>
+                    </div>
+                </div>
             </div>
         </div>
     </nav>
@@ -42,8 +42,8 @@
 
         watch: {},
         methods: {
-            logout() {
-                this.$store.dispatch('logout');
+            onLogout() {
+                this.$store.dispatch('onLogout');
             }
         }
     }

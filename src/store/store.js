@@ -72,7 +72,7 @@ const actions = {
             })
     },
 
-    logout({commit}) {
+    onLogout({commit}) {
         commit(SET_LOGGED_OFF);
         router.push('/signIn');
     },

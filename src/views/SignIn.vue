@@ -6,21 +6,19 @@
         <div class="card-body">
             <div class="row align-items-center">
                 <div class="col">
-                    <!-- FIXME: значение в for должно совпадать c ID а не с name -->
                     <label for="signIn_email">Email</label>
                 </div>
                 <div class="col-sm-9">
-                    <input name="signIn_email" type="email" class="form-control" placeholder="Input to email:" required
+                    <input id="signIn_email" name="signIn_email" type="email" class="form-control" placeholder="Input to email:" required
                            v-model="user.email">
                 </div>
             </div>
             <div class="row align-items-center mt-4">
                 <div class="col">
-                    <!-- FIXME: значение в for должно совпадать c ID а не с name -->
                     <label for="signIn_password">Password</label>
                 </div>
                 <div class="col-sm-9">
-                    <input name="signIn_password" type="password" class="form-control" placeholder="Input to password:"
+                    <input id="signIn_password" name="signIn_password" type="password" class="form-control" placeholder="Input to password:"
                            required
                            v-model="user.password">
                 </div>

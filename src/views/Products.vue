@@ -2,7 +2,7 @@
     <div class="products">
         <div class='container'>
             <button type="button" class="btn btn-secondary createProduct products__btn products__btn--showModal "
-                    @click="userHandlerCreateProduct">Create New Product
+                    @click="onCreateProduct">Create New Product
             </button>
 
             <div class="products__table table-responsive">
@@ -13,7 +13,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    <tr v-for="(product, index) in products" :key='index'>
+                    <tr v-for="(product, index) in products" :key='product.id'>
                         <td>{{ product.id }}</td>
                         <td>{{ product.sku }}</td>
                         <td>
@@ -26,13 +26,12 @@
                         <td>{{product.price}}</td>
                         <td>{{product.stock}}</td>
                         <td>
-                            <!-- FIXME: Все еще кривые префиксы -->
                             <button type="button" class="btn btn-primary btn-edit"
-                                    @click="userHandlerEditProduct(product, index)">
+                                    @click="editProductHandler(product, index)">
                                 <span class="oi oi-pencil"></span>
                             </button>
                             <button type="button" class="btn btn-primary btn-edit"
-                                    @click="userHandlerConfirmModal(index)">
+                                    @click="confirmModalHandler(index)">
                                 <span class="oi oi-trash"></span>
                             </button>
                         </td>
@@ -45,7 +44,7 @@
                 <span slot="modal-header">Remove this element?</span>
                 <div slot="modal-body" hidden></div>
                 <div slot="modal-btn">
-                    <button type="button" class="btn btn-success" @click.prevent="onSubmitRemoveProduct(editedEL)">
+                    <button type="button" class="btn btn-success" @click.prevent="onRemoveProduct(editedEL)">
                         Remove product
                     </button>
                 </div>
@@ -121,10 +120,6 @@
                         <label class="col-sm-2 col-form-label" for="product_price">Images</label>
                         <div class="col-sm-10">
                             <div class="custom-file">
-                                <!--<input type="file" class="custom-file-input" id="customFile"-->
-                                <!--@change="onFileChange">-->
-                                <!--<label class="custom-file-label" for="customFile">{{ modalFields ? modalFields.selectedFile : ''}}</label>-->
-
                                 <div v-if="!image">
                                     <input type="file" class="custom-file-input" id="customFile"
                                            @change="onFileChange">
@@ -145,7 +140,7 @@
                     <button
                             type="button"
                             :class="{'btn': true, 'btn-primary': status === 'edit', 'btn-success': status === 'create'}"
-                            @click="validateBeforeSubmit()">
+                            @click="validateFields()">
                         {{ changeStatus() }}
                     </button>
                     <!--<button v-if="status === 'edit'" type="button" class="btn btn-primary"-->
@@ -213,19 +208,19 @@
                     return 'Add product'
                 }
             },
-            userHandlerCreateProduct() {
+            onCreateProduct() {
                 this.status = 'create';
                 this.showModal = true;
             },
-            userHandlerConfirmModal(index) {
-                this.showModalConfirm = true;
-                this.editedEL = index;
-            },
-            userHandlerEditProduct(product, index) {
+            editProductHandler(product, index) {
                 this.modalFields = cloneDeep(product);
                 this.status = 'edit';
                 this.editedEL = index;
                 this.showModal = true;
+            },
+            confirmModalHandler(index) {
+                this.showModalConfirm = true;
+                this.editedEL = index;
             },
             closeModal() {
                 this.showModal = false;
@@ -266,7 +261,7 @@
             },
             // Product evt
             // Add product
-            onSubmitAddProduct() {
+            onAddProduct() {
                 this.modalFields.id = '_' + Math.random().toString(36).substr(2, 9);
                 this.addProduct(this.modalFields)
                     .then((path) => {
@@ -287,7 +282,7 @@
                         if (url) {
                             this.modalFields.image = url;
                             this.fileData = null;
-                            this.onSubmitEditProduct();
+                            this.onEditProduct();
                         } else {
                             this.closeModal();
                             this.getProductList();
@@ -295,7 +290,7 @@
                     })
             },
             //Edit product
-            onSubmitEditProduct() {
+            onEditProduct() {
                 let data = {
                     editedResults: cloneDeep(this.modalFields),
                     editElement: this.editedEL
@@ -312,7 +307,7 @@
                         if (url) {
                             this.modalFields.image = url;
                             this.fileData = null;
-                            this.onSubmitEditProduct();
+                            this.onEditProduct();
                         } else {
                             this.closeModal();
                             this.getProductList();
@@ -320,20 +315,20 @@
                     });
             },
             //Remove product
-            onSubmitRemoveProduct(index) {
+            onRemoveProduct(index) {
                 this.removeProduct(index);
                 this.closeModalConfirm();
                 this.getProductList();
             },
-            validateBeforeSubmit() {
+            validateFields() {
                 this.$validator.validateAll()
                     .then((result) => {
                         if (result && this.status === 'create') {
-                            this.onSubmitAddProduct();
+                            this.onAddProduct();
                             return;
                         }
                         if (result && this.status === 'edit') {
-                            this.onSubmitEditProduct();
+                            this.onEditProduct();
                             return;
                         }
                     })
