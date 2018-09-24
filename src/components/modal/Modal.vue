@@ -1,29 +1,23 @@
 <template>
     <transition name="fade">
-        <div class="modal" tabindex="-1" role="dialog">
+        <div class="modal" tabindex="-1" role="dialog" v-if="isVisible">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
-                    <form @submit.prevent="onSubmit()">
-                        <div class="modal-header">
-                            <h5 class="modal-title">
-                                {{modalStatus}}
-                                <slot name="modal-header"></slot>
-                            </h5>
-                            <button type="button" class="close" data-dismiss="modal" aria-label="Close"
-                                    @click.prevent="onClose()">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                        </div>
+                    <div class="modal-header">
+                        <h5 class="modal-title"> {{title}} </h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                                @click.prevent="onClose()">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
-                        <div v-if="hasContent" class="modal-body">
-                            <slot name="modal-body">
-                            </slot>
-                        </div>
+                    <div v-if="hasContent" class="modal-body">
+                        <slot name="modal-body"></slot>
+                    </div>
 
-                        <div class="modal-footer">
-                            <slot name="modal-btn"></slot>
-                        </div>
-                    </form>
+                    <div class="modal-footer">
+                        <slot name="modal-btn"></slot>
+                    </div>
                 </div>
             </div>
         </div>
@@ -38,13 +32,20 @@
             };
         },
         props: {
-            modalStatus: String,
-            hasContent: Boolean
+            title: {
+                type: String,
+                default: ''
+            },
+            hasContent: {
+                type: Boolean,
+                default: false
+            },
+            isVisible: {
+                type: Boolean,
+                default: false
+            }
         },
         methods: {
-            onSubmit() {
-                this.$emit('validate');
-            },
             onClose() {
                 this.$emit('close');
             }

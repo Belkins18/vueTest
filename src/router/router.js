@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Router from 'vue-router'
 
 import Dashboard from '../components/Dashboard'
-import Products from '../components/product/Products'
+import Products from '../components/products/Products'
 import Orders from '../components/order/Orders'
 import SignIn from '../components/SignIn'
 
