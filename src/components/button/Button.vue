@@ -1,6 +1,5 @@
 <template>
-    <button
-            class="btn"
+    <button class="btn"
             @click="handleClick"
             :disabled="buttonDisabled"
             :type="nativeType"

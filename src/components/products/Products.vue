@@ -6,6 +6,14 @@
                     @click="onCreateProduct">
                 Create New Product
             </Button>
+            <!--<Button type="danger"-->
+                    <!--@click="responsive = !responsive">-->
+                <!--Create New Product-->
+            <!--</Button>-->
+            <!--<Table-->
+                    <!--:darkTheme="true"-->
+                    <!--:responsive="responsive">-->
+            <!--</Table>-->
 
             <div class="products__table table-responsive">
                 <table class="table table-hover">
@@ -167,6 +175,7 @@
     import VeeValidate from 'vee-validate';
 
     import Button from "@/components/button/Button.vue";
+    import Table from "@/components/table/Table.vue";
     import Modal from "@/components/modal/Modal.vue";
     import {cloneDeep} from "lodash";
 
@@ -176,12 +185,14 @@
         name: "products",
         components: {
             Modal,
-            Button
+            Button,
+            Table
         },
         data() {
             return {
                 showModal: false,
                 showModalConfirm: false,
+                responsive: false,
                 status: '',
                 thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 modalFields: {},
