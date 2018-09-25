@@ -2,15 +2,13 @@
     <div v-if="responsive" :class="[classes ? `${classes}`: '', {'table-responsive': responsive}]">
         <table
                 class="table"
-                :class="[
-                {
-                    'table-dark': darkTheme,
-                    'table-hover': tableHover,
-                    'table-striped': striped,
-                    'table-bordered': bordered,
-                    'table-borderless': borderless,
-                }
-           ]">
+                :class="{
+                    ['table-dark']: darkTheme,
+                    ['table-hover']: tableHover,
+                    ['table-striped']: striped,
+                    ['table-bordered']: bordered,
+                    ['table-borderless']: borderless,
+                }">
             <thead>
                 <slot name="tableHead"></slot>
             </thead>

@@ -7,10 +7,10 @@
             <div class="collapse navbar-collapse" id="navbarResponsive">
                 <ul class="navbar-nav">
                     <li class="nav-item">
-                        <router-link class="nav-link" :to="{ name: productPage }">Products</router-link>
+                        <router-link class="nav-link" :to="{ name: PageNames.PRODUCTS }">Products</router-link>
                     </li>
                     <li class="nav-item">
-                        <router-link class="nav-link" :to="{ name: orderPage }">Orders</router-link>
+                        <router-link class="nav-link" :to="{ name: PageNames.ORDERS }">Orders</router-link>
                     </li>
                 </ul>
                 <div class="navbar-nav navbar-nav__logout ml-auto">
@@ -25,7 +25,7 @@
 
 <script>
     import Hamburger from '@/components/navigation/Hamburger';
-    import PageNames from '../../pageNames';
+    import PageNames from '../../configs/pageNames';
 
     export default {
         name: "Navigation",
@@ -34,16 +34,15 @@
         },
         data() {
             return {
-                // FIXME: Альтернативный вариант, не значит что это плохой
-                // created() {
-                //   this.PageNames = { ...PageNames  };
-                // },
-                productPage: PageNames.PRODUCTS,
-                orderPage: PageNames.ORDERS,
-                signInPage: PageNames.SIGN_IN
+                // productPage: PageNames.PRODUCTS,
+                // orderPage: PageNames.ORDERS,
+                // signInPage: PageNames.SIGN_IN
             };
         },
-
+        // FIXME: Альтернативный вариант, не значит что это плохой
+        created() {
+            this.PageNames = { ...PageNames  };
+        },
         watch: {},
         methods: {
             onLogout() {
@@ -54,8 +53,14 @@
 </script>
 
 <style scoped lang="scss">
-    .navbar{
+    .navbar {
         box-shadow: $el-box-shadow;
+    }
+
+    .nav-link {
+        &.router-link-exact-active.router-link-active {
+            color: $teal;
+        }
     }
 
     .fixed-top {

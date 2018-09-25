@@ -1,14 +1,15 @@
 <template>
     <div class="products">
         <div class='container'>
-            <Button classes="createProduct products__btn products__btn--showModal"
+            <BaseButton classes="createProduct products__btn products__btn--showModal"
                     type="secondary"
                     @click="onCreateProduct">
                 Create New Product
-            </Button>
+            </BaseButton>
 
-            <Table classes="products__table"
+            <BaseTable classes="products__table"
                    :darkTheme="false"
+                   :bordered="false"
                    :responsive="responsive">
                 <tr slot="tableHead">
                     <th v-for="(item, index) in tableData.head" :key='index'>{{item}}</th>
@@ -26,42 +27,42 @@
                     <td>{{product.price}}</td>
                     <td>{{product.stock}}</td>
                     <td>
-                        <Button classes="products__btn"
+                        <BaseButton classes="products__btn"
                                 type="info"
                                 icon="pencil"
                                 @click="editProductHandler(product, index)"
                                 :circle="true">
-                        </Button>
+                        </BaseButton>
 
-                        <Button classes="products__btn"
+                        <BaseButton classes="products__btn"
                                 type="danger"
                                 icon="trash"
                                 :circle="true"
                                 @click="confirmModalHandler(index)">
-                        </Button>
+                        </BaseButton>
                     </td>
                 </tr>
-            </Table>
+            </BaseTable>
 
-            <Modal
+            <BaseModal
                     @close="closeModalConfirm"
                     :isVisible.sync="showModalConfirm"
                     :title="'Remove this element?'">
                 <span slot="modal-header">Remove this element?</span>
                 <div slot="modal-body" hidden></div>
                 <div slot="modal-btn">
-                    <Button type="success"
+                    <BaseButton type="success"
                             @click.prevent="onRemoveProduct(editedEL)">Remove product
-                    </Button>
+                    </BaseButton>
                 </div>
-            </Modal>
+            </BaseModal>
 
-            <Modal
+            <BaseModal
                     @close="closeModal"
                     @validate="validate()"
+                    classes="products__modal"
                     :isVisible.sync="showModal"
-                    :title="changeStatus"
-                    :hasContent="true">
+                    :title="changeStatus">
                 <div slot="modal-body">
                     <form autocomplete="off">
                         <input autocomplete="false" name="hidden" type="text" style="display:none;">
@@ -134,6 +135,11 @@
                                         <input type="file" class="custom-file-input" id="customFile"
                                                @change="onFileChange">
                                         <label class="custom-file-label" for="customFile">Select File</label>
+                                        <div class="custom-file__description">
+                                            <span>maxFilesize: 2MB</span> |
+                                            <span>png or jpeg only</span>
+                                        </div>
+
                                     </div>
                                     <div v-else>
                                         <div class="preview-img">
@@ -147,34 +153,39 @@
                     </form>
                 </div>
 
-                <div slot="modal-btn">
-                    <Button :class="btnTypeStatus"
+                <div slot="modal-footer" class="btn-group">
+                    <BaseButton
+                            type="primary"
+                            @click="closeModal">Close
+                    </BaseButton>
+                    <BaseButton
+                            :class="btnTypeStatus"
                             @click="validateFields()"> {{ changeStatus }}
-                    </Button>
+                    </BaseButton>
                 </div>
-            </Modal>
+            </BaseModal>
         </div>
     </div>
 </template>
 
 <script>
     import Vue from 'vue';
-    import {mapActions} from 'vuex';
     import VeeValidate from 'vee-validate';
-
-    import Button from "@/components/button/Button.vue";
-    import Table from "@/components/table/Table.vue";
-    import Modal from "@/components/modal/Modal.vue";
+    import {mapActions} from 'vuex';
     import {cloneDeep} from "lodash";
+
+    import BaseButton from "@/components/_shared/BaseButton";
+    import BaseTable from "@/components/_shared/BaseTable";
+    import BaseModal from "@/components/_shared/BaseModal";
 
     Vue.use(VeeValidate);
 
     export default {
         name: "products",
         components: {
-            Modal,
-            Button,
-            Table
+            BaseButton,
+            BaseTable,
+            BaseModal
         },
         data() {
             return {
@@ -379,8 +390,20 @@
                 margin-bottom: 30px;
             }
         }
+        &__modal {
+            .modal-footer {
+                background: red;
+            }
+        }
         &__btn + &__btn {
             margin: rem(5);
+        }
+    }
+
+    .custom-file{
+        &__description{
+            font-size: rem(12);
+            color: $gray-500;
         }
     }
 

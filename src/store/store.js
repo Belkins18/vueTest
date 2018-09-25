@@ -2,7 +2,7 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import router from '../router/router'
 
-import apiConfig from '../apiConfig';
+import apiConfig from '../configs/apiConfig';
 import firebase from 'firebase';
 import 'firebase/firestore';
 

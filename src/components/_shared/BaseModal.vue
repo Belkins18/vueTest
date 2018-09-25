@@ -1,6 +1,6 @@
 <template>
     <transition name="fade">
-        <div class="modal" tabindex="-1" role="dialog" v-if="isVisible">
+        <div class="modal" :class="{[`${classes}`]: classes}" tabindex="-1" role="dialog" v-if="isVisible">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -11,12 +11,12 @@
                         </button>
                     </div>
 
-                    <div v-if="hasContent" class="modal-body">
+                    <div v-if="this.$slots['modal-body']" class="modal-body">
                         <slot name="modal-body"></slot>
                     </div>
 
                     <div class="modal-footer">
-                        <slot name="modal-btn"></slot>
+                        <slot name="modal-footer"></slot>
                     </div>
                 </div>
             </div>
@@ -25,9 +25,6 @@
 </template>
 
 <script>
-    // FIXME: Имя компонента – AppModal/BaseModal/VModal
-    // Слот modal-btn -> modal-footer
-    // Флаг hasContent это слишком топорно, можно юзать конструкцию this.$slots.default или this.$slots['modal-body']
     export default {
         data() {
             return {
@@ -35,13 +32,13 @@
             };
         },
         props: {
-            title: {
+            classes: {
                 type: String,
                 default: ''
             },
-            hasContent: {
-                type: Boolean,
-                default: false
+            title: {
+                type: String,
+                default: ''
             },
             isVisible: {
                 type: Boolean,

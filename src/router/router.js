@@ -1,12 +1,12 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import Dashboard from '../components/Dashboard'
+import Dashboard from '../components/pages/Dashboard'
 import Products from '../components/products/Products'
-import Orders from '../components/order/Orders'
-import SignIn from '../components/SignIn'
+import Orders from '../components/orders/Orders'
+import SignIn from '../components/pages/SignIn'
 
-import PageNames from '../pageNames'
+import PageNames from '../configs/pageNames'
 
 Vue.use(Router);
 
@@ -18,15 +18,14 @@ const routes = [
             requiresAuth: true
         },
         redirect: '/products',
-        // FIXME: Пути в childrenах должны быть без слэшей
         children: [
             {
-                path: '/products',
+                path: 'products',
                 name: PageNames.PRODUCTS,
                 component: Products,
             },
             {
-                path: '/orders',
+                path: 'orders',
                 name: PageNames.ORDERS,
                 component: Orders,
             },

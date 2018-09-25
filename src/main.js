@@ -3,12 +3,12 @@ import 'babel-polyfill'
 import './assets/scss/style.scss'
 
 import Vue from 'vue'
-import App from './App.vue'
+import App from './components/App.vue'
 import router from './router/router'
 import store from './store/store'
 import {sync} from 'vuex-router-sync';
 import './registerServiceWorker'
-import PageNames from "./pageNames";
+import PageNames from "./configs/pageNames";
 
 Vue.config.productionTip = false;
 
