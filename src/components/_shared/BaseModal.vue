@@ -72,7 +72,8 @@
         .modal {
             .modal-body {
                 max-height: 50vh;
-                overflow: auto;
+                overflow-y: auto;
+                overflow-x: hidden;
             }
         }
     }

@@ -85,10 +85,16 @@
 
 <style scoped lang="scss">
     .btn.circle {
-        position: relative;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
         @include is-circle(36, 1);
     }
-
+    .btn.circle > .oi {
+        left: 1px;
+        top: initial;
+    }
+/*
     .btn.circle > .oi {
         position: relative;
         display: flex;
@@ -101,4 +107,5 @@
             transform: translate(-50%, -50%);
         }
     }
+*/
 </style>

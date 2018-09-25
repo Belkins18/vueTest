@@ -105,7 +105,7 @@
                             <div class="col-sm-10">
                                 <input
                                         name="purPrice" v-model="modalFields.purPrice"
-                                        v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                        v-validate="{ required: true}"
                                         :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
                                         id="product_purprice" type="text" placeholder="__,__"
                                         aria-describedby="product_purpriceHelp">
@@ -118,7 +118,7 @@
                             <div class="col-sm-10">
                                 <input
                                         name="price" v-model="modalFields.price"
-                                        v-validate="{ required: true, regex: /\b\d+,\d{2}\b/ }"
+                                        v-validate="{ required: true}"
                                         :class="{'form-control': true, 'is-invalid': errors.has('price') }"
                                         id="product_price" type="text" placeholder="__,__"
                                         aria-describedby="product_priceHelp">
@@ -159,6 +159,7 @@
                     </BaseButton>
                     <BaseButton
                             :class="btnTypeStatus"
+                            :disabled="disabled"
                             @click="validateFields()"> {{ changeStatus }}
                     </BaseButton>
                 </div>
@@ -184,10 +185,11 @@
         components: {
             BaseButton,
             BaseTable,
-            BaseModal
+            BaseModal,
         },
         data() {
             return {
+                disabled: false,
                 showModal: false,
                 showModalConfirm: false,
                 responsive: true,
@@ -203,6 +205,9 @@
             };
         },
         computed: {
+            pending() {
+                return this.$store.state.pending;
+            },
             products() {
                 return this.$store.state.products;
             },
@@ -252,6 +257,7 @@
             },
             closeModal() {
                 this.showModal = false;
+                this.disabled = false;
                 this.modalFields = {};
                 this.status = '';
                 this.editedEL = '';
@@ -290,6 +296,7 @@
             // Product evt
             // Add product
             onAddProduct() {
+                this.disabled = true;
                 this.modalFields.id = '_' + Math.random().toString(36).substr(2, 9);
                 this.addProduct(this.modalFields)
                     .then((path) => {
@@ -323,6 +330,7 @@
                     editedResults: cloneDeep(this.modalFields),
                     editElement: this.editedEL
                 };
+                this.disabled = true;
                 this.editProduct(data)
                     .then(() => {
                         if (this.fileData !== null) {

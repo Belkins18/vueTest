@@ -17,7 +17,8 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba($white, 1);
+        background: rgba($white, 0.7);
+        z-index: 2000;
     }
 
     .loader {

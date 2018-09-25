@@ -1,21 +1,42 @@
 <template>
-    <div v-if="responsive" :class="[classes ? `${classes}`: '', {'table-responsive': responsive}]">
-        <table
-                class="table"
-                :class="{
+    <div>
+
+        <div v-if="responsive" :class="[classes ? `${classes}`: '', {'table-responsive': responsive}]">
+            <table
+                    class="table"
+                    :class="{
                     ['table-dark']: darkTheme,
                     ['table-hover']: tableHover,
                     ['table-striped']: striped,
                     ['table-bordered']: bordered,
                     ['table-borderless']: borderless,
                 }">
-            <thead>
+                <thead>
                 <slot name="tableHead"></slot>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 <slot name="tableBody"></slot>
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+        </div>
+        <div v-else>
+            <table
+                    class="table"
+                    :class="{
+                    ['table-dark']: darkTheme,
+                    ['table-hover']: tableHover,
+                    ['table-striped']: striped,
+                    ['table-bordered']: bordered,
+                    ['table-borderless']: borderless,
+                }">
+                <thead>
+                <slot name="tableHead"></slot>
+                </thead>
+                <tbody>
+                <slot name="tableBody"></slot>
+                </tbody>
+            </table>
+        </div>
     </div>
 
 </template>

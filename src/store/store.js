@@ -87,13 +87,15 @@ const actions = {
         commit(SET_LOGGED_OFF);
         router.push('/signIn');
     },
-    loadImages(_, dataImg) {
+    loadImages({commit}, dataImg) {
         console.log(dataImg);
+        commit(PENDING_STATUS_ON);
         return new Promise((resolve) => {
             let storageRef = firebase.storage().ref();
             let basePath = 'images/';
             let dirPath = `${basePath}${dataImg.dir}/`;
             let uploadTask = storageRef.child(`${dirPath}${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
+            commit(PENDING_STATUS_ON);
             uploadTask.on('state_changed',
                 (snapshot) => {
                     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -126,15 +128,13 @@ const actions = {
         });
     },
 
-    editProduct({commit}, payload) {
-        commit(PENDING_STATUS_ON);
+    editProduct(_, payload) {
         return new firebase.database().ref(`/products/${payload.editElement}`)
             .set(payload.editedResults)
             .then(() => payload.editedResults)
     },
 
-    removeProduct({commit}, index) {
-        commit(PENDING_STATUS_ON);
+    removeProduct(_, index) {
         return new firebase.database().ref('/products')
             .child(index).remove()
             .catch((error) => error);
