@@ -6,16 +6,18 @@ import apiConfig from '../configs/apiConfig';
 import firebase from 'firebase';
 import 'firebase/firestore';
 
-
 Vue.use(Vuex);
 
 const USER_LS = "user";
-const SET_LOGGED_IN = 'SET_LOGGED_IN ';
-const SET_LOGGED_OFF = "SET_LOGGED_OFF";
-const SAVE_USERS = "SAVE_USERS";
-const SAVE_PRODUCTS = "SAVE_PRODUCTS";
+const PENDING_STATUS_ON = 'PENDING_STATUS_ON';
+const PENDING_STATUS_OFF = 'PENDING_STATUS_OFF';
+const SET_LOGGED_IN = 'SET_LOGGED_IN';
+const SET_LOGGED_OFF = 'SET_LOGGED_OFF';
+const SAVE_USERS = 'SAVE_USERS';
+const SAVE_PRODUCTS = 'SAVE_PRODUCTS';
 
 const state = {
+    pending: false,
     isLoggedIn: !!localStorage.getItem(USER_LS),
     user: JSON.parse(localStorage.getItem('user')) || null,
     products: [],
@@ -24,6 +26,14 @@ const state = {
 };
 
 const mutations = {
+    [PENDING_STATUS_ON](state) {
+        state.pending = true
+    },
+
+    [PENDING_STATUS_OFF](state) {
+        state.pending = false
+    },
+
     [SET_LOGGED_IN](state, payload) {
         state.loading = false;
         state.isLoggedIn = true;
@@ -47,8 +57,7 @@ const mutations = {
     },
     [SAVE_USERS](state, payload) {
         state.users = payload
-    },
-
+    }
 };
 
 const actions = {
@@ -57,6 +66,7 @@ const actions = {
     },
 
     userAuth({dispatch, commit}, payload) {
+        commit(PENDING_STATUS_ON);
         return new firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
             .then((response) => {
                 const settingUser = {
@@ -66,9 +76,10 @@ const actions = {
                 };
 
                 commit(SET_LOGGED_IN, settingUser);
+                commit(PENDING_STATUS_OFF);
             })
             .then(() => {
-                dispatch('getUsersList')
+                dispatch('getUsersList');
             })
     },
 
@@ -98,7 +109,7 @@ const actions = {
                 () => {
                     uploadTask.snapshot.ref.getDownloadURL()
                         .then((downloadURL) => {
-                            resolve(downloadURL)
+                            resolve(downloadURL);
                         });
                 }
             );
@@ -115,24 +126,26 @@ const actions = {
         });
     },
 
-    editProduct(_, payload) {
-        // console.log(payload.editedResults);
-        // console.log(payload.editElement);
+    editProduct({commit}, payload) {
+        commit(PENDING_STATUS_ON);
         return new firebase.database().ref(`/products/${payload.editElement}`)
             .set(payload.editedResults)
             .then(() => payload.editedResults)
     },
 
-    removeProduct(_, index) {
+    removeProduct({commit}, index) {
+        commit(PENDING_STATUS_ON);
         return new firebase.database().ref('/products')
             .child(index).remove()
             .catch((error) => error);
     },
 
     getProductList({commit}) {
+        commit(PENDING_STATUS_ON);
         return new firebase.database().ref('/products').once("value")
             .then((snapshot) => {
                 commit(SAVE_PRODUCTS, snapshot.val());
+                commit(PENDING_STATUS_OFF);
                 return snapshot.val();
             })
     },

@@ -49,8 +49,7 @@
                     :isVisible.sync="showModalConfirm"
                     :title="'Remove this element?'">
                 <span slot="modal-header">Remove this element?</span>
-                <div slot="modal-body" hidden></div>
-                <div slot="modal-btn">
+                <div slot="modal-footer">
                     <BaseButton type="success"
                             @click.prevent="onRemoveProduct(editedEL)">Remove product
                     </BaseButton>
