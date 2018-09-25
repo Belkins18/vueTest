@@ -1,0 +1,75 @@
+@import "mixins";
+// open iconic
+$icon-font-path: '../../../node_modules/open-iconic/font/fonts/';
+
+//
+// Color system
+//
+
+$white: #fff !default;
+$gray-100: #f8f9fa !default;
+$gray-200: #e9ecef !default;
+$gray-300: #dee2e6 !default;
+$gray-400: #ced4da !default;
+$gray-500: #adb5bd !default;
+$gray-600: #6c757d !default;
+$gray-700: #495057 !default;
+$gray-800: #343a40 !default;
+$gray-900: #212529 !default;
+$black: #000 !default;
+
+$grays: () !default;
+// stylelint-disable-next-line scss/dollar-variable-default
+$grays: map-merge(
+    (
+            "100": $gray-100,
+            "200": $gray-200,
+            "300": $gray-300,
+            "400": $gray-400,
+            "500": $gray-500,
+            "600": $gray-600,
+            "700": $gray-700,
+            "800": $gray-800,
+            "900": $gray-900
+    ),
+    $grays
+);
+
+$blue: #007bff !default;
+$indigo: #6610f2 !default;
+$purple: #6f42c1 !default;
+$pink: #e83e8c !default;
+$red: #dc3545 !default;
+$orange: #fd7e14 !default;
+$yellow: #ffc107 !default;
+$green: #28a745 !default;
+$teal: #20c997 !default;
+$cyan: #17a2b8 !default;
+
+$grid-breakpoints: (
+        xs: 0,
+        sm: 576px,
+        md: 768px,
+        lg: 992px,
+        xl: 1200px
+);
+
+$container-max-widths: (
+        sm: 540px,
+        md: 720px,
+        lg: 960px,
+        xl: 1140px
+);
+
+$grid-columns: 12 !default;
+$grid-gutter-width: 30px !default;
+
+// Modals
+$modal-lg: 800px !default;
+$modal-md: 500px !default;
+$modal-sm: 300px !default;
+
+// Table min-width (custom variables)
+$table-min-width: map_get($container-max-widths, 'xl') - $grid-gutter-width;
+
+$el-box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);

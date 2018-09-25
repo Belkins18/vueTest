@@ -1,22 +1,20 @@
 import 'bootstrap'
 import 'babel-polyfill'
-import './scss/style.scss'
+import './assets/scss/style.scss'
 
 import Vue from 'vue'
-import App from './App.vue'
+import App from './components/App.vue'
 import router from './router/router'
 import store from './store/store'
 import {sync} from 'vuex-router-sync';
 import './registerServiceWorker'
-import PageNames from "./pageNames";
-import {USER_LS} from "./store/mutations";
-
-
-// import PageNames from './pageNames'
+import PageNames from "./configs/pageNames";
 
 Vue.config.productionTip = false;
 
 sync(store, router);
+
+const USER_LS = 'user';
 
 function checkRole(role) {
     let user = store.state.user || JSON.parse(localStorage.getItem(USER_LS));
@@ -41,7 +39,7 @@ router.beforeEach((to, from, next) => {
             if (!checkRole()) { return next({ name: PageNames.SIGN_IN }) }
             next();
         } else {
-            if (JSON.parse(localStorage.getItem(USER_LS)) !== null) { next({path: `/${PageNames.HOME}`}) }
+            if (JSON.parse(localStorage.getItem(USER_LS)) !== null) { next({name: PageNames.PRODUCTS}) }
             next();
         }
     }

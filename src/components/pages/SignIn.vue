@@ -9,7 +9,7 @@
                     <label for="signIn_email">Email</label>
                 </div>
                 <div class="col-sm-9">
-                    <input name="signIn_email" type="email" class="form-control" placeholder="Input to email:" required
+                    <input id="signIn_email" name="signIn_email" type="email" class="form-control" placeholder="Input to email:" required
                            v-model="user.email">
                 </div>
             </div>
@@ -18,7 +18,7 @@
                     <label for="signIn_password">Password</label>
                 </div>
                 <div class="col-sm-9">
-                    <input name="signIn_password" type="password" class="form-control" placeholder="Input to password:"
+                    <input id="signIn_password" name="signIn_password" type="password" class="form-control" placeholder="Input to password:"
                            required
                            v-model="user.password">
                 </div>
@@ -37,15 +37,8 @@
 </template>
 
 <script>
-    // @ is an alias to /src
-    import HelloWorld from '@/components/HelloWorld.vue';
-    import PageNames from "../pageNames";
-
     export default {
         name: "signIn",
-        components: {
-            HelloWorld
-        },
         data() {
             return {
                 user: {
@@ -59,16 +52,27 @@
         },
         methods: {
             enterUser() {
-                this.$store.dispatch('firebaseAuth', this.user)
-                    .then((data) => {
-                        console.log(data);
-                        this.$router.push({ path: PageNames.MAIN_LAYOUT });
+                this.$store.dispatch('userAuth', this.user)
+                    .then(() => {
+                        this.$router.push({ path: '/' });
                     });
             }
         },
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+    .card {
+        box-shadow: $el-box-shadow !important;
+    }
+    @media (min-width: map-get($grid-breakpoints, "sm")) {
+        .card {
+            position: absolute;
+            width: $modal-md;
+            margin: 0;
+            top: 50%;
+            left: 50%;
+            transform: translateX(-50%) translateY(-50%);
+        }
+    }
 </style>

@@ -1,0 +1,61 @@
+@mixin size($val) {
+  width: $val;
+  height: $val;
+}
+
+// =============================================================================
+// Функции пересчета значений
+// =============================================================================
+
+@function rem($num) {
+  $strip-unit: $num / ($num * 0 + 1);
+  @return $strip-unit / 16 * 1rem;
+}
+
+@function em($num, $root: 16) {
+  $strip-unit: $num / ($num * 0 + 1);
+  @return $strip-unit / $root * 1em;
+}
+
+/// Block Element
+/// @access public
+/// @param {String} $element - Element's name
+@mixin element($element) {
+  &__#{$element} {
+    @content;
+  }
+}
+
+/// Block Modifier
+/// @access public
+/// @param {String} $modifier - Modifier's name
+@mixin modifier($modifier) {
+  &_#{$modifier} {
+    @content;
+  }
+}
+/// @alias element
+@mixin e($element) {
+  @include element($element)  {
+    @content;
+  }
+}
+/// @alias modifier
+@mixin m($modifier) {
+  @include modifier($modifier) {
+    @content;
+  }
+}
+
+// =============================================================================
+// Button custom
+// =============================================================================
+
+// Button round
+@mixin is-circle($val , $btn-padding_custom) {
+  width: rem($val);
+  height: rem($val);
+  padding: rem($btn-padding_custom);
+  border-radius: 50%;
+  overflow: hidden;
+}

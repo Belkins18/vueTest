@@ -7,6 +7,11 @@ const apiconfig = {
         storageBucket: "mystock-c9b34.appspot.com",
         messagingSenderId: "870800532673"
     },
+    cloudinary: {
+        cloud_name: "belkins",
+        api_key: "131381863239631",
+        secure: true
+    },
     adminKey: 'giwZQCTKRfbteTueOiSVdYftEth1'
 };
 

@@ -1,45 +1,38 @@
 import Vue from 'vue'
 import Router from 'vue-router'
 
-import MainLayout from '../components/MainLayout'
-import Home from '../views/Home'
-import Products from '../views/Products'
-import Orders from '../views/Orders'
-import SignIn from '../views/SignIn'
+import Dashboard from '../components/pages/Dashboard'
+import Products from '../components/products/Products'
+import Orders from '../components/orders/Orders'
+import SignIn from '../components/pages/SignIn'
 
-import PageNames from '../pageNames'
+import PageNames from '../configs/pageNames'
 
 Vue.use(Router);
 
 const routes = [
     {
-        path: PageNames.MAIN_LAYOUT,
-        component: MainLayout,
+        path: '/',
+        component: Dashboard,
         meta: {
             requiresAuth: true
         },
-        redirect: PageNames.HOME,
-
+        redirect: '/products',
         children: [
             {
-                path: PageNames.HOME,
-                name: PageNames.HOME,
-                component: Home,
-            },
-            {
-                path: PageNames.PRODUCTS,
+                path: 'products',
                 name: PageNames.PRODUCTS,
                 component: Products,
             },
             {
-                path: PageNames.ORDERS,
+                path: 'orders',
                 name: PageNames.ORDERS,
                 component: Orders,
             },
         ]
     },
     {
-        path: `/${PageNames.SIGN_IN}`,
+        path: `/signIn`,
         name: PageNames.SIGN_IN,
         component: SignIn,
     }
