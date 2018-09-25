@@ -6,54 +6,42 @@
                     @click="onCreateProduct">
                 Create New Product
             </Button>
-            <!--<Button type="danger"-->
-                    <!--@click="responsive = !responsive">-->
-                <!--Create New Product-->
-            <!--</Button>-->
-            <!--<Table-->
-                    <!--:darkTheme="true"-->
-                    <!--:responsive="responsive">-->
-            <!--</Table>-->
 
-            <div class="products__table table-responsive">
-                <table class="table table-hover">
-                    <thead>
-                    <tr>
-                        <th v-for="(item, index) in thead" :key='index'>{{item}}</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    <tr v-for="(product, index) in products" :key='product.id'>
-                        <td>{{ product.id }}</td>
-                        <td>{{ product.sku }}</td>
-                        <td>
-                            <img
-                                    :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
-                                    alt='' width='47px'>
-                        </td>
-                        <td>{{product.name}}</td>
-                        <td>{{product.purPrice}}</td>
-                        <td>{{product.price}}</td>
-                        <td>{{product.stock}}</td>
-                        <td>
-                            <Button classes="products__btn"
-                                    type="info"
-                                    icon="pencil"
-                                    @click="editProductHandler(product, index)"
-                                    :circle="true">
-                            </Button>
+            <Table classes="products__table"
+                   :darkTheme="false"
+                   :responsive="responsive">
+                <tr slot="tableHead">
+                    <th v-for="(item, index) in tableData.head" :key='index'>{{item}}</th>
+                </tr>
+                <tr v-for="(product, index) in products" :key='product.id' slot="tableBody">
+                    <td>{{ product.id }}</td>
+                    <td>{{ product.sku }}</td>
+                    <td>
+                        <img
+                                :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
+                                alt='' width='47px'>
+                    </td>
+                    <td>{{product.name}}</td>
+                    <td>{{product.purPrice}}</td>
+                    <td>{{product.price}}</td>
+                    <td>{{product.stock}}</td>
+                    <td>
+                        <Button classes="products__btn"
+                                type="info"
+                                icon="pencil"
+                                @click="editProductHandler(product, index)"
+                                :circle="true">
+                        </Button>
 
-                            <Button classes="products__btn"
-                                    type="danger"
-                                    icon="trash"
-                                    :circle="true"
-                                    @click="confirmModalHandler(index)">
-                            </Button>
-                        </td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
+                        <Button classes="products__btn"
+                                type="danger"
+                                icon="trash"
+                                :circle="true"
+                                @click="confirmModalHandler(index)">
+                        </Button>
+                    </td>
+                </tr>
+            </Table>
 
             <Modal
                     @close="closeModalConfirm"
@@ -69,11 +57,11 @@
             </Modal>
 
             <Modal
-                   @close="closeModal"
-                   @validate="validate()"
-                   :isVisible.sync="showModal"
-                   :title="changeStatus"
-                   :hasContent="true">
+                    @close="closeModal"
+                    @validate="validate()"
+                    :isVisible.sync="showModal"
+                    :title="changeStatus"
+                    :hasContent="true">
                 <div slot="modal-body">
                     <form autocomplete="off">
                         <input autocomplete="false" name="hidden" type="text" style="display:none;">
@@ -192,9 +180,11 @@
             return {
                 showModal: false,
                 showModalConfirm: false,
-                responsive: false,
+                responsive: true,
                 status: '',
-                thead: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
+                tableData: {
+                    head: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
+                },
                 modalFields: {},
                 editedEL: '',
                 image: '',
@@ -365,7 +355,6 @@
         },
         created() {
             this.getProductList();
-
             // this.$store.getters.getDBFirebaseUsers.once("value")
             //     .then(function (snapshot) {
             //         let value = snapshot.val();
@@ -390,19 +379,11 @@
                 margin-bottom: 30px;
             }
         }
-        &__btn +  &__btn{
+        &__btn + &__btn {
             margin: rem(5);
         }
-        &__table {
-            table {
-                min-width: $table-min-width;
-                box-shadow: $el-box-shadow;
-            }
-            tr > td {
-                vertical-align: middle;
-            }
-        }
     }
+
     .preview-img {
         position: relative;
         display: inline-grid;

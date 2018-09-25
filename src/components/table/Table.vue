@@ -1,5 +1,5 @@
 <template>
-    <div v-if="responsive" :class="[{'table-responsive-lg': table-responsive}]">
+    <div v-if="responsive" :class="[classes ? `${classes}`: '', {'table-responsive': responsive}]">
         <table
                 class="table"
                 :class="[
@@ -12,84 +12,14 @@
                 }
            ]">
             <thead>
-            <tr>
-                <th scope="col">#</th>
-                <th scope="col">First</th>
-                <th scope="col">Last</th>
-                <th scope="col">Handle</th>
-            </tr>
+                <slot name="tableHead"></slot>
             </thead>
             <tbody>
-            <tr>
-                <th scope="row">1</th>
-                <td>Mark</td>
-                <td>Otto</td>
-                <td>@mdo</td>
-            </tr>
-            <tr>
-                <th scope="row">2</th>
-                <td>Jacob</td>
-                <td>Thornton</td>
-                <td>@fat</td>
-            </tr>
-            <tr>
-                <th scope="row">3</th>
-                <td>Larry</td>
-                <td>the Bird</td>
-                <td>@twitter</td>
-            </tr>
+                <slot name="tableBody"></slot>
             </tbody>
         </table>
     </div>
-    <div v-else>
-        <table
-                class="table"
-                :class="[
-                {
-                    'table-dark': darkTheme,
-                    'table-hover': tableHover,
-                    'table-striped': striped,
-                    'table-bordered': bordered,
-                    'table-borderless': borderless,
-                }
-           ]">
-            <thead>
-            <tr>
-                <th v-for="(item, index) in tableData.columns" :key='index'>{{item}}</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr v-for="(product, index) in tableData.rows" :key='product.id'>
-                <td>{{ product.id }}</td>
-                <td>{{ product.sku }}</td>
-                <td>
-                    <img
-                            :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
-                            alt='' width='47px'>
-                </td>
-                <td>{{product.name}}</td>
-                <td>{{product.purPrice}}</td>
-                <td>{{product.price}}</td>
-                <td>{{product.stock}}</td>
-                <td>
-                    <Button classes="products__btn"
-                            type="info"
-                            icon="pencil"
-                            @click="editProductHandler(product, index)"
-                            :circle="true">
-                    </Button>
 
-                    <Button classes="products__btn"
-                            type="danger"
-                            icon="trash"
-                            :circle="true"
-                            @click="confirmModalHandler(index)">
-                    </Button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </div>
 </template>
 
 <script>
@@ -136,6 +66,14 @@
     }
 </script>
 
-<style scoped>
-
+<style scoped lang="scss">
+    .table-responsive {
+        table {
+            min-width: $table-min-width;
+            box-shadow: $el-box-shadow;
+        }
+        tr > td {
+            vertical-align: middle;
+        }
+    }
 </style>
