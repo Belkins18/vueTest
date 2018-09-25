@@ -18,6 +18,7 @@ const routes = [
             requiresAuth: true
         },
         redirect: '/products',
+        // FIXME: Пути в childrenах должны быть без слэшей
         children: [
             {
                 path: '/products',

@@ -34,6 +34,10 @@
         },
         data() {
             return {
+                // FIXME: Альтернативный вариант, не значит что это плохой
+                // created() {
+                //   this.PageNames = { ...PageNames  };
+                // },
                 productPage: PageNames.PRODUCTS,
                 orderPage: PageNames.ORDERS,
                 signInPage: PageNames.SIGN_IN
