@@ -42,7 +42,7 @@
     // AppButton/BaseButton/VButton, !ОБЯЗАТЕЛЬНО! прочти https://vuejs.org/v2/style-guide/#Base-component-names-strongly-recommended
     // перед тем как рефакторить дальше что либо.
     export default {
-        name: "Button",
+        name: "VButton",
         props: {
             type: {
                 /*

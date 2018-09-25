@@ -9,7 +9,7 @@
     import Navigation from "@/components/navigation/Navigation.vue";
 
     export default {
-        name: "dashboard",
+        name: "Dashboard",
         components: {
             Navigation
         },
@@ -23,6 +23,6 @@
 
 <style scoped lang="scss">
     .mainLayout {
-        min-height: calc(100vh - 56px);
+        min-height: calc(100vh - 64px);
     }
 </style>

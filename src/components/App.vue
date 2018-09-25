@@ -26,6 +26,7 @@
 
     * {
         outline: none !important;
+        box-sizing: border-box;
     }
 
     .fade-enter-active, .fade-leave-active {
