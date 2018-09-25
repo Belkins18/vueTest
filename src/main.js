@@ -9,16 +9,12 @@ import store from './store/store'
 import {sync} from 'vuex-router-sync';
 import './registerServiceWorker'
 import PageNames from "./configs/pageNames";
-import VueWait from 'vue-wait'
 
 Vue.config.productionTip = false;
 
 sync(store, router);
 
-Vue.use(VueWait);
-
 const USER_LS = 'user';
-
 
 function checkRole(role) {
     let user = store.state.user || JSON.parse(localStorage.getItem(USER_LS));
@@ -56,8 +52,5 @@ router.beforeEach((to, from, next) => {
 new Vue({
     router,
     store,
-    wait: new VueWait({
-        useVuex: true, // You must pass this option `true` to use Vuex
-    }),
     render: h => h(App)
 }).$mount('#app');
