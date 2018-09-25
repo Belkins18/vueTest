@@ -23,6 +23,24 @@
 </template>
 
 <script>
+    // FIXME: Классы на стили можно навешивать не только через тернарный оператор, но и как то так
+    // :class="{
+    //   [`${classes}`]: classes,
+    //   [`btn-${type}`]: type,
+    //   [`btn-${size}`]: size,
+    //   [`btn-outline-${type}`]: outline,
+    //   [`btn-outline-${type}`]: outline,
+    //   ['btn-block']: block,
+    //   active: isActive,
+    //   disabled: buttonDisabled,
+    //   round: round,
+    //   circle: circle,
+    // }"
+
+    // FIXME: Очень плохая практика называть компоненты именем HTML элементов, в данном случае у тебя компонент
+    // Button – и есть соотвующий хтмл элемент с таким же названием, значит твой компонент должен называться
+    // AppButton/BaseButton/VButton, !ОБЯЗАТЕЛЬНО! прочти https://vuejs.org/v2/style-guide/#Base-component-names-strongly-recommended
+    // перед тем как рефакторить дальше что либо.
     export default {
         name: "Button",
         props: {
@@ -90,6 +108,7 @@
 </script>
 
 <style scoped lang="scss">
+    // FIXME: Ну комон, где-то в мире плачет один верстальщик от такой вложенности :)
     .btn {
         &.circle {
             position: relative;

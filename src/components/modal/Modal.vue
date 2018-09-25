@@ -25,6 +25,9 @@
 </template>
 
 <script>
+    // FIXME: Имя компонента – AppModal/BaseModal/VModal
+    // Слот modal-btn -> modal-footer
+    // Флаг hasContent это слишком топорно, можно юзать конструкцию this.$slots.default или this.$slots['modal-body']
     export default {
         data() {
             return {
@@ -79,6 +82,7 @@
 
     @media (min-width: map-get($grid-breakpoints, "sm")) {
         .modal-dialog {
+            // FIXME: Родителю нужно задать position: relative;
             position: absolute;
             width: $modal-md;
             margin: 0;
