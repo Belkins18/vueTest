@@ -20,6 +20,7 @@
     "vee-validate": "^2.1.0-beta.9",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
+    "vue-text-mask": "^6.1.2",
     "vue-wait": "^1.3.2",
     "vuefire": "^1.4.5",
     "vuex": "^3.0.1",

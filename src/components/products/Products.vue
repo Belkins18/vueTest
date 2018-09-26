@@ -1,6 +1,8 @@
 <template>
     <div class="products">
         <div class='container'>
+
+
             <BaseButton classes="createProduct products__btn products__btn--showModal"
                         type="secondary"
                         @click="onCreateProduct">
@@ -58,7 +60,6 @@
 
             <BaseModal
                     @close="closeModal"
-                    @validate="validate()"
                     classes="products__modal"
                     :isVisible.sync="showModal"
                     :title="changeStatus">
