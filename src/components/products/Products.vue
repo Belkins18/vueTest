@@ -321,7 +321,7 @@
                             } else reject();
                         });
                     });
-                }
+                };
 
                 validateLoadingImage(e.target.files[0])
                     .then(() => {
@@ -337,7 +337,11 @@
                 this.productModal.fileLoadInfo.complexFile = null;
             },
             removeImageWithPtoduct() {
-
+                let payload = {
+                    elId: this.currentIdElement,
+                    imageName: this.productModal.inputFieldsValue.imageName
+                };
+                this.$store.dispatch('removeImagesFromDB', payload);
             },
             // Product evt
             // Add product
@@ -349,11 +353,13 @@
                         let routePath = `/${this.$route.name}/`;
                         let startnum = path.indexOf(routePath) + routePath.length;
                         let key = path.slice(startnum, path.length);
+                        this.productModal.fileLoadInfo.complexFile.databaseId = key;
                         return key;
                     })
                     .then((key) => {
                         if (this.productModal.fileLoadInfo.complexFile !== null) {
                             this.currentIdElement = key;
+                            this.productModal.inputFieldsValue.imageName = this.productModal.fileLoadInfo.complexFile.fileReader.name;
                             return (this.loadImages(this.productModal.fileLoadInfo.complexFile));
                         } else {
                             return

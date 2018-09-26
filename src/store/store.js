@@ -91,11 +91,11 @@ const actions = {
         commit(PENDING_STATUS_ON);
         return new Promise((resolve) => {
             // FIXME: Очень много чейнинга посредством создания новых переменных, из след 4 строчек можно сделать 1
-            let storageRef = firebase.storage().ref();
-            let basePath = 'images/';
-            let dirPath = `${basePath}${dataImg.dir}/`;
-            let uploadTask = storageRef.child(`${dirPath}${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
-            commit(PENDING_STATUS_ON); // FIXME: Delete me
+            // let storageRef = firebase.storage().ref();
+            // let basePath = 'images/';
+            // let dirPath = `${basePath}${dataImg.dir}/`;
+            // let uploadTask = storageRef.child(`${dirPath}${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
+            let uploadTask = firebase.storage().ref().child(`images/${dataImg.dir}/${dataImg.databaseId}/${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
             uploadTask.on('state_changed',
                 (snapshot) => {
                     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -116,7 +116,13 @@ const actions = {
                 }
             );
         });
-
+    },
+    removeImagesFromDB(_, payload) {
+        console.log(payload);
+        let desertRef = firebase.storage().ref().child('images/product/-LNMmwDgTYHPxgoBVdtf/wp2168010-yellowstone-national-park-wallpapers.jpg'.toString());
+        // firebase.storage().ref().child(`images/product/${payload.elId}/${payload.imageName}`).delete();
+        desertRef.delete();
+        // firebase.storage().ref().child(`images/product/-LNMmwDgTYHPxgoBVdtf/wp2168010-yellowstone-national-park-wallpapers.jpg`).delete();
     },
     addProduct(_, payload) {
         return new Promise((resolve) => {
