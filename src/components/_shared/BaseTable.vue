@@ -1,6 +1,6 @@
 <template>
     <div>
-
+        <!-- FIXME: Зачем целую таблицу засововать в v-if если там только классы навешиваются?) -->
         <div v-if="responsive" :class="[classes ? `${classes}`: '', {'table-responsive': responsive}]">
             <table
                     class="table"
@@ -43,6 +43,7 @@
 
 <script>
     export default {
+        // FIXME: Нейминг
         name: "Table",
         data() {
             return {

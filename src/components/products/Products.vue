@@ -190,29 +190,41 @@
         },
         data() {
             return {
+                // FIXME: Что disabled?
                 disabled: false,
+                // FIXME: Какую disabled?
                 showModal: false,
                 showModalConfirm: false,
+                // FIXME: Респонсив чего?
                 responsive: true,
+                // FIXME: Статус чего?
                 status: '',
                 tableData: {
                     head: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
                 },
+                // FIXME: Поля какой модалки?
                 modalFields: {},
+                // FIXME: Какой элемент?
                 editedEL: '',
+                // FIXME: Что за картинка?
                 image: '',
+                // FIXME: Переменная называется так, как будто это метод?
                 uploadFile: null,
+                // FIXME: Какого файла?
                 fileData: null,
+                // FIXME: Че за ошибки?
                 error: null,
             };
         },
         computed: {
+            // FIXME: Не используется
             pending() {
                 return this.$store.state.pending;
             },
             products() {
                 return this.$store.state.products;
             },
+            // FIXME: Эту логику лучше перенести в шаблон
             changeStatus() {
                 if (this.status === 'edit') {
                     return 'Save changes'
@@ -221,6 +233,7 @@
                     return 'Create product'
                 }
             },
+            // FIXME: Эту логику лучше перенести в шаблон
             btnTypeStatus() {
                 if (this.status === 'edit') {
                     return 'btn-info'
@@ -379,6 +392,7 @@
                         if (url) {
                             this.modalFields.image = url;
                             this.fileData = null;
+                            // FIXME: Рекурсия?
                             this.onEditProduct();
                         } else {
                             this.closeModal();
