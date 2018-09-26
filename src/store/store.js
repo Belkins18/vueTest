@@ -90,11 +90,12 @@ const actions = {
         console.log(dataImg);
         commit(PENDING_STATUS_ON);
         return new Promise((resolve) => {
+            // FIXME: Очень много чейнинга посредством создания новых переменных, из след 4 строчек можно сделать 1
             let storageRef = firebase.storage().ref();
             let basePath = 'images/';
             let dirPath = `${basePath}${dataImg.dir}/`;
             let uploadTask = storageRef.child(`${dirPath}${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
-            commit(PENDING_STATUS_ON);
+            commit(PENDING_STATUS_ON); // FIXME: Delete me
             uploadTask.on('state_changed',
                 (snapshot) => {
                     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -119,6 +120,7 @@ const actions = {
     },
     addProduct(_, payload) {
         return new Promise((resolve) => {
+            // FIXME: Вся эта цепочка выглядит так, как будто ее можно зачейнить и не оборачивать в промис
             let databaseRef = firebase.database().ref('/products');
             let newProductRef = databaseRef.push();
             newProductRef.set(payload);
