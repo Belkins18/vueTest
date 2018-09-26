@@ -22,7 +22,6 @@ const state = {
     user: JSON.parse(localStorage.getItem('user')) || null,
     products: [],
     users: [],
-    error: ''
 };
 
 const mutations = {

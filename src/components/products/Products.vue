@@ -2,15 +2,15 @@
     <div class="products">
         <div class='container'>
             <BaseButton classes="createProduct products__btn products__btn--showModal"
-                    type="secondary"
-                    @click="onCreateProduct">
+                        type="secondary"
+                        @click="onCreateProduct">
                 Create New Product
             </BaseButton>
 
             <BaseTable classes="products__table"
-                   :darkTheme="false"
-                   :bordered="false"
-                   :responsive="responsive">
+                       :darkTheme="false"
+                       :bordered="false"
+                       :responsive="responsive">
                 <tr slot="tableHead">
                     <th v-for="(item, index) in tableData.head" :key='index'>{{item}}</th>
                 </tr>
@@ -28,17 +28,17 @@
                     <td>{{product.stock}}</td>
                     <td>
                         <BaseButton classes="products__btn"
-                                type="info"
-                                icon="pencil"
-                                @click="editProductHandler(product, index)"
-                                :circle="true">
+                                    type="info"
+                                    icon="pencil"
+                                    @click="editProductHandler(product, index)"
+                                    :circle="true">
                         </BaseButton>
 
                         <BaseButton classes="products__btn"
-                                type="danger"
-                                icon="trash"
-                                :circle="true"
-                                @click="confirmModalHandler(index)">
+                                    type="danger"
+                                    icon="trash"
+                                    :circle="true"
+                                    @click="confirmModalHandler(index)">
                         </BaseButton>
                     </td>
                 </tr>
@@ -51,7 +51,7 @@
                 <span slot="modal-header">Remove this element?</span>
                 <div slot="modal-footer">
                     <BaseButton type="success"
-                            @click.prevent="onRemoveProduct(editedEL)">Remove product
+                                @click.prevent="onRemoveProduct(editedEL)">Remove product
                     </BaseButton>
                 </div>
             </BaseModal>
@@ -134,10 +134,11 @@
                                         <input type="file" class="custom-file-input" id="customFile"
                                                @change="onFileChange">
                                         <label class="custom-file-label" for="customFile">Select File</label>
-                                        <div class="custom-file__description">
+                                        <div v-show="error === null" class="custom-file__description">
                                             <span>maxFilesize: 2MB</span> |
                                             <span>png or jpeg only</span>
                                         </div>
+                                        <div class="custom-file__error">{{ error }}</div>
 
                                     </div>
                                     <div v-else>
@@ -201,7 +202,8 @@
                 editedEL: '',
                 image: '',
                 uploadFile: null,
-                fileData: null
+                fileData: null,
+                error: null,
             };
         },
         computed: {
@@ -261,6 +263,7 @@
                 this.modalFields = {};
                 this.status = '';
                 this.editedEL = '';
+                this.error = null;
                 this.removeImage();
             },
             closeModalConfirm() {
@@ -270,23 +273,56 @@
             onFileChange(e) {
                 let files = e.target.files || e.dataTransfer.files;
                 this.uploadFile = files;
-                // console.log(files);
-                if (!files.length)
-                    return;
-                this.createImage(files[0]);
+                this.error = null;
+                this.validateLoadingImage(e.target.files[0])
+                    .then(() => {
+                        this.error = null;
+                    })
+                    .catch(() => {
+                        this.error = 'You may upload png or jpeg file 2MB max';
+                    })
             },
-            createImage(file) {
-                let reader = new FileReader();
-                reader.onload = (e) => {
-                    // console.log(e.target);
-                    this.image = e.target.result;
-                    this.fileData = {
-                        dir: this.$route.name,
-                        fileList: this.uploadFile,
-                        fileReader: file
-                    };
-                };
-                reader.readAsDataURL(file);
+            validateLoadingImage(file) {
+                return new Promise((resolve, reject) => {
+                    let typeReader = new FileReader();
+                    let baseReader = new FileReader();
+                    let MAX_SIZE_IN_BYTES = 2097152;
+                    let header = "";
+                    let type = "";
+
+                    typeReader.readAsArrayBuffer(file);
+                    typeReader.addEventListener("loadend", arrayBuffer => {
+                        new Uint8Array(arrayBuffer.target.result)
+                            .subarray(0, 4)
+                            .forEach(byte => (header += byte.toString(16)));
+
+                        switch (header) {
+                            case "89504e47":
+                                type = "image/png";
+                                break;
+                            case "ffd8ffe0":
+                            case "ffd8ffe1":
+                            case "ffd8ffe2":
+                            case "ffd8ffe3":
+                            case "ffd8ffe8":
+                                type = "image/jpeg";
+                        }
+
+                        if (type && file.size < MAX_SIZE_IN_BYTES) {
+                            baseReader.readAsDataURL(file);
+                            baseReader.addEventListener("load", () => {
+                                console.log(baseReader.result);
+                                this.image = baseReader.result;
+                                this.fileData = {
+                                    dir: this.$route.name,
+                                    fileList: this.uploadFile,
+                                    fileReader: file
+                                };
+                                resolve(baseReader.result)
+                            });
+                        } else reject();
+                    });
+                });
             },
             removeImage: function () {
                 this.image = '';
@@ -399,7 +435,7 @@
         }
         &__modal {
             .modal-footer {
-                background: red;
+                background: $red;
             }
         }
         &__btn + &__btn {
@@ -407,10 +443,16 @@
         }
     }
 
-    .custom-file{
-        &__description{
+    .custom-file {
+        &__description,
+        &__error {
             font-size: rem(12);
+        }
+        &__description {
             color: $gray-500;
+        }
+        &__error {
+            color: $red;
         }
     }
 
