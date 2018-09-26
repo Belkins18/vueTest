@@ -1,9 +1,9 @@
 <template>
     <transition name="fade">
         <div
-                class="modal"
-                :class="{[`${classes}`]: classes}" tabindex="-1" role="dialog" v-if="isVisible"
-        @su>
+                class="modal" tabindex="-1" role="dialog"
+                :class="{[`${classes}`]: classes}"
+                v-if="isVisible">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">

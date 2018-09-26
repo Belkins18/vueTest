@@ -12,16 +12,16 @@
             <BaseTable classes="products__table"
                        :darkTheme="false"
                        :bordered="false"
-                       :responsive="responsive">
+                       :responsive="table.isResponsive">
                 <tr slot="tableHead">
-                    <th v-for="(item, index) in tableData.head" :key='index'>{{item}}</th>
+                    <th v-for="(headName, index) in table.data.headNames" :key='index'>{{headName}}</th>
                 </tr>
                 <tr v-for="(product, index) in products" :key='product.id' slot="tableBody">
                     <td>{{ product.id }}</td>
                     <td>{{ product.sku }}</td>
                     <td>
                         <img
-                                :src='(product.image) ? product.image : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
+                                :src='(product.imageURL) ? product.imageURL : "https://www.freeiconspng.com/uploads/img-landscape-photo-photography-picture-icon-12.png"'
                                 alt='' width='47px'>
                     </td>
                     <td>{{product.name}}</td>
@@ -48,12 +48,12 @@
 
             <BaseModal
                     @close="closeModalConfirm"
-                    :isVisible.sync="showModalConfirm"
+                    :isVisible.sync="removeProductModal.isVisible"
                     :title="'Remove this element?'">
                 <span slot="modal-header">Remove this element?</span>
                 <div slot="modal-footer">
                     <BaseButton type="success"
-                                @click.prevent="onRemoveProduct(editedEL)">Remove product
+                                @click.prevent="onRemoveProduct(currentIdElement)">Remove product
                     </BaseButton>
                 </div>
             </BaseModal>
@@ -61,8 +61,8 @@
             <BaseModal
                     @close="closeModal"
                     classes="products__modal"
-                    :isVisible.sync="showModal"
-                    :title="changeStatus">
+                    :isVisible.sync="productModal.isVisible"
+                    :title="(productModal.status === 'edit' ? 'Save changes' : productModal.status === 'create' ? 'Create product' : null)">
                 <div slot="modal-body">
                     <form autocomplete="off">
                         <input autocomplete="false" name="hidden" type="text" style="display:none;">
@@ -70,7 +70,8 @@
                             <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="sku" v-model="modalFields.sku" v-validate="'required|alpha_dash'"
+                                        name="sku" v-model="productModal.inputFieldsValue.sku"
+                                        v-validate="'required|alpha_dash'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('sku') }"
                                         id="product_sku" type="text" placeholder="SKU"
                                         aria-describedby="product_skuHelp">
@@ -81,7 +82,7 @@
                             <label class="col-sm-2 col-form-label" for="product_name">Name</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="name" v-model="modalFields.name" v-validate="'required'"
+                                        name="name" v-model="productModal.inputFieldsValue.name" v-validate="'required'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('name') }"
                                         id="product_name" type="text" placeholder="Name"
                                         aria-describedby="product_nameHelp">
@@ -93,7 +94,8 @@
                             <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="stock" v-model="modalFields.stock" v-validate="'required|numeric'"
+                                        name="stock" v-model="productModal.inputFieldsValue.stock"
+                                        v-validate="'required|numeric'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('stock') }"
                                         id="product_stock" type="text" placeholder="Stock"
                                         aria-describedby="product_stockHelp">
@@ -105,7 +107,7 @@
                             <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="purPrice" v-model="modalFields.purPrice"
+                                        name="purPrice" v-model="productModal.inputFieldsValue.purPrice"
                                         v-validate="{ required: true}"
                                         :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
                                         id="product_purprice" type="text" placeholder="__,__"
@@ -118,7 +120,7 @@
                             <label class="col-sm-2 col-form-label" for="product_price">Price</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="price" v-model="modalFields.price"
+                                        name="price" v-model="productModal.inputFieldsValue.price"
                                         v-validate="{ required: true}"
                                         :class="{'form-control': true, 'is-invalid': errors.has('price') }"
                                         id="product_price" type="text" placeholder="__,__"
@@ -131,21 +133,31 @@
                             <label class="col-sm-2 col-form-label" for="product_price">Images</label>
                             <div class="col-sm-10">
                                 <div class="custom-file">
-                                    <div v-if="!image">
-                                        <input type="file" class="custom-file-input" id="customFile"
-                                               @change="onFileChange">
-                                        <label class="custom-file-label" for="customFile">Select File</label>
-                                        <div v-show="error === null" class="custom-file__description">
-                                            <span>maxFilesize: 2MB</span> |
-                                            <span>png or jpeg only</span>
-                                        </div>
-                                        <div class="custom-file__error">{{ error }}</div>
-
+                                    <div class="preview-img"
+                                         v-if="productModal.inputFieldsValue.imageBase64">
+                                        <img :src="productModal.inputFieldsValue.imageBase64" style="max-width: 150px"/>
+                                        <span @click.prevent="removeImageWithPtoduct">&times;</span>
                                     </div>
                                     <div v-else>
-                                        <div class="preview-img">
-                                            <img :src="image" style="max-width: 150px"/>
-                                            <span @click.prevent="removeImage">&times;</span>
+                                        <div v-if="!productModal.fileLoadInfo.base64ImageFormat">
+                                            <input type="file" class="custom-file-input" id="customFile"
+                                                   @change="onFileChange">
+                                            <label class="custom-file-label" for="customFile">Select File</label>
+                                            <div v-show="productModal.fileLoadInfo.imageOnLoadErrorMsg === null"
+                                                 class="custom-file__description">
+                                                <span>maxFilesize: 2MB</span> |
+                                                <span>png or jpeg only</span>
+                                            </div>
+                                            <div class="custom-file__error">{{
+                                                productModal.fileLoadInfo.imageOnLoadErrorMsg }}
+                                            </div>
+                                        </div>
+                                        <div v-else>
+                                            <div class="preview-img">
+                                                <img :src="productModal.fileLoadInfo.base64ImageFormat"
+                                                     style="max-width: 150px"/>
+                                                <span @click.prevent="removeOnLoadImage">&times;</span>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -160,9 +172,10 @@
                             @click="closeModal">Close
                     </BaseButton>
                     <BaseButton
-                            :class="btnTypeStatus"
-                            :disabled="disabled"
-                            @click="validateFields()"> {{ changeStatus }}
+                            :class="(productModal.status === 'edit'? 'btn-info' : productModal.status === 'create' ? 'btn-success' : null)"
+                            :disabled="productModal.confirmChangesBtn.isDisabled"
+                            @click="onConfirmChanges()"> {{(productModal.status === 'edit' ? 'Save changes' :
+                        productModal.status === 'create' ? 'Create product' : null)}}
                     </BaseButton>
                 </div>
             </BaseModal>
@@ -191,59 +204,36 @@
         },
         data() {
             return {
-                // FIXME: Что disabled?
-                disabled: false,
-                // FIXME: Какую disabled?
-                showModal: false,
-                showModalConfirm: false,
-                // FIXME: Респонсив чего?
-                responsive: true,
-                // FIXME: Статус чего?
-                status: '',
-                tableData: {
-                    head: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
+                productModal: {
+                    isVisible: false,
+                    confirmChangesBtn: {
+                        isDisabled: false
+                    },
+                    status: '',
+                    inputFieldsValue: {},
+                    fileLoadInfo: {
+                        base64ImageFormat: '',
+                        fileList: null,
+                        complexFile: null,
+                        imageOnLoadErrorMsg: null
+                    }
                 },
-                // FIXME: Поля какой модалки?
-                modalFields: {},
-                // FIXME: Какой элемент?
-                editedEL: '',
-                // FIXME: Что за картинка?
-                image: '',
-                // FIXME: Переменная называется так, как будто это метод?
-                uploadFile: null,
-                // FIXME: Какого файла?
-                fileData: null,
-                // FIXME: Че за ошибки?
-                error: null,
+                removeProductModal: {
+                    isVisible: false
+                },
+                table: {
+                    isResponsive: true,
+                    data: {
+                        headNames: ['id', 'SKU', 'Image', 'Name', 'Purchase Price', 'Price', 'Stock', 'Actions'],
+                    }
+                },
+                currentIdElement: '',
             };
         },
         computed: {
-            // FIXME: Не используется
-            pending() {
-                return this.$store.state.pending;
-            },
             products() {
                 return this.$store.state.products;
             },
-            // FIXME: Эту логику лучше перенести в шаблон
-            changeStatus() {
-                if (this.status === 'edit') {
-                    return 'Save changes'
-                }
-                if (this.status === 'create') {
-                    return 'Create product'
-                }
-            },
-            // FIXME: Эту логику лучше перенести в шаблон
-            btnTypeStatus() {
-                if (this.status === 'edit') {
-                    return 'btn-info'
-                }
-                if (this.status === 'create') {
-                    return 'btn-success'
-                }
-            },
-
         },
         methods: {
             ...mapActions([
@@ -258,97 +248,103 @@
             },
             // Modal
             onCreateProduct() {
-                this.status = 'create';
-                this.showModal = true;
+                this.productModal.status = 'create';
+                this.productModal.isVisible = true;
             },
             editProductHandler(product, index) {
-                this.modalFields = cloneDeep(product);
-                this.status = 'edit';
-                this.editedEL = index;
-                this.showModal = true;
+                this.productModal.inputFieldsValue = cloneDeep(product);
+                this.productModal.status = 'edit';
+                this.currentIdElement = index;
+                this.productModal.isVisible = true;
             },
             confirmModalHandler(index) {
-                this.showModalConfirm = true;
-                this.editedEL = index;
+                this.removeProductModal.isVisible = true;
+                this.currentIdElement = index;
             },
             closeModal() {
-                this.showModal = false;
-                this.disabled = false;
-                this.modalFields = {};
-                this.status = '';
-                this.editedEL = '';
-                this.error = null;
-                this.removeImage();
+                this.productModal.isVisible = false;
+                this.productModal.confirmChangesBtn.isDisabled = false;
+                this.productModal.inputFieldsValue = {};
+                this.productModal.status = '';
+                this.currentIdElement = '';
+                this.productModal.fileLoadInfo.imageOnLoadErrorMsg = null;
+                this.removeOnLoadImage();
             },
             closeModalConfirm() {
-                this.showModalConfirm = false;
-                this.editedEL = '';
+                this.removeProductModal.isVisible = false;
+                this.currentIdElement = '';
             },
             onFileChange(e) {
                 let files = e.target.files || e.dataTransfer.files;
-                this.uploadFile = files;
-                this.error = null;
-                this.validateLoadingImage(e.target.files[0])
+                this.productModal.fileLoadInfo.fileList = files;
+                this.productModal.fileLoadInfo.imageOnLoadErrorMsg = null;
+
+                const validateLoadingImage = (file) => {
+                    return new Promise((resolve, reject) => {
+                        let typeReader = new FileReader();
+                        let baseReader = new FileReader();
+                        let MAX_SIZE_IN_BYTES = 2097152;
+                        let header = "";
+                        let type = "";
+
+                        typeReader.readAsArrayBuffer(file);
+                        typeReader.addEventListener("loadend", arrayBuffer => {
+                            new Uint8Array(arrayBuffer.target.result)
+                                .subarray(0, 4)
+                                .forEach(byte => (header += byte.toString(16)));
+
+                            switch (header) {
+                                case "89504e47":
+                                    type = "image/png";
+                                    break;
+                                case "ffd8ffe0":
+                                case "ffd8ffe1":
+                                case "ffd8ffe2":
+                                case "ffd8ffe3":
+                                case "ffd8ffe8":
+                                    type = "image/jpeg";
+                            }
+
+                            if (type && file.size < MAX_SIZE_IN_BYTES) {
+                                baseReader.readAsDataURL(file);
+                                baseReader.addEventListener("load", () => {
+                                    console.log(baseReader.result);
+                                    this.productModal.fileLoadInfo.base64ImageFormat = baseReader.result;
+                                    this.productModal.fileLoadInfo.complexFile = {
+                                        dir: this.$route.name,
+                                        base64Image: baseReader.result,
+                                        fileList: this.productModal.fileLoadInfo.fileList,
+                                        fileReader: file
+                                    };
+                                    resolve(baseReader.result);
+                                });
+                            } else reject();
+                        });
+                    });
+                }
+
+                validateLoadingImage(e.target.files[0])
                     .then(() => {
-                        this.error = null;
+                        this.productModal.fileLoadInfo.imageOnLoadErrorMsg = null;
                     })
                     .catch(() => {
-                        this.error = 'You may upload png or jpeg file 2MB max';
+                        this.productModal.fileLoadInfo.imageOnLoadErrorMsg = 'You may upload png or jpeg file 2MB max';
                     })
             },
-            validateLoadingImage(file) {
-                return new Promise((resolve, reject) => {
-                    let typeReader = new FileReader();
-                    let baseReader = new FileReader();
-                    let MAX_SIZE_IN_BYTES = 2097152;
-                    let header = "";
-                    let type = "";
-
-                    typeReader.readAsArrayBuffer(file);
-                    typeReader.addEventListener("loadend", arrayBuffer => {
-                        new Uint8Array(arrayBuffer.target.result)
-                            .subarray(0, 4)
-                            .forEach(byte => (header += byte.toString(16)));
-
-                        switch (header) {
-                            case "89504e47":
-                                type = "image/png";
-                                break;
-                            case "ffd8ffe0":
-                            case "ffd8ffe1":
-                            case "ffd8ffe2":
-                            case "ffd8ffe3":
-                            case "ffd8ffe8":
-                                type = "image/jpeg";
-                        }
-
-                        if (type && file.size < MAX_SIZE_IN_BYTES) {
-                            baseReader.readAsDataURL(file);
-                            baseReader.addEventListener("load", () => {
-                                console.log(baseReader.result);
-                                this.image = baseReader.result;
-                                this.fileData = {
-                                    dir: this.$route.name,
-                                    fileList: this.uploadFile,
-                                    fileReader: file
-                                };
-                                resolve(baseReader.result)
-                            });
-                        } else reject();
-                    });
-                });
+            removeOnLoadImage: function () {
+                this.productModal.fileLoadInfo.base64ImageFormat = '';
+                this.productModal.fileLoadInfo.fileList = null;
+                this.productModal.fileLoadInfo.complexFile = null;
             },
-            removeImage: function () {
-                this.image = '';
-                this.uploadFile = null;
-                this.fileData = null;
+            removeImageWithPtoduct() {
+
             },
             // Product evt
             // Add product
             onAddProduct() {
-                this.disabled = true;
-                this.modalFields.id = '_' + Math.random().toString(36).substr(2, 9);
-                this.addProduct(this.modalFields)
+                this.productModal.confirmChangesBtn.isDisabled = true;
+                this.productModal.inputFieldsValue.id = '_' + Math.random().toString(36).substr(2, 9);
+                this.addProduct(this.productModal.inputFieldsValue)
                     .then((path) => {
                         let routePath = `/${this.$route.name}/`;
                         let startnum = path.indexOf(routePath) + routePath.length;
@@ -356,17 +352,18 @@
                         return key;
                     })
                     .then((key) => {
-                        if (this.fileData !== null) {
-                            this.editedEL = key;
-                            return (this.loadImages(this.fileData));
+                        if (this.productModal.fileLoadInfo.complexFile !== null) {
+                            this.currentIdElement = key;
+                            return (this.loadImages(this.productModal.fileLoadInfo.complexFile));
                         } else {
                             return
                         }
                     })
                     .then((url) => {
                         if (url) {
-                            this.modalFields.image = url;
-                            this.fileData = null;
+                            this.productModal.inputFieldsValue.imageURL = url;
+                            this.productModal.inputFieldsValue.imageBase64 = this.productModal.fileLoadInfo.complexFile.base64Image;
+                            this.productModal.fileLoadInfo.complexFile = null;
                             this.onEditProduct();
                         } else {
                             this.closeModal();
@@ -377,22 +374,23 @@
             //Edit product
             onEditProduct() {
                 let data = {
-                    editedResults: cloneDeep(this.modalFields),
-                    editElement: this.editedEL
+                    editedResults: cloneDeep(this.productModal.inputFieldsValue),
+                    editElement: this.currentIdElement
                 };
-                this.disabled = true;
+                this.productModal.confirmChangesBtn.isDisabled = true;
                 this.editProduct(data)
                     .then(() => {
-                        if (this.fileData !== null) {
-                            return (this.loadImages(this.fileData));
+                        if (this.productModal.fileLoadInfo.complexFile !== null) {
+                            return (this.loadImages(this.productModal.fileLoadInfo.complexFile));
                         } else {
                             return
                         }
                     })
                     .then((url) => {
                         if (url) {
-                            this.modalFields.image = url;
-                            this.fileData = null;
+                            this.productModal.inputFieldsValue.imageURL = url;
+                            this.productModal.inputFieldsValue.imageBase64 = this.productModal.fileLoadInfo.complexFile.base64Image;
+                            this.productModal.fileLoadInfo.complexFile = null;
                             // FIXME: Рекурсия?
                             this.onEditProduct();
                         } else {
@@ -407,14 +405,14 @@
                 this.closeModalConfirm();
                 this.getProductList();
             },
-            validateFields() {
+            onConfirmChanges() {
                 this.$validator.validateAll()
                     .then((result) => {
-                        if (result && this.status === 'create') {
+                        if (result && this.productModal.status === 'create') {
                             this.onAddProduct();
                             return;
                         }
-                        if (result && this.status === 'edit') {
+                        if (result && this.productModal.status === 'edit') {
                             this.onEditProduct();
                             return;
                         }
@@ -424,17 +422,6 @@
         },
         created() {
             this.getProductList();
-            // this.$store.getters.getDBFirebaseUsers.once("value")
-            //     .then(function (snapshot) {
-            //         let value = snapshot.val();
-            //         let key = snapshot.key;
-            //         console.log(key);
-            //         console.log(value);
-            //         console.log(snapshot.child('admin').val());
-            //     })
-            //     .catch((error) => {
-            //         console.log(error);
-            //     });
         },
     };
 </script>
