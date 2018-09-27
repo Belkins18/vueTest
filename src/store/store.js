@@ -56,7 +56,7 @@ const mutations = {
     },
     [SAVE_USERS](state, payload) {
         state.users = payload
-    }
+    },
 };
 
 const actions = {
@@ -90,12 +90,16 @@ const actions = {
         console.log(dataImg);
         commit(PENDING_STATUS_ON);
         return new Promise((resolve) => {
-            // FIXME: Очень много чейнинга посредством создания новых переменных, из след 4 строчек можно сделать 1
-            // let storageRef = firebase.storage().ref();
-            // let basePath = 'images/';
-            // let dirPath = `${basePath}${dataImg.dir}/`;
-            // let uploadTask = storageRef.child(`${dirPath}${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
-            let uploadTask = firebase.storage().ref().child(`images/${dataImg.dir}/${dataImg.databaseId}/${dataImg.fileList[0].name}`.toString()).put(dataImg.fileList[0]);
+            let uploadTask = firebase.storage().ref()
+                .child(
+                    'images/' +
+                    // state.user.uid + '/' +
+                    dataImg.dir + '/' +
+                    dataImg.databaseId + '/' +
+                    dataImg.fileList[0].name
+                        .toString())
+                .put(dataImg.fileList[0]);
+
             uploadTask.on('state_changed',
                 (snapshot) => {
                     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
@@ -117,12 +121,36 @@ const actions = {
             );
         });
     },
-    removeImagesFromDB(_, payload) {
+    imageFieldsUpdateToNull(_, payload) {
+        firebase.database().ref('products/' + payload).update({
+            imageURL: null,
+            imageName: null,
+            imageBase64: null
+        }, function (error) {
+            if (error) {
+                console.log('The write failed...');
+            } else {
+                console.log('Data saved successfully!');
+            }
+        });
+    },
+    removeImagesFromDB({dispatch}, payload) {
         console.log(payload);
-        let desertRef = firebase.storage().ref().child('images/product/-LNMmwDgTYHPxgoBVdtf/wp2168010-yellowstone-national-park-wallpapers.jpg'.toString());
-        // firebase.storage().ref().child(`images/product/${payload.elId}/${payload.imageName}`).delete();
-        desertRef.delete();
-        // firebase.storage().ref().child(`images/product/-LNMmwDgTYHPxgoBVdtf/wp2168010-yellowstone-national-park-wallpapers.jpg`).delete();
+        return new Promise((resolve) => {
+            firebase.storage()
+                .ref()
+                .child(
+                    'images/' +
+                    'products/' +
+                    payload.elId + '/' +
+                    payload.imageName)
+                .delete()
+                .then(() => {
+                    dispatch('imageFieldsUpdateToNull', payload.elId);
+                    let status = 'UPDATING';
+                    resolve(status);
+                });
+        });
     },
     addProduct(_, payload) {
         return new Promise((resolve) => {
@@ -137,7 +165,7 @@ const actions = {
 
     editProduct(_, payload) {
         return new firebase.database().ref(`/products/${payload.editElement}`)
-            .set(payload.editedResults)
+            .update(payload.editedResults)
             .then(() => payload.editedResults)
     },
 

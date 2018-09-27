@@ -308,7 +308,6 @@
                             if (type && file.size < MAX_SIZE_IN_BYTES) {
                                 baseReader.readAsDataURL(file);
                                 baseReader.addEventListener("load", () => {
-                                    console.log(baseReader.result);
                                     this.productModal.fileLoadInfo.base64ImageFormat = baseReader.result;
                                     this.productModal.fileLoadInfo.complexFile = {
                                         dir: this.$route.name,
@@ -316,6 +315,7 @@
                                         fileList: this.productModal.fileLoadInfo.fileList,
                                         fileReader: file
                                     };
+                                    console.log(this.productModal.fileLoadInfo.complexFile);
                                     resolve(baseReader.result);
                                 });
                             } else reject();
@@ -341,7 +341,18 @@
                     elId: this.currentIdElement,
                     imageName: this.productModal.inputFieldsValue.imageName
                 };
-                this.$store.dispatch('removeImagesFromDB', payload);
+                this.$store.dispatch('removeImagesFromDB', payload)
+                    .then((status) => {
+                        console.log(status);
+                        if (status === 'UPDATING') {
+                            this.productModal.inputFieldsValue.imageURL = null;
+                            this.productModal.inputFieldsValue.imageName = null;
+                            this.productModal.inputFieldsValue.imageBase64 = null;
+                            console.log('file deleted');
+                        } else return;
+                    }).catch((error) => {
+                    console.log(error);
+                });
             },
             // Product evt
             // Add product
@@ -350,6 +361,7 @@
                 this.productModal.inputFieldsValue.id = '_' + Math.random().toString(36).substr(2, 9);
                 this.addProduct(this.productModal.inputFieldsValue)
                     .then((path) => {
+                        console.log(path);
                         let routePath = `/${this.$route.name}/`;
                         let startnum = path.indexOf(routePath) + routePath.length;
                         let key = path.slice(startnum, path.length);
@@ -385,8 +397,12 @@
                 };
                 this.productModal.confirmChangesBtn.isDisabled = true;
                 this.editProduct(data)
+
                     .then(() => {
                         if (this.productModal.fileLoadInfo.complexFile !== null) {
+                            console.log(this.productModal.fileLoadInfo.complexFile);
+                            this.productModal.fileLoadInfo.complexFile.databaseId = data.editElement;
+                            this.productModal.inputFieldsValue.imageName = this.productModal.fileLoadInfo.complexFile.fileReader.name;
                             return (this.loadImages(this.productModal.fileLoadInfo.complexFile));
                         } else {
                             return
