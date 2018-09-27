@@ -1,11 +1,9 @@
 <template>
     <div class="products">
         <div class='container'>
-
-
             <BaseButton classes="createProduct products__btn products__btn--showModal"
                         type="secondary"
-                        @click="onCreateProduct">
+                        @click="createProductHandler">
                 Create New Product
             </BaseButton>
 
@@ -40,14 +38,14 @@
                                     type="danger"
                                     icon="trash"
                                     :circle="true"
-                                    @click="confirmModalHandler(index)">
+                                    @click="removeProductHandler(index)">
                         </BaseButton>
                     </td>
                 </tr>
             </BaseTable>
 
             <BaseModal
-                    @close="closeModalConfirm"
+                    @close="closeRemoveModal"
                     :isVisible.sync="removeProductModal.isVisible"
                     :title="'Remove this element?'">
                 <span slot="modal-header">Remove this element?</span>
@@ -133,31 +131,24 @@
                             <label class="col-sm-2 col-form-label" for="product_price">Images</label>
                             <div class="col-sm-10">
                                 <div class="custom-file">
-                                    <div class="preview-img"
-                                         v-if="productModal.inputFieldsValue.imageBase64">
-                                        <img :src="productModal.inputFieldsValue.imageBase64" style="max-width: 150px"/>
-                                        <span @click.prevent="removeImageWithPtoduct">&times;</span>
+                                    <div v-if="productModal.fileLoadInfo.isFlag">
+                                        <div class="preview-img">
+                                            <img :src="productModal.inputFieldsValue.imageBase64"
+                                                 style="max-width: 150px"/>
+                                            <span @click.prevent="removeLoadImageHandler">&times;</span>
+                                        </div>
                                     </div>
                                     <div v-else>
-                                        <div v-if="!productModal.fileLoadInfo.base64ImageFormat">
-                                            <input type="file" class="custom-file-input" id="customFile"
-                                                   @change="onFileChange">
-                                            <label class="custom-file-label" for="customFile">Select File</label>
-                                            <div v-show="productModal.fileLoadInfo.imageOnLoadErrorMsg === null"
-                                                 class="custom-file__description">
-                                                <span>maxFilesize: 2MB</span> |
-                                                <span>png or jpeg only</span>
-                                            </div>
-                                            <div class="custom-file__error">{{
-                                                productModal.fileLoadInfo.imageOnLoadErrorMsg }}
-                                            </div>
+                                        <input type="file" class="custom-file-input" id="customFile"
+                                               @change="onFileChange">
+                                        <label class="custom-file-label" for="customFile">Select File</label>
+                                        <div v-show="!productModal.imageOnLoadErrorMsg"
+                                             class="custom-file__description">
+                                            <span>maxFilesize: 2MB</span> |
+                                            <span>png or jpeg only</span>
                                         </div>
-                                        <div v-else>
-                                            <div class="preview-img">
-                                                <img :src="productModal.fileLoadInfo.base64ImageFormat"
-                                                     style="max-width: 150px"/>
-                                                <span @click.prevent="removeOnLoadImage">&times;</span>
-                                            </div>
+                                        <div class="custom-file__error">{{
+                                            productModal.imageOnLoadErrorMsg }}
                                         </div>
                                     </div>
                                 </div>
@@ -169,7 +160,7 @@
                 <div slot="modal-footer" class="btn-group">
                     <BaseButton
                             type="primary"
-                            @click="closeModal">Close
+                            @click="closeModal">Cancel
                     </BaseButton>
                     <BaseButton
                             :class="(productModal.status === 'edit'? 'btn-info' : productModal.status === 'create' ? 'btn-success' : null)"
@@ -210,12 +201,13 @@
                         isDisabled: false
                     },
                     status: '',
+                    imageOnLoadErrorMsg: '',
                     inputFieldsValue: {},
                     fileLoadInfo: {
-                        base64ImageFormat: '',
+                        isFlag: false,
+                        dir: null,
                         fileList: null,
-                        complexFile: null,
-                        imageOnLoadErrorMsg: null
+                        fileReader: null,
                     }
                 },
                 removeProductModal: {
@@ -240,13 +232,239 @@
                 'addProduct',
                 'editProduct',
                 'removeProduct',
+                'removeImagesFromDB',
                 'getProductList',
                 'loadImages'
             ]),
-            validate() {
-                alert("onsubmit")
+
+            // ОТКРыВАНИЕ МОДАЛЬНыХ ОКОН
+            /**
+             * Открывает модальное окно создания продукта
+             *
+             */
+            createProductHandler() {
+                let productModal = this.productModal;
+                productModal.status = 'create';
+                productModal.isVisible = true;
             },
-            // Modal
+
+            /**
+             * Открывает модальное окно редактирования продукта
+             *
+             * @param {Object} product - объект из полей продуска.
+             *        {String} index - id ячейки продукта в RealTime Database (Firebase)
+             *
+             */
+            editProductHandler(product, index) {
+                let productModal = this.productModal;
+                productModal.isVisible = true;
+                this.currentIdElement = index;
+                productModal.inputFieldsValue = cloneDeep(product);
+                productModal.status = 'edit';
+            },
+
+            /**
+             * Открывает модальное окно удаления продукта
+             *
+             * @param {String} index - id ячейки продукта в RealTime Database (Firebase)
+             *
+             */
+            removeProductHandler(index) {
+                this.removeProductModal.isVisible = true;
+                this.currentIdElement = index;
+            },
+
+            // ЗАКРЫВАНИЕ МОДАЛЬНЫХ ОКОН
+            /**
+             * Закрывает модальное окно создания/редактирования продукта
+             * Снимает значение id ячейки продукта в RealTime Database (Firebase) (для модального окна редактирования)
+             * Очищает заполненные поля формы, статус, сообщение о ошибке при загрузке файла
+             * Убирает атрибут disabled с кнопок 'Create product', 'Edit product'
+             *
+             */
+            closeModal() {
+                let productModal = this.productModal;
+                this.currentIdElement = '';
+                // this.removeOnLoadImage();
+                productModal.isVisible = false;
+                productModal.confirmChangesBtn.isDisabled = false;
+                productModal.inputFieldsValue = {};
+                productModal.status = '';
+                productModal.imageOnLoadErrorMsg = '';
+            },
+
+            /**
+             * Закрывает модальное окно удаления продукта
+             * Снимает значение id ячейки продукта в RealTime Database (Firebase) (для модального окна редактирования)
+             *
+             */
+            closeRemoveModal() {
+                this.removeProductModal.isVisible = false;
+                this.currentIdElement = '';
+            },
+
+            // МЕТОДЫ ДЛЯ РАБОТЫ С ФАЙЛАМИ КАТРИНОК
+            /**
+             * Следит за изменением input[type='file']
+             *
+             * @param {event} event - event input[type='file'].
+             *
+             */
+            onFileChange(event) {
+                let files = event.target.files || event.dataTransfer.files;
+                let productModal = this.productModal;
+                let loadInfo = this.productModal.fileLoadInfo;
+
+                loadInfo.fileList = files;
+                productModal.imageOnLoadErrorMsg = '';
+
+                /**
+                 * Проверяет файл что пытаемся загрузить на соответсвие параметрам:
+                 * png or jpeg file 2MB max
+                 *
+                 * @param {file} file - файл что загружается
+                 * @return {Promise}
+                 * resolve - base64 typeFile format (для отрисовки превью)
+                 * reject - вернет код ошибки
+                 */
+                const validateLoadingImage = (file) => {
+                    return new Promise((resolve, reject) => {
+                        let typeReader = new FileReader();
+                        let baseReader = new FileReader();
+                        let MAX_SIZE_IN_BYTES = 2097152;
+                        let header = "";
+                        let type = "";
+
+                        typeReader.readAsArrayBuffer(file);
+                        typeReader.addEventListener("loadend", arrayBuffer => {
+                            new Uint8Array(arrayBuffer.target.result)
+                                .subarray(0, 4)
+                                .forEach(byte => (header += byte.toString(16)));
+
+                            switch (header) {
+                                case "89504e47":
+                                    type = "image/png";
+                                    break;
+                                case "ffd8ffe0":
+                                case "ffd8ffe1":
+                                case "ffd8ffe2":
+                                case "ffd8ffe3":
+                                case "ffd8ffe8":
+                                    type = "image/jpeg";
+                            }
+
+                            if (type && file.size < MAX_SIZE_IN_BYTES) {
+                                baseReader.readAsDataURL(file);
+                                baseReader.addEventListener("load", () => {
+                                    this.$set(productModal.inputFieldsValue, 'imageBase64', baseReader.result);
+                                    this.$set(productModal.inputFieldsValue, 'imageName', file.name);
+
+                                    this.$set(loadInfo, 'isFlag', true);
+                                    this.$set(loadInfo, 'dir', this.$route.name);
+                                    this.$set(loadInfo, 'fileReader', file);
+                                    console.log(this.productModal.fileLoadInfo);
+                                    resolve(baseReader.result);
+                                });
+                            } else reject();
+                        });
+                    });
+                };
+
+                validateLoadingImage(event.target.files[0])
+                    .then(() => {
+                        this.$set(productModal, 'imageOnLoadErrorMsg', '');
+                    })
+                    .catch(() => {
+                        this.$set(productModal, 'imageOnLoadErrorMsg', 'You may upload png or jpeg file 2MB max');
+                    })
+            },
+
+            /**
+             * Удаляет загруженный файл в input[type='file']
+             * Очищает информацию о загруженном в input[type='file'] файле
+             *
+             */
+            removeLoadImageHandler: function () {
+                let inputValues = this.productModal.inputFieldsValue;
+                let loadInfo = this.productModal.fileLoadInfo;
+
+                this.$set(loadInfo, 'productFbId', null);
+                this.$set(loadInfo, 'dir', null);
+                this.$set(loadInfo, 'fileList', null);
+                this.$set(loadInfo, 'fileReader', null);
+                this.$set(loadInfo, 'isFlag', false);
+
+                this.$set(inputValues, 'imageBase64', '');
+                this.$set(inputValues, 'imageName', '');
+            },
+
+            // CRUD МЕТОДЫ
+            getKeyInDBPath(path) {
+                let loadInfo = this.productModal.fileLoadInfo;
+                let routePath = `/${this.$route.name}/`;
+                let startnum = path.indexOf(routePath) + routePath.length;
+                let key = path.slice(startnum, path.length);
+
+                this.$set(loadInfo, 'productFbId', key);
+                return key;
+            },
+            onAddProduct() {
+                let productModal = this.productModal;
+                // let loadInfo= this.productModal.fileLoadInfo;
+
+                this.$set(productModal, 'id', `_${Math.random().toString(36).substr(2, 9)}`);
+                this.$set(productModal.confirmChangesBtn, 'isDisabled', true);
+
+                this.addProduct(productModal.inputFieldsValue)
+                    .then((path) => {
+                        return this.getKeyInDBPath(path);
+                    })
+                    .then((key) => {
+                        console.log(key);
+                        if (this.productModal.fileLoadInfo.complexFile !== null) {
+                            this.currentIdElement = key;
+                            this.productModal.inputFieldsValue.imageName = this.productModal.fileLoadInfo.complexFile.fileReader.name;
+                            return (this.loadImages(this.productModal.fileLoadInfo.complexFile));
+                        } else {
+                            return
+                        }
+                    })
+                    .then((url) => {
+                        if (url) {
+                            this.productModal.inputFieldsValue.imageURL = url;
+                            this.productModal.inputFieldsValue.imageBase64 = this.productModal.fileLoadInfo.complexFile.base64Image;
+                            this.productModal.fileLoadInfo.complexFile = null;
+                            this.onEditProduct();
+                        } else {
+                            this.closeModal();
+                            this.getProductList();
+                        }
+                    })
+            },
+
+            /**
+             * В зависимости от статуса при котором было открыто модальное окно
+             * выполняет создание / ркдактирование продукта
+             *
+             * @methods {onAddProduct}
+             *          {onEditProduct}
+             *
+             */
+            onConfirmChanges() {
+                let status = this.productModal.status;
+                this.$validator.validateAll()
+                    .then((result) => {
+                        if (result && status === 'create')
+                            this.onAddProduct();
+                        if (result && status === 'edit')
+                            this.onEditProduct();
+                    })
+                    .catch((error) => error);
+            }
+
+
+
+            /*-----------------------------------
             onCreateProduct() {
                 this.productModal.status = 'create';
                 this.productModal.isVisible = true;
@@ -341,7 +559,7 @@
                     elId: this.currentIdElement,
                     imageName: this.productModal.inputFieldsValue.imageName
                 };
-                this.$store.dispatch('removeImagesFromDB', payload)
+                this.removeImagesFromDB(payload)
                     .then((status) => {
                         console.log(status);
                         if (status === 'UPDATING') {
@@ -441,6 +659,7 @@
                     })
                     .catch((error) => error);
             }
+            -------------------------------*/
         },
         created() {
             this.getProductList();
