@@ -538,6 +538,11 @@
                     };
                     this.onDeleteImgFromFbStorage(forRemoveData)
                 } else {
+                    let updatedData = {
+                        editedResults: cloneDeep(inputValues),
+                        editElement: loadInfo.productFbId
+                    };
+                    this.editProduct(updatedData);
                     alert('->');
                     this.closeModal();
                     this.getProductList();
