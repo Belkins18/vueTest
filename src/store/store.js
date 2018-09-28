@@ -86,8 +86,8 @@ const actions = {
         commit(SET_LOGGED_OFF);
         router.push('/signIn');
     },
+
     loadImages({commit}, dataImg) {
-        console.log(dataImg);
         commit(PENDING_STATUS_ON);
         return new Promise((resolve) => {
             let uploadTask = firebase.storage().ref()
@@ -95,7 +95,7 @@ const actions = {
                     'images/' +
                     // state.user.uid + '/' +
                     dataImg.dir + '/' +
-                    dataImg.databaseId + '/' +
+                    dataImg.productFbId + '/' +
                     dataImg.fileList[0].name
                         .toString())
                 .put(dataImg.fileList[0]);
@@ -121,36 +121,16 @@ const actions = {
             );
         });
     },
-    imageFieldsUpdateToNull(_, payload) {
-        firebase.database().ref('products/' + payload).update({
-            imageURL: null,
-            imageName: null,
-            imageBase64: null
-        }, function (error) {
-            if (error) {
-                console.log('The write failed...');
-            } else {
-                console.log('Data saved successfully!');
-            }
-        });
-    },
-    removeImagesFromDB({dispatch}, payload) {
+    deleteImgFromFbStorage(_, payload) {
         console.log(payload);
-        return new Promise((resolve) => {
-            firebase.storage()
-                .ref()
-                .child(
-                    'images/' +
-                    'products/' +
-                    payload.elId + '/' +
-                    payload.imageName)
-                .delete()
-                .then(() => {
-                    dispatch('imageFieldsUpdateToNull', payload.elId);
-                    let status = 'UPDATING';
-                    resolve(status);
-                });
-        });
+        return new firebase.storage()
+            .ref()
+            .child(
+                'images/' +
+                'products/' +
+                payload.editElement + '/' +
+                payload.imageName)
+            .delete()
     },
     addProduct(_, payload) {
         return new Promise((resolve) => {
