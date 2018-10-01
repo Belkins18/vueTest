@@ -420,7 +420,7 @@
              * Возвращает значение ключа в виде строки
              *
              * @param {String} path: путь к продукту в FBDatabase
-             * 
+             *
              * @return {String} FBDatabase product key
              *
              */

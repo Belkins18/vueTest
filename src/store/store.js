@@ -60,10 +60,24 @@ const mutations = {
 };
 
 const actions = {
+    /**
+     * Инициализирует firebase
+     *
+     */
     initFirebase() {
         firebase.initializeApp(apiConfig.firebase);
     },
 
+    /**
+     * Action входа пользователя
+     *
+     * @param
+     *  dispatch: getUsersList
+     *  commit: [PENDING_STATUS_ON, SET_LOGGED_IN, PENDING_STATUS_OFF]
+     *
+     * @return {Promise} FBDatabase product key
+     *
+     */
     userAuth({dispatch, commit}, payload) {
         commit(PENDING_STATUS_ON);
         return new firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
@@ -82,18 +96,34 @@ const actions = {
             })
     },
 
+    /**
+     * Action выхода пользователя из App
+     *
+     * @param
+     *  commit: [SET_LOGGED_OFF]
+     *
+     */
     onLogout({commit}) {
         commit(SET_LOGGED_OFF);
         router.push('/signIn');
     },
 
+    /**
+     * Загружает картинки в firebase.storage
+     *
+     * @param
+     *  commit: [PENDING_STATUS_ON, SET_LOGGED_IN, PENDING_STATUS_OFF]
+     *  dataImg: {dir, fileList, fileReader, isFlag, productFBid}
+     *
+     * @return {String} URL FBDatabase product key
+     *
+     */
     loadImages({commit}, dataImg) {
         commit(PENDING_STATUS_ON);
         return new Promise((resolve) => {
             let uploadTask = firebase.storage().ref()
                 .child(
                     'images/' +
-                    // state.user.uid + '/' +
                     dataImg.dir + '/' +
                     dataImg.productFbId + '/' +
                     dataImg.fileList[0].name
@@ -121,6 +151,14 @@ const actions = {
             );
         });
     },
+
+    /**
+     * Удаляет картинки из firebase.storage
+     *
+     * @param
+     *  payload: {dir, fileList, fileReader, isFlag, productFBid}
+     *
+     */
     deleteImgFromFbStorage(_, payload) {
         console.log(payload);
         return new firebase.storage()
@@ -132,9 +170,12 @@ const actions = {
                 payload.imageName)
             .delete()
     },
+
+    /**
+     * Action добавления продукта
+     */
     addProduct(_, payload) {
         return new Promise((resolve) => {
-            // FIXME: Вся эта цепочка выглядит так, как будто ее можно зачейнить и не оборачивать в промис
             let databaseRef = firebase.database().ref('/products');
             let newProductRef = databaseRef.push();
             newProductRef.set(payload);
@@ -143,18 +184,27 @@ const actions = {
         });
     },
 
+    /**
+     * Action редактирования продукта
+     */
     editProduct(_, payload) {
         return new firebase.database().ref(`/products/${payload.editElement}`)
             .update(payload.editedResults)
             .then(() => payload.editedResults)
     },
 
+    /**
+     * Action удаления продукта
+     */
     removeProduct(_, index) {
         return new firebase.database().ref('/products')
             .child(index).remove()
             .catch((error) => error);
     },
 
+    /**
+     * Action получение снимка (списка) продуктов
+     */
     getProductList({commit}) {
         commit(PENDING_STATUS_ON);
         return new firebase.database().ref('/products').once("value")
@@ -165,6 +215,9 @@ const actions = {
             })
     },
 
+    /**
+     * Action получение снимка (списка) всех пользователей
+     */
     getUsersList({commit}) {
         return new firebase.database().ref('/users').once("value")
             .then((snapshot) => {
