@@ -416,6 +416,14 @@
             },
 
             // CRUD МЕТОДЫ
+            /**
+             * Возвращает значение ключа в виде строки
+             *
+             * @param {String} path: путь к продукту в FBDatabase
+             * 
+             * @return {String} FBDatabase product key
+             *
+             */
             getKeyInDBPath(path) {
                 let loadInfo = this.productModal.fileLoadInfo;
                 let routePath = `/${this.$route.name}/`;
@@ -425,6 +433,21 @@
                 this.$set(loadInfo, 'productFbId', key);
                 return key;
             },
+
+            /**
+             * Запускает action удаления картинки
+             * После выполняет обновление данных (editProduct)
+             *
+             * @param {Object} forRemoveData -
+             * keys: editElement, imageName
+             *
+             * @actions {deleteImgFromFbStorage}
+             *          {editProduct}
+             *          {getProductList}
+             *
+             * @methods {closeModal}
+             *
+             */
             onDeleteImgFromFbStorage(forRemoveData) {
                 let inputValues = this.productModal.inputFieldsValue;
                 let loadInfo = this.productModal.fileLoadInfo;
@@ -443,6 +466,7 @@
                         this.getProductList();
                     });
             },
+
             /**
              * Возвращает имя картинки что была / небыла загружена в Storage
              * keys[i] - это ключ
@@ -462,6 +486,19 @@
                 }
             },
 
+            /**
+             * Добавление продукта в FBDatabase,
+             * загрузка картинки в FBStorage (если файл был выбран)
+             *
+             * @actions {addProduct}
+             *          {loadImages}
+             *          {editProduct}
+             *          {getProductList}
+             *
+             * @methods {addProductFunc}
+             *          {getKeyInDBPath}
+             *          {closeModal}
+             */
             onAddProduct() {
                 let productModal = this.productModal;
                 let inputValues = this.productModal.inputFieldsValue;
@@ -507,6 +544,20 @@
                     })
             },
 
+            /**
+             * Редактирование продукта в FBDatabase,
+             * загрузка картинки в FBStorage (если файл был выбран)
+             * удаление картинки если файл был удален
+             *
+             * @actions {loadImages}
+             *          {editProduct}
+             *
+             *          {getProductList}
+             *
+             * @methods {closeModal}
+             *          {onDeleteImgFromFbStorage}
+             *
+             */
             onEditProduct() {
                 let productModal = this.productModal;
                 let inputValues = this.productModal.inputFieldsValue;
@@ -531,7 +582,6 @@
                             this.getProductList();
                         })
                 } else if (inputValues.imageName) {
-                    alert('!!!');
                     let forRemoveData = {
                         editElement: loadInfo.productFbId,
                         imageName: inputValues.imageName
@@ -543,13 +593,23 @@
                         editElement: loadInfo.productFbId
                     };
                     this.editProduct(updatedData);
-                    alert('->');
                     this.closeModal();
                     this.getProductList();
                 }
             },
 
-            //Remove product
+            /**
+             * Удаление продуката (если есть загруженная картинка, то удаляет ее
+             * по ключу из FBStorage) из FBDatabase
+             *
+             * @actions {deleteImgFromFbStorage}
+             *          {removeProduct}
+             *          {getProductList}
+             *
+             * @methods {getCurrentProduductFromStore}
+             *          {closeRemoveModal}
+             *
+             */
             onRemoveProduct(index) {
                 let forRemoveData = {
                     editElement: this.currentIdElement,
@@ -565,13 +625,6 @@
                     this.closeRemoveModal();
                     this.getProductList();
                 }
-                // this.onDeleteImgFromFbStorage(forRemoveData)
-                // this.$set(productModal.confirmChangesBtn, 'isDisabled', true);
-                // console.log(objProdStore);
-                // console.log(keys);
-                // this.onDeleteImgFromFbStorage();
-                // this.removeProduct(index);
-                //
             },
 
             /**
@@ -593,213 +646,11 @@
                     })
                     .catch((error) => error);
             }
-
-
-
-            /*-----------------------------------
-            onCreateProduct() {
-                this.productModal.status = 'create';
-                this.productModal.isVisible = true;
-            },
-            editProductHandler(product, index) {
-                this.productModal.inputFieldsValue = cloneDeep(product);
-                this.productModal.status = 'edit';
-                this.currentIdElement = index;
-                this.productModal.isVisible = true;
-            },
-            confirmModalHandler(index) {
-                this.removeProductModal.isVisible = true;
-                this.currentIdElement = index;
-            },
-            closeModal() {
-                this.productModal.isVisible = false;
-                this.productModal.confirmChangesBtn.isDisabled = false;
-                this.productModal.inputFieldsValue = {};
-                this.productModal.status = '';
-                this.currentIdElement = '';
-                this.productModal.fileLoadInfo.imageOnLoadErrorMsg = null;
-                this.removeOnLoadImage();
-            },
-            closeModalConfirm() {
-                this.removeProductModal.isVisible = false;
-                this.currentIdElement = '';
-            },
-            onFileChange(e) {
-                let files = e.target.files || e.dataTransfer.files;
-                this.productModal.fileLoadInfo.fileList = files;
-                this.productModal.fileLoadInfo.imageOnLoadErrorMsg = null;
-
-                const validateLoadingImage = (file) => {
-                    return new Promise((resolve, reject) => {
-                        let typeReader = new FileReader();
-                        let baseReader = new FileReader();
-                        let MAX_SIZE_IN_BYTES = 2097152;
-                        let header = "";
-                        let type = "";
-
-                        typeReader.readAsArrayBuffer(file);
-                        typeReader.addEventListener("loadend", arrayBuffer => {
-                            new Uint8Array(arrayBuffer.target.result)
-                                .subarray(0, 4)
-                                .forEach(byte => (header += byte.toString(16)));
-
-                            switch (header) {
-                                case "89504e47":
-                                    type = "image/png";
-                                    break;
-                                case "ffd8ffe0":
-                                case "ffd8ffe1":
-                                case "ffd8ffe2":
-                                case "ffd8ffe3":
-                                case "ffd8ffe8":
-                                    type = "image/jpeg";
-                            }
-
-                            if (type && file.size < MAX_SIZE_IN_BYTES) {
-                                baseReader.readAsDataURL(file);
-                                baseReader.addEventListener("load", () => {
-                                    this.productModal.fileLoadInfo.base64ImageFormat = baseReader.result;
-                                    this.productModal.fileLoadInfo.complexFile = {
-                                        dir: this.$route.name,
-                                        base64Image: baseReader.result,
-                                        fileList: this.productModal.fileLoadInfo.fileList,
-                                        fileReader: file
-                                    };
-                                    console.log(this.productModal.fileLoadInfo.complexFile);
-                                    resolve(baseReader.result);
-                                });
-                            } else reject();
-                        });
-                    });
-                };
-
-                validateLoadingImage(e.target.files[0])
-                    .then(() => {
-                        this.productModal.fileLoadInfo.imageOnLoadErrorMsg = null;
-                    })
-                    .catch(() => {
-                        this.productModal.fileLoadInfo.imageOnLoadErrorMsg = 'You may upload png or jpeg file 2MB max';
-                    })
-            },
-            removeOnLoadImage: function () {
-                this.productModal.fileLoadInfo.base64ImageFormat = '';
-                this.productModal.fileLoadInfo.fileList = null;
-                this.productModal.fileLoadInfo.complexFile = null;
-            },
-            removeImageWithPtoduct() {
-                let payload = {
-                    elId: this.currentIdElement,
-                    imageName: this.productModal.inputFieldsValue.imageName
-                };
-                this.removeImagesFromDB(payload)
-                    .then((status) => {
-                        console.log(status);
-                        if (status === 'UPDATING') {
-                            this.productModal.inputFieldsValue.imageURL = null;
-                            this.productModal.inputFieldsValue.imageName = null;
-                            this.productModal.inputFieldsValue.imageBase64 = null;
-                            console.log('file deleted');
-                        } else return;
-                    }).catch((error) => {
-                    console.log(error);
-                });
-            },
-            // Product evt
-            // Add product
-            onAddProduct() {
-                this.productModal.confirmChangesBtn.isDisabled = true;
-                this.productModal.inputFieldsValue.id = '_' + Math.random().toString(36).substr(2, 9);
-                this.addProduct(this.productModal.inputFieldsValue)
-                    .then((path) => {
-                        console.log(path);
-                        let routePath = `/${this.$route.name}/`;
-                        let startnum = path.indexOf(routePath) + routePath.length;
-                        let key = path.slice(startnum, path.length);
-                        this.productModal.fileLoadInfo.complexFile.databaseId = key;
-                        return key;
-                    })
-                    .then((key) => {
-                        if (this.productModal.fileLoadInfo.complexFile !== null) {
-                            this.currentIdElement = key;
-                            this.productModal.inputFieldsValue.imageName = this.productModal.fileLoadInfo.complexFile.fileReader.name;
-                            return (this.loadImages(this.productModal.fileLoadInfo.complexFile));
-                        } else {
-                            return
-                        }
-                    })
-                    .then((url) => {
-                        if (url) {
-                            this.productModal.inputFieldsValue.imageURL = url;
-                            this.productModal.inputFieldsValue.imageBase64 = this.productModal.fileLoadInfo.complexFile.base64Image;
-                            this.productModal.fileLoadInfo.complexFile = null;
-                            this.onEditProduct();
-                        } else {
-                            this.closeModal();
-                            this.getProductList();
-                        }
-                    })
-            },
-            //Edit product
-            onEditProduct() {
-                let data = {
-                    editedResults: cloneDeep(this.productModal.inputFieldsValue),
-                    editElement: this.currentIdElement
-                };
-                this.productModal.confirmChangesBtn.isDisabled = true;
-                this.editProduct(data)
-
-                    .then(() => {
-                        if (this.productModal.fileLoadInfo.complexFile !== null) {
-                            console.log(this.productModal.fileLoadInfo.complexFile);
-                            this.productModal.fileLoadInfo.complexFile.databaseId = data.editElement;
-                            this.productModal.inputFieldsValue.imageName = this.productModal.fileLoadInfo.complexFile.fileReader.name;
-                            return (this.loadImages(this.productModal.fileLoadInfo.complexFile));
-                        } else {
-                            return
-                        }
-                    })
-                    .then((url) => {
-                        if (url) {
-                            this.productModal.inputFieldsValue.imageURL = url;
-                            this.productModal.inputFieldsValue.imageBase64 = this.productModal.fileLoadInfo.complexFile.base64Image;
-                            this.productModal.fileLoadInfo.complexFile = null;
-                            // FIXME: Рекурсия?
-                            this.onEditProduct();
-                        } else {
-                            this.closeModal();
-                            this.getProductList();
-                        }
-                    });
-            },
-            //Remove product
-            onRemoveProduct(index) {
-                this.removeProduct(index);
-                this.closeModalConfirm();
-                this.getProductList();
-            },
-            onConfirmChanges() {
-                this.$validator.validateAll()
-                    .then((result) => {
-                        if (result && this.productModal.status === 'create') {
-                            this.onAddProduct();
-                            return;
-                        }
-                        if (result && this.productModal.status === 'edit') {
-                            this.onEditProduct();
-                            return;
-                        }
-                    })
-                    .catch((error) => error);
-            }
-            -------------------------------*/
-        }
-        ,
+        },
         created() {
             this.getProductList();
-        }
-        ,
-    }
-    ;
+        },
+    };
 </script>
 
 <style scoped lang="scss">
