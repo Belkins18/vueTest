@@ -9,10 +9,13 @@ import store from './store/store'
 import {sync} from 'vuex-router-sync';
 import './registerServiceWorker'
 import PageNames from "./configs/pageNames";
+import VeeValidate from 'vee-validate';
 
 Vue.config.productionTip = false;
 
 sync(store, router);
+Vue.use(VeeValidate);
+
 
 const USER_LS = 'user';
 

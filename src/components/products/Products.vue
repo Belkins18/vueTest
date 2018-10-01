@@ -8,8 +8,6 @@
             </BaseButton>
 
             <BaseTable classes="products__table"
-                       :darkTheme="false"
-                       :bordered="false"
                        :responsive="table.isResponsive">
                 <tr slot="tableHead">
                     <th v-for="(headName, index) in table.data.headNames" :key='index'>{{headName}}</th>
@@ -185,8 +183,6 @@
 </template>
 
 <script>
-    import Vue from 'vue';
-    import VeeValidate from 'vee-validate';
     import {mapActions} from 'vuex';
     import {cloneDeep} from "lodash";
 
@@ -194,7 +190,6 @@
     import BaseTable from "@/components/_shared/BaseTable";
     import BaseModal from "@/components/_shared/BaseModal";
 
-    Vue.use(VeeValidate);
 
     export default {
         name: "products",
@@ -649,7 +644,7 @@
         },
         created() {
             this.getProductList();
-        },
+        }
     };
 </script>
 
