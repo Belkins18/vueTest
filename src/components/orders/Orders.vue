@@ -17,7 +17,9 @@
                     <td>{{ order.date }}</td>
                     <td>
                         <ul class="orders__product-list product-list">
-                            <li v-for="product in products" :key='product.id' class="product-list__item">{{ product.name }} x {{ product.stock }}</li>
+                            <li v-for="product in products" :key='product.id' class="product-list__item">{{ product.name
+                                }} x {{ product.stock }}
+                            </li>
                         </ul>
                     </td>
                     <td>{{ order.clientName }}</td>
@@ -52,6 +54,23 @@
                     <form autocomplete="off">
                         <input autocomplete="false" name="hidden" type="text" style="display:none;">
                         <div class="form-group row">
+                            <label class="col-sm-2 col-form-label" for="oreder_productCount">Product</label>
+                            <div class="col-sm-10 input-group">
+                                <BaseSelect :options="products" classes="select2" customData="products" name="test"
+                                            v-model="selected"></BaseSelect>
+                                <div class="input-group-append">
+                                    <input name="productCount" v-model="orderModal.inputFieldsValue.productCount"
+                                           v-validate="'numeric'"
+                                           :class="{'form-control': true, 'is-invalid': errors.has('productCount') }"
+                                           id="oreder_productCount" type="text" placeholder="Name"
+                                           aria-describedby="oreder_productCountHelp">
+                                    <small id="oreder_productCountHelp" class="invalid-feedback"> {{
+                                        errors.first('productCount') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group row">
                             <label class="col-sm-2 col-form-label" for="oreder_clientName">Client Name</label>
                             <div class="col-sm-10">
                                 <input
@@ -60,7 +79,9 @@
                                         :class="{'form-control': true, 'is-invalid': errors.has('clientName') }"
                                         id="oreder_clientName" type="text" placeholder="Name"
                                         aria-describedby="oreder_clientNameHelp">
-                                <small id="oreder_clientNameHelp" class="invalid-feedback"> {{ errors.first('clientName') }}</small>
+                                <small id="oreder_clientNameHelp" class="invalid-feedback"> {{
+                                    errors.first('clientName') }}
+                                </small>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -72,23 +93,24 @@
                                         :class="{'form-control': true, 'is-invalid': errors.has('phone') }"
                                         id="oreder_phone" type="text" placeholder="(xxx) xx xx xxx"
                                         aria-describedby="oreder_phoneHelp">
-                                <small id="oreder_phoneHelp" class="invalid-feedback"> {{ errors.first('phone') }}</small>
+                                <small id="oreder_phoneHelp" class="invalid-feedback"> {{ errors.first('phone') }}
+                                </small>
                             </div>
                         </div>
                     </form>
                 </div>
 
                 <!--<div slot="modal-footer" class="btn-group">-->
-                    <!--<BaseButton-->
-                            <!--type="primary"-->
-                            <!--@click="closeModal">Cancel-->
-                    <!--</BaseButton>-->
-                    <!--<BaseButton-->
-                            <!--:class="(orederModal.status === 'edit'? 'btn-info' : orederModal.status === 'create' ? 'btn-success' : null)"-->
-                            <!--:disabled="orederModal.confirmChangesBtn.isDisabled"-->
-                            <!--@click="onConfirmChanges()"> {{(orederModal.status === 'edit' ? 'Save changes' :-->
-                        <!--orederModal.status === 'create' ? 'Create oreder' : null)}}-->
-                    <!--</BaseButton>-->
+                <!--<BaseButton-->
+                <!--type="primary"-->
+                <!--@click="closeModal">Cancel-->
+                <!--</BaseButton>-->
+                <!--<BaseButton-->
+                <!--:class="(orederModal.status === 'edit'? 'btn-info' : orederModal.status === 'create' ? 'btn-success' : null)"-->
+                <!--:disabled="orederModal.confirmChangesBtn.isDisabled"-->
+                <!--@click="onConfirmChanges()"> {{(orederModal.status === 'edit' ? 'Save changes' :-->
+                <!--orederModal.status === 'create' ? 'Create oreder' : null)}}-->
+                <!--</BaseButton>-->
                 <!--</div>-->
             </BaseModal>
         </div>
@@ -102,16 +124,24 @@
     import BaseButton from '@/components/_shared/BaseButton';
     import BaseTable from '@/components/_shared/BaseTable';
     import BaseModal from '@/components/_shared/BaseModal';
+    import BaseSelect from '@/components/_shared/BaseSelect';
 
     export default {
         name: "Orders",
         components: {
             BaseButton,
             BaseTable,
-            BaseModal
+            BaseModal,
+            BaseSelect
         },
         data() {
             return {
+                options: {
+                    apples: 'green',
+                    bananas: 'yellow',
+                    orange: 'orange'
+                },
+                selected: '',
                 orderModal: {
                     isVisible: false,
                     // confirmChangesBtn: {
@@ -132,16 +162,55 @@
                     data: {
                         headNames: ['id', 'Date', 'Products', 'Client Name', 'Phone', 'Total', 'Paid', 'Sent', 'Actions'],
                         bodyContent: [
-                            {id: 1, date: '2025-04-01', clientName: 'Belibov Nikolay', phone: '(067) 12 34 567', total: '2340,00', paid: true, sent: false},
-                            {id: 2, date: '2025-04-01', clientName: 'Belibov Nikolay', phone: '(067) 12 34 567', total: '2340,00', paid: true, sent: false},
-                            {id: 3, date: '2025-04-01', clientName: 'Belibov Nikolay', phone: '(067) 12 34 567', total: '2340,00', paid: true, sent: false},
-                            {id: 4, date: '2025-04-01', clientName: 'Belibov Nikolay', phone: '(067) 12 34 567', total: '2340,00', paid: true, sent: false},
+                            {
+                                id: 1,
+                                date: '2025-04-01',
+                                clientName: 'Belibov Nikolay',
+                                phone: '(067) 12 34 567',
+                                total: '2340,00',
+                                paid: true,
+                                sent: false
+                            },
+                            {
+                                id: 2,
+                                date: '2025-04-01',
+                                clientName: 'Belibov Nikolay',
+                                phone: '(067) 12 34 567',
+                                total: '2340,00',
+                                paid: true,
+                                sent: false
+                            },
+                            {
+                                id: 3,
+                                date: '2025-04-01',
+                                clientName: 'Belibov Nikolay',
+                                phone: '(067) 12 34 567',
+                                total: '2340,00',
+                                paid: true,
+                                sent: false
+                            },
+                            {
+                                id: 4,
+                                date: '2025-04-01',
+                                clientName: 'Belibov Nikolay',
+                                phone: '(067) 12 34 567',
+                                total: '2340,00',
+                                paid: true,
+                                sent: false
+                            },
                         ],
 
                     }
                 },
             }
         },
+        // watch: {
+        //     products() {
+        //         // this.$refs.baseselect = this.products;
+        //         // console.log(this.$refs.baseselect.$options.propsData.options = this.products);
+        //         this.$refs.baseselect.options = this.products;
+        //     }
+        // },
         computed: {
             products() {
                 return this.$store.state.products;
@@ -183,7 +252,7 @@
         },
         created() {
             this.getProductList();
-        }
+        },
     }
 </script>
 
@@ -201,7 +270,32 @@
         }
     }
 
-    .product-list{
+    .modal {
+        .input-group {
+            display: flex;
+            flex-wrap: nowrap;
+            input {
+                border-top-left-radius: 0;
+                border-bottom-left-radius: 0;
+            }
+            .select2-container{
+                flex-shrink: 0;
+                &.select2-container--bootstrap{
+                    .select2-selection--single{
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
+                    }
+                }
+            }
+            .input-group-append {
+                flex-wrap: wrap;
+                flex-shrink: 0;
+                width: rem(100);
+            }
+        }
+    }
+
+    .product-list {
         list-style: none;
         padding: 0;
         margin: 0;

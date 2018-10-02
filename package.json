@@ -17,6 +17,7 @@
     "open-iconic": "^1.1.1",
     "popper.js": "^1.14.4",
     "register-service-worker": "^1.0.0",
+    "select2": "^4.0.6-rc.1",
     "vee-validate": "^2.1.0-beta.9",
     "vue": "^2.5.17",
     "vue-router": "^3.0.1",
