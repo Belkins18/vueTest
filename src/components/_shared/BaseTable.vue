@@ -1,25 +1,7 @@
 <template>
     <div>
         <!-- FIXME: Зачем целую таблицу засововать в v-if если там только классы навешиваются?) -->
-        <div v-if="responsive" :class="[classes ? `${classes}`: '', {'table-responsive': responsive}]">
-            <table
-                    class="table"
-                    :class="{
-                    ['table-dark']: darkTheme,
-                    ['table-hover']: tableHover,
-                    ['table-striped']: striped,
-                    ['table-bordered']: bordered,
-                    ['table-borderless']: borderless,
-                }">
-                <thead>
-                <slot name="tableHead"></slot>
-                </thead>
-                <tbody>
-                <slot name="tableBody"></slot>
-                </tbody>
-            </table>
-        </div>
-        <div v-else>
+        <div :class="[{'table-responsive': responsive}]">
             <table
                     class="table"
                     :class="{
@@ -94,5 +76,12 @@
         tr > td {
             vertical-align: middle;
         }
+    }
+    table {
+        min-width: $table-min-width;
+        box-shadow: $el-box-shadow;
+    }
+    tr > td {
+        vertical-align: middle;
     }
 </style>

@@ -25,19 +25,21 @@
                     <td>{{product.price}}</td>
                     <td>{{product.stock}}</td>
                     <td>
-                        <BaseButton classes="products__btn"
-                                    type="info"
-                                    icon="pencil"
-                                    @click="editProductHandler(product, index)"
-                                    :circle="true">
-                        </BaseButton>
+                        <div style="display: flex; align-items: center">
+                            <BaseButton classes="products__btn"
+                                        type="info"
+                                        icon="pencil"
+                                        @click="editProductHandler(product, index)"
+                                        :circle="true">
+                            </BaseButton>
 
-                        <BaseButton classes="products__btn"
-                                    type="danger"
-                                    icon="trash"
-                                    :circle="true"
-                                    @click="removeProductHandler(index)">
-                        </BaseButton>
+                            <BaseButton classes="products__btn"
+                                        type="danger"
+                                        icon="trash"
+                                        :circle="true"
+                                        @click="removeProductHandler(index)">
+                            </BaseButton>
+                        </div>
                     </td>
                 </tr>
             </BaseTable>
@@ -344,7 +346,7 @@
                     return new Promise((resolve, reject) => {
                         let typeReader = new FileReader();
                         let baseReader = new FileReader();
-                        let MAX_SIZE_IN_BYTES = 2097152;
+                        let MAX_SIZE_IN_BYTES = 65536;
                         let header = "";
                         let type = "";
 
@@ -510,6 +512,7 @@
                             })
                             .then((key) => {
                                 console.log(key);
+                                this.$set(inputValues, 'key', key);
                                 if (loadInfo.isFlag && loadInfo.productFbId !== null) {
                                     resolve(this.loadImages(loadInfo));
                                 } else reject();

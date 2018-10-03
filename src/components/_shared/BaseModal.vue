@@ -61,6 +61,10 @@
         background: rgba(0, 0, 0, 0.6);
         display: block;
     }
+    .modal-dialog {
+        top: 50%;
+        transform: translateY(-50%);
+    }
 
     @media screen and (orientation: portrait) {
         .modal {

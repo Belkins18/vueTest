@@ -40,9 +40,12 @@
             }
         },
         computed: {
+
         },
         mounted() {
             this.formatOptions();
+            let vm = this;
+            console.log(vm);
             // let vm = this;
             // select.select2('refresh');
         },
@@ -50,6 +53,7 @@
             ...mapActions([
                 'getProductList',
             ]),
+
             init() {
                 let select = $(this.$el);
                 console.log(select);
@@ -57,8 +61,8 @@
                     .select2({
                         templateResult: this.formatState,
                         placeholder: 'Select',
-                        theme: 'bootstrap',
                         width: '100%',
+                        theme: 'default',
                         allowClear: true,
                         data: this.select2data
                     })
@@ -91,10 +95,18 @@
                         let parseData = JSON.parse(JSON.stringify(val));
                         let normalData = Object.values(parseData);
                         normalData.forEach((element) => {
-                            this.select2data.push({id: element.id, image: element.imageURL, text: element.name})
+                            this.select2data.push({
+                                key: element.key,
+                                id: element.id,
+                                image: element.imageURL,
+                                text: element.name
+                            })
                         });
                         this.init();
                         return this.select2data;
+                    })
+                    .then((select2Data) => {
+                        console.log(select2Data);
                     });
 
             },
@@ -118,34 +130,12 @@
             $(this.$el).off().select2('destroy');
             select2;
         },
-        created(){
+        created() {
             this.getProductList();
         },
     }
 </script>
 
-<style lang="scss">
-    .select2-container{
-        &.select2-container--bootstrap{
-            .select2-selection--single{
-                width: 100%;
-                height: calc(2.25rem + 2px);
-                padding: 0.375rem 0.75rem;
-                font-size: 1rem;
-                line-height: 1.5;
-                color: #495057;
-                background-color: #fff;
-                background-clip: padding-box;
-                border: 1px solid #ced4da;
-                border-radius: 0.25rem;
+<style lang="scss" scoped>
 
-                .select2-selection__rendered {
-                    padding: 0;
-                }
-            }
-        }
-    }
-    .select2-dropdown {
-        border: 1px solid #ced4da;
-    }
 </style>

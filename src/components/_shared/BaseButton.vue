@@ -14,6 +14,7 @@
                 disabled: buttonDisabled,
                 round: round,
                 circle: circle,
+                square: square,
             }">
         <span class="oi" :class="[icon ? `oi-${icon}` : '']" v-if="icon"></span>
         <span v-if="$slots.default"><slot></slot></span>
@@ -69,6 +70,7 @@
             disabled: Boolean,
             round: Boolean,
             circle: Boolean,
+            square: Boolean,
         },
         computed: {
             buttonDisabled() {
@@ -85,10 +87,11 @@
 
 <style scoped lang="scss">
     .btn.circle {
+        @include is-circle(36, 1);
         display: inline-flex;
         align-items: center;
         justify-content: center;
-        @include is-circle(36, 1);
+        flex-shrink: 0;
     }
     .btn.circle > .oi {
         left: 1px;

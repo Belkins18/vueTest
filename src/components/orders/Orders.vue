@@ -28,19 +28,21 @@
                     <td>{{ order.paid }}</td>
                     <td>{{ order.sent }}</td>
                     <td>
-                        <BaseButton classes="orders__btn"
-                                    type="info"
-                                    icon="pencil"
-                                    @click="editOrderHandler(order, index)"
-                                    :circle="true">
-                        </BaseButton>
+                        <div style="display: flex; align-items: center">
+                            <BaseButton classes="orders__btn"
+                                        type="info"
+                                        icon="pencil"
+                                        @click="editOrderHandler(order, index)"
+                                        :circle="true">
+                            </BaseButton>
 
-                        <BaseButton classes="orders__btn"
-                                    type="danger"
-                                    icon="trash"
-                                    :circle="true"
-                                    @click="removeOrderHandler(index)">
-                        </BaseButton>
+                            <BaseButton classes="orders__btn"
+                                        type="danger"
+                                        icon="trash"
+                                        :circle="true"
+                                        @click="removeOrderHandler(index)">
+                            </BaseButton>
+                        </div>
                     </td>
                 </tr>
             </BaseTable>
@@ -53,20 +55,47 @@
                 <div slot="modal-body">
                     <form autocomplete="off">
                         <input autocomplete="false" name="hidden" type="text" style="display:none;">
-                        <div class="form-group row">
-                            <label class="col-sm-2 col-form-label" for="oreder_productCount">Product</label>
-                            <div class="col-sm-10 input-group">
-                                <BaseSelect :options="products" classes="select2" customData="products" name="test"
-                                            v-model="selected"></BaseSelect>
-                                <div class="input-group-append">
-                                    <input name="productCount" v-model="orderModal.inputFieldsValue.productCount"
-                                           v-validate="'numeric'"
-                                           :class="{'form-control': true, 'is-invalid': errors.has('productCount') }"
-                                           id="oreder_productCount" type="text" placeholder="Name"
-                                           aria-describedby="oreder_productCountHelp">
-                                    <small id="oreder_productCountHelp" class="invalid-feedback"> {{
-                                        errors.first('productCount') }}
-                                    </small>
+                        <div class="form-group ">
+                            <div class="row">
+                                <label class="col-sm-2 col-form-label">Product</label>
+                                <transition-group name='bounce' tag='ul' class="product-list col-sm-10">
+                                    <li class='product-list__item' v-for='(item, index) in orderModal.productList'
+                                        :key='item + "__" + index'>
+                                        <div class="input-group">
+                                            <div class="input-group__select-wraper">
+                                                <BaseSelect :options="products" classes="select2" customData="products"
+                                                            name="test"
+                                                            v-model="item.selected">
+                                                </BaseSelect>
+                                            </div>
+                                            <div class="input-group-append" :title="errors.first('productCount')">
+                                                <input name="productCount" v-model="item.productCount"
+                                                       v-validate="'numeric'"
+                                                       :class="{'form-control': true, 'is-invalid': errors.has('productCount') }"
+                                                       id="" type="text" placeholder="Count"
+                                                       aria-describedby="oreder_productCountHelp">
+                                            </div>
+                                            <BaseButton classes="product-list__removeBtn"
+                                                        type="danger"
+                                                        icon="trash"
+                                                        :square="true"
+                                                        :disabled="ordersProductsList < 2"
+                                                        @click="removeProductWithOrdersProductListHandler(index)">
+                                            </BaseButton>
+                                        </div>
+                                    </li>
+                                </transition-group>
+                            </div>
+                            <div class="row">
+                                <div class="col-sm-10 offset-sm-2 ">
+                                    <BaseButton classes=""
+                                                :block="true"
+                                                :outline="true"
+                                                type="info"
+                                                :disabled="ordersProductsList >= Object.keys(this.products).length"
+                                                @click="addProductInOrdersProductListHandler">
+                                        Add One More Product
+                                    </BaseButton>
                                 </div>
                             </div>
                         </div>
@@ -97,6 +126,12 @@
                                 </small>
                             </div>
                         </div>
+                        <div class="form-group row">
+                            <div class="col-sm-10 offset-sm-2">
+                                <BaseCheckbox text="Paid" v-model="orderModal.inputFieldsValue.paidCheckbox" :checked="checkToogle" id="paidCheckbox"></BaseCheckbox>
+                                <BaseCheckbox text="Sent" v-model="orderModal.inputFieldsValue.sentCheckbox" :checked="checkToogle" id="sentCheckbox"></BaseCheckbox>
+                            </div>
+                        </div>
                     </form>
                 </div>
 
@@ -125,6 +160,7 @@
     import BaseTable from '@/components/_shared/BaseTable';
     import BaseModal from '@/components/_shared/BaseModal';
     import BaseSelect from '@/components/_shared/BaseSelect';
+    import BaseCheckbox from '@/components/_shared/BaseCheckbox';
 
     export default {
         name: "Orders",
@@ -132,7 +168,8 @@
             BaseButton,
             BaseTable,
             BaseModal,
-            BaseSelect
+            BaseSelect,
+            BaseCheckbox
         },
         data() {
             return {
@@ -156,6 +193,7 @@
                     //     fileList: null,
                     //     fileReader: null,
                     // }
+                    productList: [{}]
                 },
                 table: {
                     isResponsive: true,
@@ -180,24 +218,6 @@
                                 paid: true,
                                 sent: false
                             },
-                            {
-                                id: 3,
-                                date: '2025-04-01',
-                                clientName: 'Belibov Nikolay',
-                                phone: '(067) 12 34 567',
-                                total: '2340,00',
-                                paid: true,
-                                sent: false
-                            },
-                            {
-                                id: 4,
-                                date: '2025-04-01',
-                                clientName: 'Belibov Nikolay',
-                                phone: '(067) 12 34 567',
-                                total: '2340,00',
-                                paid: true,
-                                sent: false
-                            },
                         ],
 
                     }
@@ -211,16 +231,24 @@
         //         this.$refs.baseselect.options = this.products;
         //     }
         // },
+        mounted() {
+        },
         computed: {
             products() {
                 return this.$store.state.products;
             },
+            ordersProductsList() {
+                let items = this.orderModal.productList;
+                return items.length
+            },
+            checkToogle() {
+                return !this.checked;
+            }
         },
         methods: {
             ...mapActions([
                 'getProductList',
             ]),
-
             // ОТКРыВАНИЕ МОДАЛЬНыХ ОКОН
             /**
              * Открывает модальное окно создания ордера
@@ -239,6 +267,17 @@
 
             },
 
+            addProductInOrdersProductListHandler() {
+                let items = this.orderModal.productList;
+                items.push({});
+            },
+            removeProductWithOrdersProductListHandler(item) {
+                let items = this.orderModal.productList;
+                let index = items.indexOf(item);
+                items.splice(index, 1);
+                console.log(items.length);
+                console.log();
+            },
 
             closeModal() {
                 let orderModal = this.orderModal;
@@ -246,6 +285,7 @@
                 orderModal.isVisible = false;
                 // orderModal.confirmChangesBtn.isDisabled = false;
                 orderModal.inputFieldsValue = {};
+                orderModal.productList = [{}];
                 orderModal.status = '';
             },
 
@@ -270,39 +310,85 @@
         }
     }
 
+    .btn.square {
+        @include is-circle(38, 1);
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        border-radius: 0;
+        > .oi {
+            left: 1px;
+            top: initial;
+        }
+    }
+
     .modal {
         .input-group {
             display: flex;
             flex-wrap: nowrap;
             input {
-                border-top-left-radius: 0;
-                border-bottom-left-radius: 0;
+                border-radius: 0;
             }
-            .select2-container{
-                flex-shrink: 0;
-                &.select2-container--bootstrap{
-                    .select2-selection--single{
-                        border-top-right-radius: 0;
-                        border-bottom-right-radius: 0;
-                    }
-                }
-            }
+
             .input-group-append {
                 flex-wrap: wrap;
                 flex-shrink: 0;
                 width: rem(100);
+                z-index: 1;
+            }
+        }
+        .input-group {
+            & /deep/ .select2-container {
+                &.select2-container--default {
+                    .select2-selection--single {
+                        width: 100%;
+                        height: calc(2.25rem + 2px);
+                        padding: 0.375rem rem(20) 0.375rem 0.75rem;
+                        font-size: 1rem;
+                        line-height: 1.5;
+                        color: $gray-700;
+                        background-color: #fff;
+                        background-clip: padding-box;
+                        border: 1px solid $gray-400;
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
+                        .select2-selection__placeholder {
+                            color: $gray-700;
+                        }
+                        .select2-selection__rendered {
+                            padding: 0;
+                        }
+                        .select2-selection__arrow {
+                            height: 2.25rem;
+                        }
+                    }
+                }
+            }
+
+            &__select-wraper {
+                width: calc(100% - 138px);
             }
         }
     }
 
-    .product-list {
-        list-style: none;
-        padding: 0;
-        margin: 0;
-        display: flex;
-        flex-direction: column;
-        &__item {
+    .select {
+        width: 100%;
+    }
 
+    @media (min-width: map-get($grid-breakpoints, "sm")) {
+        .select {
+            width: calc(100% - 138px) !important;
+        }
+    }
+
+    .product-list {
+        &__item {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            display: flex;
+            flex-direction: column;
         }
         &__item + &__item {
             margin-top: rem(5);

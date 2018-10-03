@@ -66,6 +66,7 @@ const actions = {
      */
     initFirebase() {
         firebase.initializeApp(apiConfig.firebase);
+        console.log(firebase)
     },
 
     /**
