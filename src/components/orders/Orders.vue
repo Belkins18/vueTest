@@ -128,19 +128,13 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-10 offset-sm-2">
-                                <!--<BaseCheckbox v-model="orderModal.checkboxStatus.paidCheckbox"-->
-                                <!--id="paidCheckbox">-->
-                                <!--</BaseCheckbox>-->
-                                <!--<BaseCheckbox v-model="orderModal.checkboxStatus.sentCheckbox"-->
-                                <!--id="sentCheckbox">Sent-->
-                                <!--</BaseCheckbox>-->
                                 <ul class="checkboxList">
                                     <li class="checkboxList__item">
                                         <BaseCheckbox id='paidCheckbox'
                                                       name="paidCheckbox"
                                                       aria-describedby="paidCheckboxHelp"
                                                       :isMargin="false"
-                                                      v-validate="'required'"
+                                                      v-validate="'required|truthy'"
                                                       v-model="orderModal.inputFieldsValue.paidCheckbox">Paid
                                         </BaseCheckbox>
                                         <small id="paidCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
@@ -152,7 +146,7 @@
                                                       name="sentCheckbox"
                                                       aria-describedby="sentCheckboxHelp"
                                                       :isMargin="false"
-                                                      v-validate="'required'"
+                                                      v-validate="'required|truthy'"
                                                       v-model="orderModal.inputFieldsValue.sentCheckbox">Sent
                                         </BaseCheckbox>
                                         <small id="sentCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
@@ -182,6 +176,8 @@
 </template>
 
 <script>
+    import Vue from 'vue'
+    import VeeValidate from 'vee-validate';
     import {mapActions} from 'vuex';
     // import {cloneDeep} from "lodash";
 
@@ -190,6 +186,15 @@
     import BaseModal from '@/components/_shared/BaseModal';
     import BaseSelect from '@/components/_shared/BaseSelect';
     import BaseCheckbox from '@/components/_shared/BaseCheckbox';
+
+    Vue.use(VeeValidate);
+    // VeeValidate.Validator.extend('custom_validation', (value) => {
+    //     return value.value !== 0
+    // });
+    VeeValidate.Validator.extend('truthy', {
+        getMessage: field => 'The ' + field + ' value is not truthy.',
+        validate: value => !! value
+    });
 
     export default {
         name: "Orders",
