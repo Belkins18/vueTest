@@ -64,16 +64,23 @@
                                         <div class="input-group">
                                             <div class="input-group__select-wraper">
                                                 <BaseSelect :options="products" classes="select2" customData="products"
+                                                            :hasValidate="orderModal.confirmChangesBtn.isPressed"
+                                                            v-validate="'required'"
                                                             name="test"
                                                             v-model="item.selected">
                                                 </BaseSelect>
                                             </div>
                                             <div class="input-group-append" :title="errors.first('productCount')">
                                                 <input name="productCount" v-model="item.productCount"
-                                                       v-validate="'numeric'"
+                                                       v-validate="'required|numeric|notZero'"
+                                                       min="1"
+                                                       :max="{}"
                                                        :class="{'form-control': true, 'is-invalid': errors.has('productCount') }"
                                                        id="" type="text" placeholder="Count"
                                                        aria-describedby="oreder_productCountHelp">
+                                                <!--<small id="oreder_productCountHelp" class="invalid-feedback"> {{-->
+                                                    <!--errors.first('productCount') }}-->
+                                                <!--</small>-->
                                             </div>
                                             <BaseButton classes="productList__removeBtn"
                                                         type="danger"
@@ -83,6 +90,9 @@
                                                         @click="removeProductWithOrdersProductListHandler(index)">
                                             </BaseButton>
                                         </div>
+                                        <small id="oreder_productCountHelp" class="invalid-feedback"> {{
+                                            errors.first('productCount') }}
+                                        </small>
                                     </li>
                                 </transition-group>
                             </div>
@@ -122,8 +132,7 @@
                                         :class="{'form-control': true, 'is-invalid': errors.has('phone') }"
                                         id="oreder_phone" type="text" placeholder="(xxx) xx xx xxx"
                                         aria-describedby="oreder_phoneHelp">
-                                <small id="oreder_phoneHelp" class="invalid-feedback"> {{ errors.first('phone') }}
-                                </small>
+                                <small id="oreder_phoneHelp" class="invalid-feedback"> {{ errors.first('phone') }}</small>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -195,6 +204,12 @@
         getMessage: field => 'The ' + field + ' value is not truthy.',
         validate: value => !! value
     });
+    VeeValidate.Validator.extend('notZero', {
+        getMessage: field => 'The ' + field + ' value must be more then 0',
+        validate(value) {
+            return value > 0
+        }
+    });
 
     export default {
         name: "Orders",
@@ -216,7 +231,8 @@
                 orderModal: {
                     isVisible: false,
                     confirmChangesBtn: {
-                        isDisabled: false
+                        isDisabled: false,
+                        isPressed: false,
                     },
                     status: '',
                     inputFieldsValue: {},
@@ -293,21 +309,21 @@
                 let items = this.orderModal.productList;
                 let index = items.indexOf(item);
                 items.splice(index, 1);
-                console.log(items.length);
-                console.log();
             },
 
             closeModal() {
                 let orderModal = this.orderModal;
 
                 orderModal.isVisible = false;
-                // orderModal.confirmChangesBtn.isDisabled = false;
+                orderModal.confirmChangesBtn.isDisabled = false;
+                orderModal.confirmChangesBtn.isPressed = false;
                 orderModal.inputFieldsValue = {};
                 orderModal.productList = [{}];
                 orderModal.status = '';
             },
 
             onConfirm() {
+                this.orderModal.confirmChangesBtn.isPressed = true;
                 this.$validator.validateAll()
                     .then((result) => {
                         console.log(result);
@@ -364,6 +380,12 @@
             }
         }
         .input-group {
+
+            & /deep/ [aria-invalid="true"]{
+                &[hasvalidate="true"] ~ .select2 .select2-selection.select2-selection--single {
+                    border-color: $red;
+                }
+            }
             & /deep/ .select2-container {
                 &.select2-container--default {
                     .select2-selection--single {
@@ -427,6 +449,7 @@
         &__item {
             display: flex;
             flex-direction: column;
+            align-items: baseline;
         }
 
         &__item + &__item {

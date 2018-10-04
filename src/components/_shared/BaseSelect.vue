@@ -26,7 +26,7 @@
                 default: ''
             },
             classes: {
-                type: String,
+                type: String | [],
                 default: ''
             },
             multiple: {
@@ -137,5 +137,4 @@
 </script>
 
 <style lang="scss" scoped>
-
 </style>
