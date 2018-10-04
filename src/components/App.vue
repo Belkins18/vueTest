@@ -24,6 +24,10 @@
         }
     }
 
+    [aria-invalid="true"] ~ .invalid-feedback {
+        display: block;
+    }
+
     * {
         outline: none !important;
         box-sizing: border-box;

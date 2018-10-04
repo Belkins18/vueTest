@@ -16,8 +16,8 @@
                     <td>{{ order.id }}</td>
                     <td>{{ order.date }}</td>
                     <td>
-                        <ul class="orders__product-list product-list">
-                            <li v-for="product in products" :key='product.id' class="product-list__item">{{ product.name
+                        <ul class="orders__product-list productList">
+                            <li v-for="product in products" :key='product.id' class="productList__item">{{ product.name
                                 }} x {{ product.stock }}
                             </li>
                         </ul>
@@ -58,8 +58,8 @@
                         <div class="form-group ">
                             <div class="row">
                                 <label class="col-sm-2 col-form-label">Product</label>
-                                <transition-group name='bounce' tag='ul' class="product-list col-sm-10">
-                                    <li class='product-list__item' v-for='(item, index) in orderModal.productList'
+                                <transition-group name='bounce' tag='ul' class="productList col-sm-10">
+                                    <li class='productList__item' v-for='(item, index) in orderModal.productList'
                                         :key='item + "__" + index'>
                                         <div class="input-group">
                                             <div class="input-group__select-wraper">
@@ -75,7 +75,7 @@
                                                        id="" type="text" placeholder="Count"
                                                        aria-describedby="oreder_productCountHelp">
                                             </div>
-                                            <BaseButton classes="product-list__removeBtn"
+                                            <BaseButton classes="productList__removeBtn"
                                                         type="danger"
                                                         icon="trash"
                                                         :square="true"
@@ -128,25 +128,54 @@
                         </div>
                         <div class="form-group row">
                             <div class="col-sm-10 offset-sm-2">
-                                <BaseCheckbox text="Paid" v-model="orderModal.inputFieldsValue.paidCheckbox" :checked="checkToogle" id="paidCheckbox"></BaseCheckbox>
-                                <BaseCheckbox text="Sent" v-model="orderModal.inputFieldsValue.sentCheckbox" :checked="checkToogle" id="sentCheckbox"></BaseCheckbox>
+                                <!--<BaseCheckbox v-model="orderModal.checkboxStatus.paidCheckbox"-->
+                                <!--id="paidCheckbox">-->
+                                <!--</BaseCheckbox>-->
+                                <!--<BaseCheckbox v-model="orderModal.checkboxStatus.sentCheckbox"-->
+                                <!--id="sentCheckbox">Sent-->
+                                <!--</BaseCheckbox>-->
+                                <ul class="checkboxList">
+                                    <li class="checkboxList__item">
+                                        <BaseCheckbox id='paidCheckbox'
+                                                      name="paidCheckbox"
+                                                      aria-describedby="paidCheckboxHelp"
+                                                      :isMargin="false"
+                                                      v-validate="'required'"
+                                                      v-model="orderModal.inputFieldsValue.paidCheckbox">Paid
+                                        </BaseCheckbox>
+                                        <small id="paidCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
+                                            errors.first('paidCheckbox') }}
+                                        </small>
+                                    </li>
+                                    <li class="checkboxList__item">
+                                        <BaseCheckbox id='sentCheckbox'
+                                                      name="sentCheckbox"
+                                                      aria-describedby="sentCheckboxHelp"
+                                                      :isMargin="false"
+                                                      v-validate="'required'"
+                                                      v-model="orderModal.inputFieldsValue.sentCheckbox">Sent
+                                        </BaseCheckbox>
+                                        <small id="sentCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
+                                            errors.first('sentCheckbox') }}
+                                        </small>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </form>
                 </div>
 
-                <!--<div slot="modal-footer" class="btn-group">-->
-                <!--<BaseButton-->
-                <!--type="primary"-->
-                <!--@click="closeModal">Cancel-->
-                <!--</BaseButton>-->
-                <!--<BaseButton-->
-                <!--:class="(orederModal.status === 'edit'? 'btn-info' : orederModal.status === 'create' ? 'btn-success' : null)"-->
-                <!--:disabled="orederModal.confirmChangesBtn.isDisabled"-->
-                <!--@click="onConfirmChanges()"> {{(orederModal.status === 'edit' ? 'Save changes' :-->
-                <!--orederModal.status === 'create' ? 'Create oreder' : null)}}-->
-                <!--</BaseButton>-->
-                <!--</div>-->
+                <div slot="modal-footer" class="btn-group">
+                    <BaseButton type="primary"
+                                :outline="true"
+                                @click="closeModal">Cancel
+                    </BaseButton>
+                    <BaseButton type="secondary"
+                                :outline="true"
+                                :disabled="orderModal.confirmChangesBtn.isDisabled"
+                                @click="onConfirm()"> Save
+                    </BaseButton>
+                </div>
             </BaseModal>
         </div>
     </div>
@@ -169,7 +198,7 @@
             BaseTable,
             BaseModal,
             BaseSelect,
-            BaseCheckbox
+            BaseCheckbox,
         },
         data() {
             return {
@@ -181,19 +210,12 @@
                 selected: '',
                 orderModal: {
                     isVisible: false,
-                    // confirmChangesBtn: {
-                    //     isDisabled: false
-                    // },
+                    confirmChangesBtn: {
+                        isDisabled: false
+                    },
                     status: '',
-                    // imageOnLoadErrorMsg: '',
                     inputFieldsValue: {},
-                    // fileLoadInfo: {
-                    //     isFlag: false,
-                    //     dir: null,
-                    //     fileList: null,
-                    //     fileReader: null,
-                    // }
-                    productList: [{}]
+                    productList: [{}],
                 },
                 table: {
                     isResponsive: true,
@@ -202,15 +224,6 @@
                         bodyContent: [
                             {
                                 id: 1,
-                                date: '2025-04-01',
-                                clientName: 'Belibov Nikolay',
-                                phone: '(067) 12 34 567',
-                                total: '2340,00',
-                                paid: true,
-                                sent: false
-                            },
-                            {
-                                id: 2,
                                 date: '2025-04-01',
                                 clientName: 'Belibov Nikolay',
                                 phone: '(067) 12 34 567',
@@ -288,6 +301,13 @@
                 orderModal.productList = [{}];
                 orderModal.status = '';
             },
+
+            onConfirm() {
+                this.$validator.validateAll()
+                    .then((result) => {
+                        console.log(result);
+                    });
+            }
 
         },
         created() {
@@ -382,7 +402,7 @@
         }
     }
 
-    .product-list {
+    .productList {
         &__item {
             list-style: none;
             padding: 0;
@@ -392,6 +412,20 @@
         }
         &__item + &__item {
             margin-top: rem(5);
+        }
+    }
+
+    .checkboxList {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        &__item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        &__item + &__item {
+            margin-top: rem(8);
         }
     }
 </style>

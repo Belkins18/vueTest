@@ -1,47 +1,38 @@
 <template>
-    <div class="checkbox" :class="{[`${classes}`]: classes}" @click="handleClick">
-        <input class="checkbox__input"  :id="id" type="checkbox" :checked="checked"/>
-        <label class="checkbox__label" :for="id">
-            <span class="checkbox__text">{{text}}</span>
-        </label>
-        <i class="checkbox__button"></i>
-    </div>
+    <label class="checkbox" :class="{[`checkbox_block`]: isBlock, [`checkbox_margin`]: isMargin}">
+        <input class="checkbox__input"
+               type="checkbox"
+               :id="id"
+               :checked="value"
+               @change="$emit('input', $event.target.checked)">
+        <span class="checkbox__label" :class="{[`is-checked`]: value}">
+            <i class="checkbox__button"></i>
+            <span class="checkbox__text" v-if="$slots.default || text">
+                    <slot></slot>
+                    <template v-if="!$slots.default">{{text}}</template>
+            </span>
+        </span>
+    </label>
 </template>
 
 <script>
     export default {
         name: "BaseCheckbox",
         props: {
-            text: {
-                type: String,
-                default: ''
-            },
-            classes: {
-                type: String,
-                default: ''
-            },
             id: {
                 type: String,
                 default: 'checkbox'
             },
-            checked: Boolean,
+            isBlock: {
+                type: Boolean,
+                default: false
+            },
+            isMargin: {
+                type: Boolean,
+                default: true
+            },
+            value: Boolean
         },
-        // data() {
-        //     return {
-        //         checked: false
-        //     }
-        // },
-        // computed: {
-        //    checkToogle() {
-        //        return !this.checked;
-        //    }
-        // },
-        methods: {
-            handleClick(evt) {
-                console.log(evt.target.checked);
-                // this.$emit('click', evt);
-            }
-        }
     }
 </script>
 
@@ -49,53 +40,33 @@
     .checkbox {
         position: relative;
         display: inline-flex;
-
+        margin-bottom: 0;
         &__input {
             display: none;
         }
-        &__input + label {
+        &__label {
             cursor: pointer;
-            position: relative;
-            margin: 0;
-            padding-left: 28px;
-            font-size: 16px;
-            font-weight: 500;
-            line-height: 20px;
-            letter-spacing: normal;
-            text-transform: none;
-            transition: 0.3s ease all;
-            z-index: 1;
-        }
-
-        &__input:checked
-        + &__label
-        ~ &__button {
-            color: $gray-700;
-            &::after, &::before {
-                opacity: 1;
-                transition: height 0.28s ease;
-            }
-            &::after {
-                height: 0.5rem;
-            }
-            &::before {
-                height: 1.2rem;
-                transition-delay: 0.28s;
+            display: flex;
+            line-height: 1.2;
+            > * + * {
+                margin-left: rem(5);
             }
         }
-
+        &__text{
+            padding-top: rem(1);
+        }
         &__button {
-            position: absolute;
+            position: relative;
             -webkit-user-select: none;
             -moz-user-select: none;
             -ms-user-select: none;
             user-select: none;
-            display: block;
+            display: inline-flex;
             color: $gray-400;
             left: 0;
             top: 0;
-            width: 18px;
-            height: 18px;
+            width: 20px;
+            height: 20px;
             z-index: 0;
             border: 1px solid currentColor;
             border-radius: 0;
@@ -128,4 +99,31 @@
             }
         }
     }
+
+    .is-checked {
+        .checkbox__button {
+            color: $gray-700;
+            &::after, &::before {
+                opacity: 1;
+                transition: height 0.28s ease;
+            }
+            &::after {
+                height: 0.5rem;
+            }
+            &::before {
+                height: 1.2rem;
+                transition-delay: 0.28s;
+            }
+        }
+    }
+
+    .checkbox {
+        &_block {
+            display: flex;
+        }
+        &_margin {
+            margin-bottom: 0.5rem;
+        }
+    }
+
 </style>
