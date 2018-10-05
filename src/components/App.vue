@@ -28,6 +28,10 @@
         display: block;
     }
 
+    .invalid-feedback {
+        font-size: rem(12);
+    }
+
     * {
         outline: none !important;
         box-sizing: border-box;

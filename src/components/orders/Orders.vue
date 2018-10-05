@@ -65,22 +65,27 @@
                                             <div class="input-group__select-wraper">
                                                 <BaseSelect :options="products" classes="select2" customData="products"
                                                             :hasValidate="orderModal.confirmChangesBtn.isPressed"
+                                                            :id="'baseSelect_' + index"
+                                                            :name="'baseSelect_' + index"
+                                                            :aria-describedby="'baseSelectHelp_' + index"
                                                             v-validate="'required'"
-                                                            name="test"
                                                             v-model="item.selected">
                                                 </BaseSelect>
+                                                <small :id="'baseSelectHelp_'+ index" class="invalid-feedback"> {{
+                                                    errors.first('baseSelect_'+ index)}}
+                                                </small>
                                             </div>
-                                            <div class="input-group-append" :title="errors.first('productCount')">
-                                                <input name="productCount" v-model="item.productCount"
+                                            <div class="input-group-append">
+                                                <input type="text"
+                                                       placeholder="Count"
+                                                       :class="{'form-control': true, 'is-invalid': errors.has('productCount_'+ index) }"
+                                                       :name="'productCount_'+ index"
+                                                       :aria-describedby="'productCountHelp_'+ index"
                                                        v-validate="'required|numeric|notZero'"
-                                                       min="1"
-                                                       :max="{}"
-                                                       :class="{'form-control': true, 'is-invalid': errors.has('productCount') }"
-                                                       id="" type="text" placeholder="Count"
-                                                       aria-describedby="oreder_productCountHelp">
-                                                <!--<small id="oreder_productCountHelp" class="invalid-feedback"> {{-->
-                                                    <!--errors.first('productCount') }}-->
-                                                <!--</small>-->
+                                                       v-model="item.productCount">
+                                                <small :id="'productCountHelp_'+ index" class="invalid-feedback"> {{
+                                                    errors.first('productCount_'+ index)}}
+                                                </small>
                                             </div>
                                             <BaseButton classes="productList__removeBtn"
                                                         type="danger"
@@ -132,7 +137,8 @@
                                         :class="{'form-control': true, 'is-invalid': errors.has('phone') }"
                                         id="oreder_phone" type="text" placeholder="(xxx) xx xx xxx"
                                         aria-describedby="oreder_phoneHelp">
-                                <small id="oreder_phoneHelp" class="invalid-feedback"> {{ errors.first('phone') }}</small>
+                                <small id="oreder_phoneHelp" class="invalid-feedback"> {{ errors.first('phone') }}
+                                </small>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -188,6 +194,8 @@
     import Vue from 'vue'
     import VeeValidate from 'vee-validate';
     import {mapActions} from 'vuex';
+    import $ from 'jquery';
+    import select2 from 'select2';
     // import {cloneDeep} from "lodash";
 
     import BaseButton from '@/components/_shared/BaseButton';
@@ -202,7 +210,7 @@
     // });
     VeeValidate.Validator.extend('truthy', {
         getMessage: field => 'The ' + field + ' value is not truthy.',
-        validate: value => !! value
+        validate: value => !!value
     });
     VeeValidate.Validator.extend('notZero', {
         getMessage: field => 'The ' + field + ' value must be more then 0',
@@ -305,10 +313,13 @@
                 let items = this.orderModal.productList;
                 items.push({});
             },
-            removeProductWithOrdersProductListHandler(item) {
+            removeProductWithOrdersProductListHandler(index) {
+                console.log(index);
                 let items = this.orderModal.productList;
-                let index = items.indexOf(item);
                 items.splice(index, 1);
+                let select = $(this.$el.querySelector('#baseSelect_' + index));
+                console.log(select);
+                
             },
 
             closeModal() {
@@ -381,7 +392,7 @@
         }
         .input-group {
 
-            & /deep/ [aria-invalid="true"]{
+            & /deep/ [aria-invalid="true"] {
                 &[hasvalidate="true"] ~ .select2 .select2-selection.select2-selection--single {
                     border-color: $red;
                 }
