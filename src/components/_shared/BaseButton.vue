@@ -8,7 +8,6 @@
                 [`btn-${type}`]: type,
                 [`btn-${size}`]: size,
                 [`btn-outline-${type}`]: outline,
-                [`btn-outline-${type}`]: outline,
                 ['btn-block']: block,
                 active: isActive,
                 disabled: buttonDisabled,

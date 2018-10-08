@@ -29,24 +29,29 @@
                            v-model="user.password">
                 </div>
             </div>
-            <div v-if='signError' class="mt-2">
+            <div v-if='signError' class="col-sm-9 mt-2">
                 <div class="signError">
-                    <div class="invalid-feedback">{{code}}</div>
                     <div class="invalid-feedback">{{message}}</div>
                 </div>
             </div>
         </div>
         <div class="card-footer">
-            <div class="col-4">
-                <button type="submit" class="btn btn-lg btn-block btn-outline-primary">Sign In</button>
+            <div class="row align-items-center justify-content-center">
+                <div class="col-4">
+                    <BaseButton :nativeType="'submit'" type="primary" block="true" outline="true">Sign In</BaseButton>
+                </div>
             </div>
         </div>
     </form>
 </template>
 
 <script>
+    import BaseButton from "@/components/_shared/BaseButton";
     export default {
         name: "signIn",
+        components: {
+            BaseButton
+        },
         data() {
             return {
                 user: {
@@ -58,9 +63,7 @@
                 message: ''
             }
         },
-        watch: {
-
-        },
+        watch: {},
         methods: {
             change() {
                 this.signError = false;

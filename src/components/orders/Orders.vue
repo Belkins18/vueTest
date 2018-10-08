@@ -150,7 +150,6 @@
                                                       name="paidCheckbox"
                                                       aria-describedby="paidCheckboxHelp"
                                                       :isMargin="false"
-                                                      v-validate="'required|truthy'"
                                                       v-model="orderModal.inputFieldsValue.paidCheckbox">Paid
                                         </BaseCheckbox>
                                         <small id="paidCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
@@ -162,7 +161,6 @@
                                                       name="sentCheckbox"
                                                       aria-describedby="sentCheckboxHelp"
                                                       :isMargin="false"
-                                                      v-validate="'required|truthy'"
                                                       v-model="orderModal.inputFieldsValue.sentCheckbox">Sent
                                         </BaseCheckbox>
                                         <small id="sentCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
@@ -482,6 +480,11 @@
         }
         &__item + &__item {
             margin-top: rem(5);
+        }
+    }
+    .productList__item{
+        * + .invalid-feedback {
+            display: initial;
         }
     }
 

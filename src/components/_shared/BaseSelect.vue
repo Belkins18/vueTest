@@ -44,9 +44,9 @@
             products() {
                 return this.$store.state.products;
             },
-             vm() {
-                 return this;
-             }
+            vm() {
+                return this;
+            }
         },
         mounted() {
             this.formatOptions();
@@ -58,13 +58,18 @@
             },
 
             options: function (options) {
-                $(this.$el).select2({
-                    data: options,
-                    placeholder: 'Select',
-                    width: '100%',
-                    theme: 'default',
-                    allowClear: this.clear !== '' ? this.clear : false
-                })
+                let select = $(this.$el);
+                select
+                    .select2({
+                        data: options,
+                        placeholder: 'Select',
+                        width: '100%',
+                        theme: 'default',
+                        allowClear: this.clear !== '' ? this.clear : false
+                        })
+                    .val(this.value)
+                    .trigger('change')
+                
             }
         },
         methods: {
@@ -127,4 +132,8 @@
 </script>
 
 <style lang="scss" scoped>
+
+    .select2-container--default .select2-selection--single .select2-selection__rendered {
+        line-height: 1.5;
+    }
 </style>
