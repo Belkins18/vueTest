@@ -47,6 +47,7 @@
         methods: {
             onLogout() {
                 this.$store.dispatch('onLogout');
+                this.$router.push('/signIn');
             }
         }
     }

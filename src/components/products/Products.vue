@@ -68,7 +68,7 @@
                             <label class="col-sm-2 col-form-label" for="product_sku">SKU</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="sku" v-model="productModal.inputFieldsValue.sku"
+                                        name="sku" v-model="productModal.formFields.sku"
                                         v-validate="'required|alpha_dash'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('sku') }"
                                         id="product_sku" type="text" placeholder="SKU"
@@ -80,7 +80,7 @@
                             <label class="col-sm-2 col-form-label" for="product_name">Name</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="name" v-model="productModal.inputFieldsValue.name" v-validate="'required'"
+                                        name="name" v-model="productModal.formFields.name" v-validate="'required'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('name') }"
                                         id="product_name" type="text" placeholder="Name"
                                         aria-describedby="product_nameHelp">
@@ -92,7 +92,7 @@
                             <label class="col-sm-2 col-form-label" for="product_stock">Stock</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="stock" v-model="productModal.inputFieldsValue.stock"
+                                        name="stock" v-model="productModal.formFields.stock"
                                         v-validate="'required|numeric'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('stock') }"
                                         id="product_stock" type="text" placeholder="Stock"
@@ -105,7 +105,7 @@
                             <label class="col-sm-2 col-form-label" for="product_purprice">Purchase Price</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="purPrice" v-model="productModal.inputFieldsValue.purPrice"
+                                        name="purPrice" v-model="productModal.formFields.purPrice"
                                         v-validate="{ required: true}"
                                         :class="{'form-control': true, 'is-invalid': errors.has('purPrice') }"
                                         id="product_purprice" type="text" placeholder="__,__"
@@ -118,7 +118,7 @@
                             <label class="col-sm-2 col-form-label" for="product_price">Price</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="price" v-model="productModal.inputFieldsValue.price"
+                                        name="price" v-model="productModal.formFields.price"
                                         v-validate="{ required: true}"
                                         :class="{'form-control': true, 'is-invalid': errors.has('price') }"
                                         id="product_price" type="text" placeholder="__,__"
@@ -132,9 +132,9 @@
                             <div class="col-sm-10">
                                 <div class="custom-file">
 
-                                    <div v-if="productModal.inputFieldsValue.imageURL && productModal.inputFieldsValue.imageBase64">
+                                    <div v-if="productModal.formFields.imageURL && productModal.formFields.imageBase64">
                                         <div class="preview-img">
-                                            <img :src="productModal.inputFieldsValue.imageBase64"
+                                            <img :src="productModal.formFields.imageBase64"
                                                  style="max-width: 150px"/>
                                             <span @click.prevent="removeLoadImageHandler">&times;</span>
                                         </div>
@@ -142,7 +142,7 @@
                                     <div v-else>
                                         <div v-if="productModal.fileLoadInfo.isFlag">
                                             <div class="preview-img">
-                                                <img :src="productModal.inputFieldsValue.imageBase64"
+                                                <img :src="productModal.formFields.imageBase64"
                                                      style="max-width: 150px"/>
                                                 <span @click.prevent="removeLoadImageHandler">&times;</span>
                                             </div>
@@ -209,14 +209,11 @@
                     },
                     status: '',
                     imageOnLoadErrorMsg: '',
-                    //TODO Rename
-                    inputFieldsValue: {},
+                    formFields: {},
                     fileLoadInfo: {
                         isFlag: false,
                         dir: null,
-                        fileList: null,
-                        fileReader: null,
-                        //TODO Пофиксить излищнее использование $set
+                        file: null,
                         productFbId: null,
                     }
                 },
@@ -267,14 +264,14 @@
              */
             editProductHandler(product, index) {
                 let productModal = this.productModal;
-                let loadInfo = this.productModal.fileLoadInfo;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
 
                 this.currentIdElement = index;
                 productModal.isVisible = true;
-                productModal.inputFieldsValue = cloneDeep(product);
+                productModal.formFields = cloneDeep(product);
                 productModal.status = 'edit';
 
-                this.$set(loadInfo, 'productFbId', index);
+                fileLoadInfo.productFbId = index;
             },
 
             /**
@@ -298,17 +295,17 @@
              */
             closeModal() {
                 let productModal = this.productModal;
-                let loadInfo = this.productModal.fileLoadInfo;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
 
                 this.currentIdElement = '';
                 this.removeLoadImageHandler();
                 productModal.isVisible = false;
                 productModal.confirmChangesBtn.isDisabled = false;
-                productModal.inputFieldsValue = {};
+                productModal.formFields = {};
                 productModal.status = '';
                 productModal.imageOnLoadErrorMsg = '';
 
-                this.$set(loadInfo, 'productFbId', null);
+                fileLoadInfo.productFbId = null;
             },
 
             /**
@@ -329,12 +326,12 @@
              *
              */
             onFileChange(event) {
-                //TODO Выпилить везде dataTransfer
-                let files = event.target.files || event.dataTransfer.files;
+                // eslint-disable-next-line
+                let files = event.target.files;
                 let productModal = this.productModal;
-                let loadInfo = this.productModal.fileLoadInfo;
+                let formFields = this.productModal.formFields;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
 
-                loadInfo.fileList = files;
                 productModal.imageOnLoadErrorMsg = '';
 
                 /**
@@ -375,13 +372,12 @@
                             if (type && file.size < MAX_SIZE_IN_BYTES) {
                                 baseReader.readAsDataURL(file);
                                 baseReader.addEventListener("load", () => {
-                                    this.$set(productModal.inputFieldsValue, 'imageBase64', baseReader.result);
-                                    this.$set(productModal.inputFieldsValue, 'imageName', file.name);
+                                    formFields.imageBase64 = baseReader.result;
+                                    formFields.imageName = file.name;
 
-                                    this.$set(loadInfo, 'isFlag', true);
-                                    this.$set(loadInfo, 'dir', this.$route.name);
-                                    this.$set(loadInfo, 'fileReader', file);
-                                    console.log(this.productModal.fileLoadInfo);
+                                    fileLoadInfo.dir = this.$route.name;
+                                    fileLoadInfo.file = file;
+                                    fileLoadInfo.isFlag = true;
                                     resolve(baseReader.result);
                                 });
                             } else reject();
@@ -391,10 +387,10 @@
 
                 validateLoadingImage(event.target.files[0])
                     .then(() => {
-                        this.$set(productModal, 'imageOnLoadErrorMsg', '');
+                        productModal.imageOnLoadErrorMsg = ''
                     })
                     .catch(() => {
-                        this.$set(productModal, 'imageOnLoadErrorMsg', 'You may upload png or jpeg file 2MB max');
+                        productModal.imageOnLoadErrorMsg = 'You may upload png or jpeg file 64kb max';
                     })
             },
 
@@ -404,16 +400,16 @@
              *
              */
             removeLoadImageHandler() {
-                let inputValues = this.productModal.inputFieldsValue;
-                let loadInfo = this.productModal.fileLoadInfo;
+                let formFields = this.productModal.formFields;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
 
-                this.$set(loadInfo, 'dir', null);
-                this.$set(loadInfo, 'fileList', null);
-                this.$set(loadInfo, 'fileReader', null);
-                this.$set(loadInfo, 'isFlag', false);
+                fileLoadInfo.dir = null;
+                fileLoadInfo.file = null;
+                fileLoadInfo.isFlag = false;
 
-                this.$set(inputValues, 'imageBase64', '');
-                this.$set(inputValues, 'imageURL', '');
+                formFields.imageBase64 = '';
+                formFields.imageName = '';
+                formFields.imageURL = '';
             },
 
             // CRUD МЕТОДЫ
@@ -426,12 +422,12 @@
              *
              */
             getKeyInDBPath(path) {
-                let loadInfo = this.productModal.fileLoadInfo;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
                 let routePath = `/${this.$route.name}/`;
                 let startnum = path.indexOf(routePath) + routePath.length;
                 let key = path.slice(startnum, path.length);
 
-                this.$set(loadInfo, 'productFbId', key);
+                fileLoadInfo.productFbId = key;
                 return key;
             },
 
@@ -450,16 +446,16 @@
              *
              */
             onDeleteImgFromFbStorage(forRemoveData) {
-                let inputValues = this.productModal.inputFieldsValue;
-                let loadInfo = this.productModal.fileLoadInfo;
+                let formFields = this.productModal.formFields;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
 
                 this.deleteImgFromFbStorage(forRemoveData)
                     .then(() => {
-                        inputValues.imageName = '';
+                        formFields.imageName = '';
 
                         let updatedData = {
-                            editedResults: cloneDeep(inputValues),
-                            editElement: loadInfo.productFbId
+                            editedResults: cloneDeep(formFields),
+                            editElement: fileLoadInfo.productFbId
                         };
 
                         this.editProduct(updatedData);
@@ -468,26 +464,6 @@
                         this.closeModal();
                         this.getProductList();
                     });
-            },
-
-            /**
-             * Возвращает имя картинки что была / небыла загружена в Storage
-             * keys[i] - это ключ
-             * obj[keys[i]] - а это свойство, доступное по этому ключу
-             *
-             * @param {Object} store - this.$store.state.products.
-             *
-             */
-            //TODO Выпилить
-            getCurrentProductFromStore(store, index) {
-                let obj = store;
-                let keys = Object.keys(obj);
-
-                for (let i = 0, l = keys.length; i < l; i++) {
-                    if (keys[i] === index) {
-                        return obj[keys[i]]
-                    }
-                }
             },
 
             /**
@@ -505,24 +481,24 @@
              */
             onAddProduct() {
                 let productModal = this.productModal;
-                let inputValues = this.productModal.inputFieldsValue;
-                let loadInfo = this.productModal.fileLoadInfo;
+                let formFields = this.productModal.formFields;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
 
-                this.$set(inputValues, 'id', '_' + Math.random().toString(36).substr(2, 9));
-                this.$set(productModal.confirmChangesBtn, 'isDisabled', true);
+                formFields.id = '_' + Math.random().toString(36).substr(2, 9);
+                productModal.confirmChangesBtn.isDisabled = true;
 
                 const addProductFunc = () => {
                     return new Promise((resolve, reject) => {
-                        this.addProduct(productModal.inputFieldsValue)
+                        this.addProduct(productModal.formFields)
                             .then((path) => {
                                 return this.getKeyInDBPath(path);
                             })
                             .then((key) => {
-                                console.log(key);
-                                this.$set(inputValues, 'key', key);
+                                formFields.key = key;
 
-                                if (loadInfo.isFlag && loadInfo.productFbId !== null) {
-                                    resolve(this.loadImages(loadInfo));
+                                if (fileLoadInfo.isFlag && fileLoadInfo.productFbId !== null) {
+                                    debugger;
+                                    resolve(this.loadImages(fileLoadInfo));
                                 } else reject();
                             })
                     });
@@ -530,13 +506,12 @@
 
                 addProductFunc()
                     .then((url) => {
-                        console.log(url);
                         if (url !== undefined) {
-                            inputValues.imageURL = url;
+                            formFields.imageURL = url;
 
                             let updatedData = {
-                                editedResults: cloneDeep(inputValues),
-                                editElement: loadInfo.productFbId
+                                editedResults: cloneDeep(formFields),
+                                editElement: fileLoadInfo.productFbId
                             };
 
                             this.editProduct(updatedData);
@@ -568,19 +543,20 @@
              */
             onEditProduct() {
                 let productModal = this.productModal;
-                let inputValues = this.productModal.inputFieldsValue;
-                let loadInfo = this.productModal.fileLoadInfo;
-                this.$set(productModal.confirmChangesBtn, 'isDisabled', true);
+                let formFields = this.productModal.formFields;
+                let fileLoadInfo = this.productModal.fileLoadInfo;
 
-                if (loadInfo.isFlag) {
-                    this.loadImages(loadInfo)
+                productModal.confirmChangesBtn.isDisabled = true;
+
+                if (fileLoadInfo.isFlag) {
+                    this.loadImages(fileLoadInfo)
                         .then((url) => {
                             if (url !== undefined) {
-                                inputValues.imageURL = url;
+                                formFields.imageURL = url;
 
                                 let updatedData = {
-                                    editedResults: cloneDeep(inputValues),
-                                    editElement: loadInfo.productFbId
+                                    editedResults: cloneDeep(formFields),
+                                    editElement: fileLoadInfo.productFbId
                                 };
 
                                 this.editProduct(updatedData);
@@ -590,17 +566,17 @@
                             this.closeModal();
                             this.getProductList();
                         })
-                } else if (inputValues.imageName) {
+                } else if (formFields.imageName) {
                     let forRemoveData = {
-                        editElement: loadInfo.productFbId,
-                        imageName: inputValues.imageName
+                        editElement: fileLoadInfo.productFbId,
+                        imageName: formFields.imageName
                     };
 
                     this.onDeleteImgFromFbStorage(forRemoveData)
                 } else {
                     let updatedData = {
-                        editedResults: cloneDeep(inputValues),
-                        editElement: loadInfo.productFbId
+                        editedResults: cloneDeep(formFields),
+                        editElement: fileLoadInfo.productFbId
                     };
 
                     this.editProduct(updatedData);
@@ -624,8 +600,7 @@
             onRemoveProduct(index) {
                 let forRemoveData = {
                     editElement: this.currentIdElement,
-                    //TODO
-                    imageName: (this.getCurrentProductFromStore(this.$store.state.products, index) || {}).imageName
+                    imageName: (this.$store.state.products[index] || {}).imageName
                 };
 
                 if (forRemoveData.imageName) {

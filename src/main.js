@@ -20,11 +20,14 @@ const USER_LS = 'user';
 
 function checkRole() {
     let user = store.state.user || JSON.parse(localStorage.getItem(USER_LS));
-    //TODO Отрефакторить и убрать isAuth....
-    let isAuthFulfilled = store.state.isLoggedIn;
 
-    if (user === null || isAuthFulfilled === false) { return false }
-    if (user === Object || isAuthFulfilled === true) { return true }
+    if (user === null) {
+        return false
+    }
+
+    if (user === Object) {
+        return true
+    }
 
     return true;
 }

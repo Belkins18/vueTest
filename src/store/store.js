@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import Vuex from 'vuex'
-import router from '../router/router'
 
 import apiConfig from '../configs/apiConfig';
 import firebase from 'firebase';
@@ -108,8 +107,6 @@ const actions = {
      */
     onLogout({commit}) {
         commit(SET_LOGGED_OFF);
-        //ToDO
-        router.push('/signIn');
     },
 
     /**
@@ -124,16 +121,13 @@ const actions = {
      */
     loadImages({commit}, dataImg) {
         commit(PENDING_STATUS_ON);
+
         console.log(dataImg);
+
         return new Promise((resolve) => {
             let uploadTask = firebase.storage().ref()
-                .child(
-                    //TODO ``
-                    'images/' +
-                    dataImg.dir + '/' +
-                    dataImg.productFbId + '/' +
-                    dataImg.fileList[0].name
-                ).put(dataImg.fileList[0]);
+                .child(`images/${ dataImg.dir}/${ dataImg.productFbId}/${dataImg.file.name}`)
+                .put(dataImg.file);
 
             uploadTask.on('state_changed',
                 (snapshot) => {
@@ -167,16 +161,9 @@ const actions = {
      *
      */
     deleteImgFromFbStorage(_, payload) {
-        console.log(payload);
-
         return new firebase.storage()
             .ref()
-            .child(
-                'images/' +
-                'products/' +
-                payload.editElement + '/' +
-                payload.imageName
-            ).delete()
+            .child(`images/products/${payload.editElement}/${payload.imageName}`).delete()
     },
 
     /**
@@ -220,7 +207,9 @@ const actions = {
     getProductList({commit}) {
         commit(PENDING_STATUS_ON);
 
-        return new firebase.database().ref('/products').once("value")
+        return new firebase.database()
+            .ref('/products')
+            .once("value")
             .then((snapshot) => {
                 commit(SAVE_PRODUCTS, snapshot.val());
                 commit(PENDING_STATUS_OFF);
