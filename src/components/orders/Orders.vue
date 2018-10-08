@@ -64,13 +64,14 @@
                                         <div class="input-group">
                                             <div class="input-group__select-wraper">
                                                 <BaseSelect :options="products" classes="select2" customData="products"
-                                                            :hasValidate="orderModal.confirmChangesBtn.isPressed"
                                                             :id="'baseSelect_' + index"
                                                             :name="'baseSelect_' + index"
                                                             :aria-describedby="'baseSelectHelp_' + index"
                                                             v-validate="'required'"
                                                             v-model="item.selected">
                                                 </BaseSelect>
+                                                <!--v-validate="{is_not: hasDuplicate(item)}"-->
+                                                <!--:hasValidate="orderModal.confirmChangesBtn.isPressed"-->
                                                 <small :id="'baseSelectHelp_'+ index" class="invalid-feedback"> {{
                                                     errors.first('baseSelect_'+ index)}}
                                                 </small>
@@ -83,9 +84,9 @@
                                                        :aria-describedby="'productCountHelp_'+ index"
                                                        v-validate="'required|numeric|notZero'"
                                                        v-model="item.productCount">
-                                                <small :id="'productCountHelp_'+ index" class="invalid-feedback"> {{
-                                                    errors.first('productCount_'+ index)}}
-                                                </small>
+                                                <!--<small :id="'productCountHelp_'+ index" class="invalid-feedback"> {{-->
+                                                    <!--errors.first('productCount_'+ index)}}-->
+                                                <!--</small>-->
                                             </div>
                                             <BaseButton classes="productList__removeBtn"
                                                         type="danger"
@@ -95,8 +96,8 @@
                                                         @click="removeProductWithOrdersProductListHandler(index)">
                                             </BaseButton>
                                         </div>
-                                        <small id="oreder_productCountHelp" class="invalid-feedback"> {{
-                                            errors.first('productCount') }}
+                                        <small :id="'productCountHelp_'+ index" class="invalid-feedback"> {{
+                                            errors.first('productCount_'+ index)}}
                                         </small>
                                     </li>
                                 </transition-group>
@@ -194,8 +195,8 @@
     import Vue from 'vue'
     import VeeValidate from 'vee-validate';
     import {mapActions} from 'vuex';
-    import $ from 'jquery';
-    import select2 from 'select2';
+    // import $ from 'jquery';
+    // import select2 from 'select2';
     // import {cloneDeep} from "lodash";
 
     import BaseButton from '@/components/_shared/BaseButton';
@@ -205,8 +206,17 @@
     import BaseCheckbox from '@/components/_shared/BaseCheckbox';
 
     Vue.use(VeeValidate);
-    // VeeValidate.Validator.extend('custom_validation', (value) => {
-    //     return value.value !== 0
+    // VeeValidate.Validator.extend('isDuplicate', {
+    //     getMessage: field => 'The ' + field + ' value has duplicate fields.',
+    //     validate(value, {obj}) {
+    //         let duplicate;
+    //         obj.map(v => v.selected)
+    //             .sort()
+    //             .sort((a, b) => {
+    //                 return (a === b) ? duplicate = true : duplicate = false;
+    //             });
+    //         return duplicate;
+    //     }
     // });
     VeeValidate.Validator.extend('truthy', {
         getMessage: field => 'The ' + field + ' value is not truthy.',
@@ -230,17 +240,11 @@
         },
         data() {
             return {
-                options: {
-                    apples: 'green',
-                    bananas: 'yellow',
-                    orange: 'orange'
-                },
-                selected: '',
                 orderModal: {
                     isVisible: false,
                     confirmChangesBtn: {
                         isDisabled: false,
-                        isPressed: false,
+                        // isPressed: false,
                     },
                     status: '',
                     inputFieldsValue: {},
@@ -283,9 +287,7 @@
                 let items = this.orderModal.productList;
                 return items.length
             },
-            checkToogle() {
-                return !this.checked;
-            }
+
         },
         methods: {
             ...mapActions([
@@ -317,9 +319,6 @@
                 console.log(index);
                 let items = this.orderModal.productList;
                 items.splice(index, 1);
-                let select = $(this.$el.querySelector('#baseSelect_' + index));
-                console.log(select);
-                
             },
 
             closeModal() {
@@ -332,12 +331,45 @@
                 orderModal.productList = [{}];
                 orderModal.status = '';
             },
-
+            hasDuplicate(values) {
+                console.log(values);
+                let isDuplicate;
+                values
+                    .map(v => v.selected)
+                    .sort()
+                    .sort((a, b) => {
+                        return (a === b) ? isDuplicate = true : isDuplicate = false;
+                    });
+                console.log(isDuplicate);
+                return isDuplicate;
+            },
             onConfirm() {
                 this.orderModal.confirmChangesBtn.isPressed = true;
                 this.$validator.validateAll()
-                    .then((result) => {
-                        console.log(result);
+                    .then((response, reject) => {
+                        if (this.hasDuplicate(this.orderModal.productList) === true || this.errors.items.length !== 0) {
+                            console.log(this.errors.items.length);
+                            reject;
+                        } else {
+                            console.log(response);
+                            response;
+                        }
+                        // if(this.errors.items.length === 0) {
+                        //     console.log(response);
+                        //     response;
+                        // } else {
+                        //     console.log(this.errors.items.length);
+                        //     // let isDuplicate;
+                        //     // this.orderModal.productList
+                        //     //     .map(v => v.selected)
+                        //     //     .sort()
+                        //     //     .sort((a, b) => {
+                        //     //         return (a === b) ? isDuplicate = true : isDuplicate = false;
+                        //     //     });
+                        //     // console.log(isDuplicate);
+                        //     this.hasDuplicate(this.orderModal.productList);
+                        //     reject;
+                        // }
                     });
             }
 
@@ -412,7 +444,7 @@
                         border-top-right-radius: 0;
                         border-bottom-right-radius: 0;
                         .select2-selection__placeholder {
-                            color: $gray-700;
+                            color: $gray-400;
                         }
                         .select2-selection__rendered {
                             padding: 0;

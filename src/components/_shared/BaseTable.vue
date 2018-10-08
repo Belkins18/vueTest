@@ -75,6 +75,7 @@
         }
         tr > td {
             vertical-align: middle;
+            white-space: nowrap;
         }
     }
     table {

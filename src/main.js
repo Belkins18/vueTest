@@ -7,7 +7,6 @@ import App from './components/App.vue'
 import router from './router/router'
 import store from './store/store'
 import {sync} from 'vuex-router-sync';
-import './registerServiceWorker'
 import PageNames from "./configs/pageNames";
 import VeeValidate from 'vee-validate';
 
@@ -19,34 +18,33 @@ Vue.use(VeeValidate);
 
 const USER_LS = 'user';
 
-function checkRole(role) {
+function checkRole() {
     let user = store.state.user || JSON.parse(localStorage.getItem(USER_LS));
+    //TODO Отрефакторить и убрать isAuth....
     let isAuthFulfilled = store.state.isLoggedIn;
 
     if (user === null || isAuthFulfilled === false) { return false }
-    if (user == Object || isAuthFulfilled === true) { return true }
+    if (user === Object || isAuthFulfilled === true) { return true }
 
-    if (typeof role === 'string') {
-        const { granted } = user;
-        if (granted) {
-            return granted.findIndex(role_ => role_ === role) !== -1;
-        }
-        return false;
-    }
     return true;
 }
 
 router.beforeEach((to, from, next) => {
     try {
         if (to.matched.some(record => record.meta.requiresAuth)) {
-            if (!checkRole()) { return next({ name: PageNames.SIGN_IN }) }
+            if (!checkRole()) {
+                return next({ name: PageNames.SIGN_IN })
+            }
+
             next();
         } else {
-            if (JSON.parse(localStorage.getItem(USER_LS)) !== null) { next({name: PageNames.PRODUCTS}) }
+            if (JSON.parse(localStorage.getItem(USER_LS)) !== null) {
+                next({name: PageNames.PRODUCTS})
+            }
+
             next();
         }
-    }
-    catch (error) {
+    } catch (error) {
         next({name: PageNames.SIGN_IN});
         throw error;
     }

@@ -4,6 +4,18 @@
     </div>
 </template>
 
+<script>
+    export default {
+        data() {
+            return {};
+        },
+        created() {
+            this.$store.dispatch('initFirebase');
+        },
+        watch: {},
+        methods: {}
+    };
+</script>
 
 <style lang="scss">
     #app {
@@ -47,15 +59,4 @@
     }
 </style>
 
-<script>
-    export default {
-        data() {
-            return {};
-        },
-        created() {
-            this.$store.dispatch('initFirebase');
-        },
-        watch: {},
-        methods: {}
-    };
-</script>
+

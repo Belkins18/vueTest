@@ -11,6 +11,7 @@
 <script>
     import {mapActions} from 'vuex';
     import $ from 'jquery';
+    // eslint-disable-next-line
     import select2 from 'select2';
 
     export default {
@@ -40,75 +41,65 @@
             }
         },
         computed: {
-
+            products() {
+                return this.$store.state.products;
+            },
+             vm() {
+                 return this;
+             }
         },
         mounted() {
             this.formatOptions();
-            let vm = this;
-            console.log(vm);
-            // let vm = this;
-            // select.select2('refresh');
+            this.init(this.select2data);
+        },
+        watch: {
+            value: function (value) {
+                $(this.$el).val(value).trigger('change');
+            },
+
+            options: function (options) {
+                $(this.$el).select2({
+                    data: options,
+                    placeholder: 'Select',
+                    width: '100%',
+                    theme: 'default',
+                    allowClear: this.clear !== '' ? this.clear : false
+                })
+            }
         },
         methods: {
             ...mapActions([
                 'getProductList',
             ]),
 
-            init() {
+            init(data) {
                 let select = $(this.$el);
-                console.log(select);
                 select
                     .select2({
                         templateResult: this.formatState,
+                        data: data,
                         placeholder: 'Select',
                         width: '100%',
                         theme: 'default',
-                        allowClear: true,
-                        data: this.select2data
+                        allowClear: this.clear !== '' ? this.clear : false
                     })
+                    .val(this.value)
+                    .trigger('change')
                     .on('change', () => {
                         this.$emit('input', select.val())
                     });
-                select.val(this.value).trigger('change');
             },
             formatOptions() {
-                // // this.select2data.push({id: '', text: 'Select'});
-                // if (this.customData === 'products') {
-                //
-                // } else {
-                //     for (let key in this.options) {
-                //         this.select2data.push({id: key, text: this.options[key]})
-                //     }
-                // }
-                // return new Promise((resolve, reject) => {
-                //
-                //     let parseData = JSON.parse(JSON.stringify(this.options));
-                //     let normalData = Object.values(parseData);
-                //     normalData.forEach((element) => {
-                //         this.select2data.push({id: element.id, image: element.imageURL, text: element.name})
-                //     });
-                // });
-                console.log(this.options);
-                this.getProductList()
-                    .then((val) => {
-                        console.log(val);
-                        let parseData = JSON.parse(JSON.stringify(val));
-                        let normalData = Object.values(parseData);
-                        normalData.forEach((element) => {
-                            this.select2data.push({
-                                key: element.key,
-                                id: element.id,
-                                image: element.imageURL,
-                                text: element.name
-                            })
-                        });
-                        this.init();
-                        return this.select2data;
+                let parseData = JSON.parse(JSON.stringify(this.products));
+                let normalData = Object.values(parseData);
+                normalData.forEach((element) => {
+                    this.select2data.push({
+                        key: element.key,
+                        id: element.id,
+                        image: element.imageURL,
+                        text: element.name
                     })
-                    .then((select2Data) => {
-                        console.log(select2Data);
-                    });
-
+                });
             },
             formatState(state) {
                 if (!state.id) {
@@ -128,7 +119,6 @@
         },
         destroyed() {
             $(this.$el).off().select2('destroy');
-            select2;
         },
         created() {
             this.getProductList();

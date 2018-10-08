@@ -81,7 +81,9 @@ const actions = {
      */
     userAuth({dispatch, commit}, payload) {
         commit(PENDING_STATUS_ON);
-        return new firebase.auth().signInWithEmailAndPassword(payload.email, payload.password)
+
+        return new firebase.auth()
+            .signInWithEmailAndPassword(payload.email, payload.password)
             .then((response) => {
                 const settingUser = {
                     email: response.user.email,
@@ -106,6 +108,7 @@ const actions = {
      */
     onLogout({commit}) {
         commit(SET_LOGGED_OFF);
+        //ToDO
         router.push('/signIn');
     },
 
@@ -121,20 +124,23 @@ const actions = {
      */
     loadImages({commit}, dataImg) {
         commit(PENDING_STATUS_ON);
+        console.log(dataImg);
         return new Promise((resolve) => {
             let uploadTask = firebase.storage().ref()
                 .child(
+                    //TODO ``
                     'images/' +
                     dataImg.dir + '/' +
                     dataImg.productFbId + '/' +
                     dataImg.fileList[0].name
-                        .toString())
-                .put(dataImg.fileList[0]);
+                ).put(dataImg.fileList[0]);
 
             uploadTask.on('state_changed',
                 (snapshot) => {
                     let progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
+
                     console.log('Upload is ' + progress + '% done');
+
                     switch (snapshot.state) {
                         case firebase.storage.TaskState.PAUSED: // or 'paused'
                             break;
@@ -162,14 +168,15 @@ const actions = {
      */
     deleteImgFromFbStorage(_, payload) {
         console.log(payload);
+
         return new firebase.storage()
             .ref()
             .child(
                 'images/' +
                 'products/' +
                 payload.editElement + '/' +
-                payload.imageName)
-            .delete()
+                payload.imageName
+            ).delete()
     },
 
     /**
@@ -179,8 +186,10 @@ const actions = {
         return new Promise((resolve) => {
             let databaseRef = firebase.database().ref('/products');
             let newProductRef = databaseRef.push();
+
             newProductRef.set(payload);
             let path = newProductRef.toString();
+
             resolve(path)
         });
     },
@@ -189,7 +198,8 @@ const actions = {
      * Action редактирования продукта
      */
     editProduct(_, payload) {
-        return new firebase.database().ref(`/products/${payload.editElement}`)
+        return new firebase.database()
+            .ref(`/products/${payload.editElement}`)
             .update(payload.editedResults)
             .then(() => payload.editedResults)
     },
@@ -198,7 +208,8 @@ const actions = {
      * Action удаления продукта
      */
     removeProduct(_, index) {
-        return new firebase.database().ref('/products')
+        return new firebase.database()
+            .ref('/products')
             .child(index).remove()
             .catch((error) => error);
     },
@@ -208,10 +219,12 @@ const actions = {
      */
     getProductList({commit}) {
         commit(PENDING_STATUS_ON);
+
         return new firebase.database().ref('/products').once("value")
             .then((snapshot) => {
                 commit(SAVE_PRODUCTS, snapshot.val());
                 commit(PENDING_STATUS_OFF);
+
                 return snapshot.val();
             })
     },

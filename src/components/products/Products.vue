@@ -209,12 +209,15 @@
                     },
                     status: '',
                     imageOnLoadErrorMsg: '',
+                    //TODO Rename
                     inputFieldsValue: {},
                     fileLoadInfo: {
                         isFlag: false,
                         dir: null,
                         fileList: null,
                         fileReader: null,
+                        //TODO Пофиксить излищнее использование $set
+                        productFbId: null,
                     }
                 },
                 removeProductModal: {
@@ -326,6 +329,7 @@
              *
              */
             onFileChange(event) {
+                //TODO Выпилить везде dataTransfer
                 let files = event.target.files || event.dataTransfer.files;
                 let productModal = this.productModal;
                 let loadInfo = this.productModal.fileLoadInfo;
@@ -452,10 +456,12 @@
                 this.deleteImgFromFbStorage(forRemoveData)
                     .then(() => {
                         inputValues.imageName = '';
+
                         let updatedData = {
                             editedResults: cloneDeep(inputValues),
                             editElement: loadInfo.productFbId
                         };
+
                         this.editProduct(updatedData);
                     })
                     .then(() => {
@@ -472,7 +478,8 @@
              * @param {Object} store - this.$store.state.products.
              *
              */
-            getCurrentProduductFromStore(store, index) {
+            //TODO Выпилить
+            getCurrentProductFromStore(store, index) {
                 let obj = store;
                 let keys = Object.keys(obj);
 
@@ -513,6 +520,7 @@
                             .then((key) => {
                                 console.log(key);
                                 this.$set(inputValues, 'key', key);
+
                                 if (loadInfo.isFlag && loadInfo.productFbId !== null) {
                                     resolve(this.loadImages(loadInfo));
                                 } else reject();
@@ -525,10 +533,12 @@
                         console.log(url);
                         if (url !== undefined) {
                             inputValues.imageURL = url;
+
                             let updatedData = {
                                 editedResults: cloneDeep(inputValues),
                                 editElement: loadInfo.productFbId
                             };
+
                             this.editProduct(updatedData);
                         }
                     })
@@ -560,7 +570,6 @@
                 let productModal = this.productModal;
                 let inputValues = this.productModal.inputFieldsValue;
                 let loadInfo = this.productModal.fileLoadInfo;
-
                 this.$set(productModal.confirmChangesBtn, 'isDisabled', true);
 
                 if (loadInfo.isFlag) {
@@ -568,10 +577,12 @@
                         .then((url) => {
                             if (url !== undefined) {
                                 inputValues.imageURL = url;
+
                                 let updatedData = {
                                     editedResults: cloneDeep(inputValues),
                                     editElement: loadInfo.productFbId
                                 };
+
                                 this.editProduct(updatedData);
                             }
                         })
@@ -584,12 +595,14 @@
                         editElement: loadInfo.productFbId,
                         imageName: inputValues.imageName
                     };
+
                     this.onDeleteImgFromFbStorage(forRemoveData)
                 } else {
                     let updatedData = {
                         editedResults: cloneDeep(inputValues),
                         editElement: loadInfo.productFbId
                     };
+
                     this.editProduct(updatedData);
                     this.closeModal();
                     this.getProductList();
@@ -604,25 +617,24 @@
              *          {removeProduct}
              *          {getProductList}
              *
-             * @methods {getCurrentProduductFromStore}
+             * @methods {getCurrentProductFromStore}
              *          {closeRemoveModal}
              *
              */
             onRemoveProduct(index) {
                 let forRemoveData = {
                     editElement: this.currentIdElement,
-                    imageName: (this.getCurrentProduductFromStore(this.$store.state.products, index) || {}).imageName
+                    //TODO
+                    imageName: (this.getCurrentProductFromStore(this.$store.state.products, index) || {}).imageName
                 };
+
                 if (forRemoveData.imageName) {
                     this.deleteImgFromFbStorage(forRemoveData);
-                    this.removeProduct(index);
-                    this.closeRemoveModal();
-                    this.getProductList();
-                } else {
-                    this.removeProduct(index);
-                    this.closeRemoveModal();
-                    this.getProductList();
                 }
+
+                this.removeProduct(index);
+                this.closeRemoveModal();
+                this.getProductList();
             },
 
             /**
@@ -635,6 +647,7 @@
              */
             onConfirmChanges() {
                 let status = this.productModal.status;
+
                 this.$validator.validateAll()
                     .then((result) => {
                         if (result && status === 'create')
