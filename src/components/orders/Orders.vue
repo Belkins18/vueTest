@@ -17,9 +17,7 @@
                     <td>{{ order.date }}</td>
                     <td>
                         <ul class="orders__product-list productList">
-                            <li v-for="product in products" :key='product.id' class="productList__item">{{ product.name
-                                }} x {{ product.stock }}
-                            </li>
+                            <li v-for="product in products" :key='product.id' class="productList__item">{{ product.name }} x {{ product.stock }}</li>
                         </ul>
                     </td>
                     <td>{{ order.clientName }}</td>
@@ -369,7 +367,7 @@
                                     selectList[index].previousElementSibling.classList.remove('is-invalid');
                                 });
                             }
-                            
+
                             if (this.errors.items.length !== 0) {
                                 selectList.forEach((item, index) => {
                                     if (item.previousElementSibling.classList.contains('hasError')) {

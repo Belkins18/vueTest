@@ -35,10 +35,13 @@
             }
         }
     }
-
-    /*[aria-invalid="true"] ~ .invalid-feedback {*/
-        /*display: block;*/
-    /*}*/
+    .select2-container--default .select2-results__option {
+        font-size: rem(12);
+    }
+    .select2-container--default .select2-results__option[aria-selected=true] {
+        background-color: rgba($cyan, 0.7);
+        color: $gray-100;
+    }
 
     .invalid-feedback {
         font-size: rem(12);

@@ -37,7 +37,8 @@
         },
         data() {
             return {
-                select2data: []
+                select2data: [],
+                newData: []
             }
         },
         computed: {
@@ -49,7 +50,7 @@
             }
         },
         mounted() {
-            this.formatOptions();
+            this.formatOptions(this.products, this.select2data);
             this.init(this.select2data);
         },
         watch: {
@@ -62,9 +63,11 @@
 
             options: function (options) {
                 let select = $(this.$el);
+                this.formatOptions(options, this.newData);
 
                 select.select2({
-                        data: options,
+                        templateResult: this.formatState,
+                        data: this.newData,
                         placeholder: 'Select',
                         width: '100%',
                         theme: 'default',
@@ -96,16 +99,17 @@
                         this.$emit('input', select.val())
                     });
             },
-            formatOptions() {
-                let parseData = JSON.parse(JSON.stringify(this.products));
+            formatOptions(options, newData) {
+                let parseData = JSON.parse(JSON.stringify(options));
                 let normalData = Object.values(parseData);
-
                 normalData.forEach((element) => {
-                    this.select2data.push({
+                    newData.push({
                         key: element.key,
                         id: element.id,
                         image: element.imageURL,
-                        text: element.name
+                        text: element.name,
+                        stock: element.stock,
+                        price: element.price
                     })
                 });
             },
@@ -121,7 +125,7 @@
                             <span style="display: flex; align-items: center; justify-content: center;">
                                 <img src=${state.image} class="select__img" width="30px" />
                             </span>
-                            <span style="margin-left: 5px">${state.text}</span>
+                            <span style="margin-left: 5px">${state.text}<span style="margin-left: 5px; color: #ced4da;">(${state.stock})</span></span>
                         </div>
                         `));
             }
