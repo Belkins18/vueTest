@@ -63,16 +63,16 @@
                                         :key='item + "__" + index'>
                                         <div class="input-group">
                                             <div class="input-group__select-wraper">
-                                                <BaseSelect :options="products" classes="select2" customData="products"
+                                                <BaseSelect :options="products"
+                                                            :class="{'hasError': errors.has('baseSelect_'+ index) }"
                                                             :id="'baseSelect_' + index"
                                                             :name="'baseSelect_' + index"
                                                             :aria-describedby="'baseSelectHelp_' + index"
+                                                            customData="products"
                                                             v-validate="'required'"
                                                             v-model="item.selected">
                                                 </BaseSelect>
-                                                <!--v-validate="{is_not: hasDuplicate(item)}"-->
-                                                <!--:hasValidate="orderModal.confirmChangesBtn.isPressed"-->
-                                                <small :id="'baseSelectHelp_'+ index" class="invalid-feedback"> {{
+                                                <small :id="'baseSelectHelp_'+ index" class="invalid-feedback">{{
                                                     errors.first('baseSelect_'+ index)}}
                                                 </small>
                                             </div>
@@ -84,9 +84,6 @@
                                                        :aria-describedby="'productCountHelp_'+ index"
                                                        v-validate="'required|numeric|notZero'"
                                                        v-model="item.productCount">
-                                                <!--<small :id="'productCountHelp_'+ index" class="invalid-feedback"> {{-->
-                                                    <!--errors.first('productCount_'+ index)}}-->
-                                                <!--</small>-->
                                             </div>
                                             <BaseButton classes="productList__removeBtn"
                                                         type="danger"
@@ -96,8 +93,7 @@
                                                         @click="removeProductWithOrdersProductListHandler(index)">
                                             </BaseButton>
                                         </div>
-                                        <small :id="'productCountHelp_'+ index" class="invalid-feedback"> {{
-                                            errors.first('productCount_'+ index)}}
+                                        <small class="invalid-feedback"> {{ errors.first('productCount_'+ index) }}
                                         </small>
                                     </li>
                                 </transition-group>
@@ -122,24 +118,25 @@
                                         name="clientName" v-model="orderModal.inputFieldsValue.clientName"
                                         v-validate="'required|alpha_spaces'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('clientName') }"
-                                        id="oreder_clientName" type="text" placeholder="Name"
-                                        aria-describedby="oreder_clientNameHelp">
-                                <small id="oreder_clientNameHelp" class="invalid-feedback"> {{
-                                    errors.first('clientName') }}
-                                </small>
+                                        id="oreder_clientName" type="text" placeholder="Name">
+                                <small class="invalid-feedback"> {{ errors.first('clientName') }}</small>
                             </div>
                         </div>
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label" for="oreder_phone">Phone</label>
                             <div class="col-sm-10">
-                                <input
-                                        name="phone" v-model="orderModal.inputFieldsValue.phone"
-                                        v-validate="'required|alpha_dash'"
-                                        :class="{'form-control': true, 'is-invalid': errors.has('phone') }"
-                                        id="oreder_phone" type="text" placeholder="(xxx) xx xx xxx"
-                                        aria-describedby="oreder_phoneHelp">
-                                <small id="oreder_phoneHelp" class="invalid-feedback"> {{ errors.first('phone') }}
-                                </small>
+                                <MaskedInput v-model="orderModal.inputFieldsValue.phone"
+                                             name="phone"
+                                             mask="\+\8 (111) 111-1111"
+                                             :class="{'is-invalid': errors.has('phone')}"
+                                             class="form-control"
+                                             v-validate:phoneNumber="'min:12'"
+                                             placeholder-char="_"
+                                             placeholder="Phone number"
+                                             id="oreder_phone"
+                                             type="tel">
+                                </MaskedInput>
+                                <small class="invalid-feedback"> {{ errors.first('phone') }}</small>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -192,10 +189,8 @@
 <script>
     import Vue from 'vue'
     import VeeValidate from 'vee-validate';
+    import MaskedInput from 'vue-masked-input'
     import {mapActions} from 'vuex';
-    // import $ from 'jquery';
-    // import select2 from 'select2';
-    // import {cloneDeep} from "lodash";
 
     import BaseButton from '@/components/_shared/BaseButton';
     import BaseTable from '@/components/_shared/BaseTable';
@@ -204,18 +199,6 @@
     import BaseCheckbox from '@/components/_shared/BaseCheckbox';
 
     Vue.use(VeeValidate);
-    // VeeValidate.Validator.extend('isDuplicate', {
-    //     getMessage: field => 'The ' + field + ' value has duplicate fields.',
-    //     validate(value, {obj}) {
-    //         let duplicate;
-    //         obj.map(v => v.selected)
-    //             .sort()
-    //             .sort((a, b) => {
-    //                 return (a === b) ? duplicate = true : duplicate = false;
-    //             });
-    //         return duplicate;
-    //     }
-    // });
     VeeValidate.Validator.extend('truthy', {
         getMessage: field => 'The ' + field + ' value is not truthy.',
         validate: value => !!value
@@ -226,6 +209,16 @@
             return value > 0
         }
     });
+    VeeValidate.Validator.extend('isBigger', (value, [otherValue]) => {
+        return value > otherValue;
+    }, {
+        hasTarget: true
+    });
+    VeeValidate.Validator.extend('isSmaller', (value, [otherValue]) => {
+        return value < otherValue;
+    }, {
+        hasTarget: true
+    });
 
     export default {
         name: "Orders",
@@ -235,6 +228,7 @@
             BaseModal,
             BaseSelect,
             BaseCheckbox,
+            MaskedInput
         },
         data() {
             return {
@@ -242,11 +236,15 @@
                     isVisible: false,
                     confirmChangesBtn: {
                         isDisabled: false,
-                        // isPressed: false,
                     },
                     status: '',
-                    inputFieldsValue: {},
-                    productList: [{}],
+                    inputFieldsValue: {
+                        clientName: '',
+                        phone: '',
+                        paidCheckbox: false,
+                        sentCheckbox: false
+                    },
+                    productList: [],
                 },
                 table: {
                     isResponsive: true,
@@ -285,7 +283,11 @@
                 let items = this.orderModal.productList;
                 return items.length
             },
-
+            phoneNumber() {
+                if (this.orderModal.inputFieldsValue.phone) {
+                    return this.orderModal.inputFieldsValue.phone.replace(/[^0-9a-zA-Z+]/g, '')
+                }
+            },
         },
         methods: {
             ...mapActions([
@@ -298,8 +300,12 @@
              */
             createOrdersHandler() {
                 let orderModal = this.orderModal;
+
                 orderModal.status = 'create';
                 orderModal.isVisible = true;
+                orderModal.productList = [{}];
+                this.$set(orderModal.productList, 'id', '1');
+
                 console.log(this.products);
             },
             editOrderHandler() {
@@ -321,32 +327,59 @@
 
             closeModal() {
                 let orderModal = this.orderModal;
+                let inputFieldsValue = this.orderModal.inputFieldsValue;
 
                 orderModal.isVisible = false;
                 orderModal.confirmChangesBtn.isDisabled = false;
-                orderModal.confirmChangesBtn.isPressed = false;
-                orderModal.inputFieldsValue = {};
                 orderModal.productList = [{}];
                 orderModal.status = '';
+
+                inputFieldsValue.clientName = '';
+                inputFieldsValue.phone = '';
+                inputFieldsValue.paidCheckbox = false;
+                inputFieldsValue.sentCheckbox = false;
             },
             hasDuplicate(values) {
-                console.log(values);
-                let isDuplicate;
+                let isDuplicate = false;
                 values
                     .map(v => v.selected)
                     .sort()
                     .sort((a, b) => {
-                        return (a === b) ? isDuplicate = true : isDuplicate = false;
+                        if (a === b) {
+                            return isDuplicate = true
+                        }
                     });
-                console.log(isDuplicate);
                 return isDuplicate;
             },
             onConfirm() {
-                this.orderModal.confirmChangesBtn.isPressed = true;
                 this.$validator.validateAll()
                     .then((response, reject) => {
+                        let selectList = document.querySelectorAll('.productList .select2');
+
                         if (this.hasDuplicate(this.orderModal.productList) === true || this.errors.items.length !== 0) {
                             console.log(this.errors.items.length);
+                            console.log(this.errors.items);
+
+                            if (this.hasDuplicate(this.orderModal.productList) === true) {
+                                selectList.forEach((item, index) => {
+                                    selectList[index].previousElementSibling.classList.add('is-invalid');
+                                });
+                            } else {
+                                selectList.forEach((item, index) => {
+                                    selectList[index].previousElementSibling.classList.remove('is-invalid');
+                                });
+                            }
+                            
+                            if (this.errors.items.length !== 0) {
+                                selectList.forEach((item, index) => {
+                                    if (item.previousElementSibling.classList.contains('hasError')) {
+                                        selectList[index].previousElementSibling.classList.add('is-invalid');
+                                        console.log(selectList[index].previousElementSibling);
+                                    }
+                                });
+                            }
+
+
                             reject;
                         } else {
                             console.log(response);
@@ -421,52 +454,9 @@
             }
         }
         .input-group {
-
-            & /deep/ [aria-invalid="true"] {
-                &[hasvalidate="true"] ~ .select2 .select2-selection.select2-selection--single {
-                    border-color: $red;
-                }
-            }
-            & /deep/ .select2-container {
-                &.select2-container--default {
-                    .select2-selection--single {
-                        width: 100%;
-                        height: calc(2.25rem + 2px);
-                        padding: 0.375rem rem(20) 0.375rem 0.75rem;
-                        font-size: 1rem;
-                        line-height: 1.5;
-                        color: $gray-700;
-                        background-color: #fff;
-                        background-clip: padding-box;
-                        border: 1px solid $gray-400;
-                        border-top-right-radius: 0;
-                        border-bottom-right-radius: 0;
-                        .select2-selection__placeholder {
-                            color: $gray-400;
-                        }
-                        .select2-selection__rendered {
-                            padding: 0;
-                        }
-                        .select2-selection__arrow {
-                            height: 2.25rem;
-                        }
-                    }
-                }
-            }
-
             &__select-wraper {
                 width: calc(100% - 138px);
             }
-        }
-    }
-
-    .select {
-        width: 100%;
-    }
-
-    @media (min-width: map-get($grid-breakpoints, "sm")) {
-        .select {
-            width: calc(100% - 138px) !important;
         }
     }
 
@@ -480,11 +470,6 @@
         }
         &__item + &__item {
             margin-top: rem(5);
-        }
-    }
-    .productList__item{
-        * + .invalid-feedback {
-            display: initial;
         }
     }
 

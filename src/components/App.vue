@@ -36,9 +36,9 @@
         }
     }
 
-    [aria-invalid="true"] ~ .invalid-feedback {
-        display: block;
-    }
+    /*[aria-invalid="true"] ~ .invalid-feedback {*/
+        /*display: block;*/
+    /*}*/
 
     .invalid-feedback {
         font-size: rem(12);

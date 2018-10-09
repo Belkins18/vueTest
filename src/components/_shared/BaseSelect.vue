@@ -1,5 +1,5 @@
 <template>
-    <select class="form-control"
+    <select class="custom-select"
             :class="{
                 [`${classes}`]: classes,
             }"
@@ -54,22 +54,24 @@
         },
         watch: {
             value: function (value) {
-                $(this.$el).val(value).trigger('change');
+                let select = $(this.$el);
+
+                select.val(value).trigger('change');
+                select.removeClass('is-invalid');
             },
 
             options: function (options) {
                 let select = $(this.$el);
-                select
-                    .select2({
+
+                select.select2({
                         data: options,
                         placeholder: 'Select',
                         width: '100%',
                         theme: 'default',
                         allowClear: this.clear !== '' ? this.clear : false
-                        })
+                    })
                     .val(this.value)
-                    .trigger('change')
-                
+                    .trigger('change');
             }
         },
         methods: {
@@ -79,8 +81,8 @@
 
             init(data) {
                 let select = $(this.$el);
-                select
-                    .select2({
+
+                select.select2({
                         templateResult: this.formatState,
                         data: data,
                         placeholder: 'Select',
@@ -97,6 +99,7 @@
             formatOptions() {
                 let parseData = JSON.parse(JSON.stringify(this.products));
                 let normalData = Object.values(parseData);
+
                 normalData.forEach((element) => {
                     this.select2data.push({
                         key: element.key,
@@ -110,6 +113,7 @@
                 if (!state.id) {
                     return state.text;
                 }
+
                 return (!state.image)
                     ? ($(`<span>${state.text}</span>`))
                     : ($(`
@@ -132,8 +136,57 @@
 </script>
 
 <style lang="scss" scoped>
+    .custom-select {
+        display: none;
+        ~ {
+            & /deep/ .select2-container {
+                &.select2-container--default {
+                    .select2-selection--single {
+                        width: 100%;
+                        display: inline-flex;
+                        align-items: center;
+                        height: rem(38);
+                        padding: 0 rem(20) 0 rem(10);
+                        font-size: 1rem;
+                        line-height: 1.5;
+                        color: $gray-700;
+                        background-color: #fff;
+                        background-clip: padding-box;
+                        border: 1px solid $gray-400;
+                        border-top-right-radius: 0;
+                        border-bottom-right-radius: 0;
+                        .select2-selection__placeholder {
+                            color: $gray-400;
+                        }
+                        .select2-selection__rendered {
+                            padding: 0;
+                        }
+                        .select2-selection__arrow {
+                            height: rem(36);
+                            top: rem(1);
+                            right: rem(1);
+                        }
+                    }
+                }
+            }
+        }
+    }
 
-    .select2-container--default .select2-selection--single .select2-selection__rendered {
-        line-height: 1.5;
+    .custom-select.is-invalid ~ {
+        & /deep/ .select2-container {
+            &.select2-container--default {
+                .select2-selection--single {
+                    position: relative;
+                    border-color: $red;
+                    z-index: 2;
+
+                    .select2-selection__arrow {
+                        height: rem(36);
+                        top: rem(0);
+                        right: rem(0);
+                    }
+                }
+            }
+        }
     }
 </style>

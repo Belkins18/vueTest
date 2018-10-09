@@ -38,7 +38,7 @@
         <div class="card-footer">
             <div class="row align-items-center justify-content-center">
                 <div class="col-4">
-                    <BaseButton :nativeType="'submit'" type="primary" block="true" outline="true">Sign In</BaseButton>
+                    <BaseButton :nativeType="'submit'" type="primary" :block="true" :outline="true">Sign In</BaseButton>
                 </div>
             </div>
         </div>

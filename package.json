@@ -20,6 +20,7 @@
     "select2": "^4.0.6-rc.1",
     "vee-validate": "^2.1.0-beta.9",
     "vue": "^2.5.17",
+    "vue-masked-input": "^0.5.2",
     "vue-router": "^3.0.1",
     "vue-text-mask": "^6.1.2",
     "vue-wait": "^1.3.2",
