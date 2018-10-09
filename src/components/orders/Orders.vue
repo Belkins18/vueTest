@@ -49,7 +49,7 @@
                     @close="closeModal"
                     classes="orders__modal"
                     :isVisible.sync="orderModal.isVisible"
-                    :title="(orderModal.status === 'edit' ? 'Save changes' : orderModal.status === 'create' ? 'Create product' : null)">
+                    :title="(orderModal.status === 'edit' ? 'Save changes' : orderModal.status === 'create' ? 'Create order' : null)">
                 <div slot="modal-body">
                     <form autocomplete="off">
                         <input autocomplete="false" name="hidden" type="text" style="display:none;">
@@ -113,7 +113,7 @@
                             <label class="col-sm-2 col-form-label" for="oreder_clientName">Client Name</label>
                             <div class="col-sm-10">
                                 <input
-                                        name="clientName" v-model="orderModal.inputFieldsValue.clientName"
+                                        name="clientName" v-model="orderModal.formFields.clientName"
                                         v-validate="'required|alpha_spaces'"
                                         :class="{'form-control': true, 'is-invalid': errors.has('clientName') }"
                                         id="oreder_clientName" type="text" placeholder="Name">
@@ -123,7 +123,7 @@
                         <div class="form-group row">
                             <label class="col-sm-2 col-form-label" for="oreder_phone">Phone</label>
                             <div class="col-sm-10">
-                                <MaskedInput v-model="orderModal.inputFieldsValue.phone"
+                                <MaskedInput v-model="orderModal.formFields.phone"
                                              name="phone"
                                              mask="\+\8 (111) 111-1111"
                                              :class="{'is-invalid': errors.has('phone')}"
@@ -145,7 +145,7 @@
                                                       name="paidCheckbox"
                                                       aria-describedby="paidCheckboxHelp"
                                                       :isMargin="false"
-                                                      v-model="orderModal.inputFieldsValue.paidCheckbox">Paid
+                                                      v-model="orderModal.formFields.paidCheckbox">Paid
                                         </BaseCheckbox>
                                         <small id="paidCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
                                             errors.first('paidCheckbox') }}
@@ -156,7 +156,7 @@
                                                       name="sentCheckbox"
                                                       aria-describedby="sentCheckboxHelp"
                                                       :isMargin="false"
-                                                      v-model="orderModal.inputFieldsValue.sentCheckbox">Sent
+                                                      v-model="orderModal.formFields.sentCheckbox">Sent
                                         </BaseCheckbox>
                                         <small id="sentCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
                                             errors.first('sentCheckbox') }}
@@ -176,7 +176,7 @@
                     <BaseButton type="secondary"
                                 :outline="true"
                                 :disabled="orderModal.confirmChangesBtn.isDisabled"
-                                @click="onConfirm()"> Save
+                                @click="onConfirm()"> Accept
                     </BaseButton>
                 </div>
             </BaseModal>
@@ -231,12 +231,13 @@
         data() {
             return {
                 orderModal: {
+                    data: {},
                     isVisible: false,
                     confirmChangesBtn: {
                         isDisabled: false,
                     },
                     status: '',
-                    inputFieldsValue: {
+                    formFields: {
                         clientName: '',
                         phone: '',
                         paidCheckbox: false,
@@ -282,8 +283,8 @@
                 return items.length
             },
             phoneNumber() {
-                if (this.orderModal.inputFieldsValue.phone) {
-                    return this.orderModal.inputFieldsValue.phone.replace(/[^0-9a-zA-Z+]/g, '')
+                if (this.orderModal.formFields.phone) {
+                    return this.orderModal.formFields.phone.replace(/[^0-9a-zA-Z+]/g, '')
                 }
             },
         },
@@ -325,20 +326,21 @@
 
             closeModal() {
                 let orderModal = this.orderModal;
-                let inputFieldsValue = this.orderModal.inputFieldsValue;
+                let formFields = this.orderModal.formFields;
 
                 orderModal.isVisible = false;
                 orderModal.confirmChangesBtn.isDisabled = false;
                 orderModal.productList = [{}];
                 orderModal.status = '';
 
-                inputFieldsValue.clientName = '';
-                inputFieldsValue.phone = '';
-                inputFieldsValue.paidCheckbox = false;
-                inputFieldsValue.sentCheckbox = false;
+                formFields.clientName = '';
+                formFields.phone = '';
+                formFields.paidCheckbox = false;
+                formFields.sentCheckbox = false;
             },
             hasDuplicate(values) {
                 let isDuplicate = false;
+
                 values
                     .map(v => v.selected)
                     .sort()
@@ -347,16 +349,39 @@
                             return isDuplicate = true
                         }
                     });
+
                 return isDuplicate;
             },
+
+            onCreateOrder() {
+                console.log("allGood");
+                let orderModal = this.orderModal;
+                let formFields = this.orderModal.formFields;
+                let data = this.orderModal.data;
+
+                orderModal.confirmChangesBtn.isDisabled = true;
+
+            },
+            onEditOrder() {
+
+            },
+
+            /**
+             * В зависимости от статуса при котором было открыто модальное окно
+             * выполняет создание / ркдактирование заказа
+             *
+             * @methods {onCreateOrder}
+             *          {onEditOrder}
+             *
+             */
             onConfirm() {
+                let status = this.orderModal.status;
+
                 this.$validator.validateAll()
-                    .then((response, reject) => {
+                    .then((result) => {
                         let selectList = document.querySelectorAll('.productList .select2');
 
                         if (this.hasDuplicate(this.orderModal.productList) === true || this.errors.items.length !== 0) {
-                            console.log(this.errors.items.length);
-                            console.log(this.errors.items);
 
                             if (this.hasDuplicate(this.orderModal.productList) === true) {
                                 selectList.forEach((item, index) => {
@@ -376,29 +401,12 @@
                                     }
                                 });
                             }
-
-
-                            reject;
                         } else {
-                            console.log(response);
-                            response;
+                            if (result && status === 'create')
+                                this.onCreateOrder();
+                            if (result && status === 'edit')
+                                this.onEditOrder();
                         }
-                        // if(this.errors.items.length === 0) {
-                        //     console.log(response);
-                        //     response;
-                        // } else {
-                        //     console.log(this.errors.items.length);
-                        //     // let isDuplicate;
-                        //     // this.orderModal.productList
-                        //     //     .map(v => v.selected)
-                        //     //     .sort()
-                        //     //     .sort((a, b) => {
-                        //     //         return (a === b) ? isDuplicate = true : isDuplicate = false;
-                        //     //     });
-                        //     // console.log(isDuplicate);
-                        //     this.hasDuplicate(this.orderModal.productList);
-                        //     reject;
-                        // }
                     });
             }
 
