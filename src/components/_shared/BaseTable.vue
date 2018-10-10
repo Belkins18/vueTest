@@ -73,6 +73,7 @@
             min-width: $table-min-width;
             box-shadow: $el-box-shadow;
         }
+        tr > th,
         tr > td {
             vertical-align: middle;
             white-space: nowrap;

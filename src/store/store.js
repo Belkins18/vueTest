@@ -14,12 +14,14 @@ const SET_LOGGED_IN = 'SET_LOGGED_IN';
 const SET_LOGGED_OFF = 'SET_LOGGED_OFF';
 const SAVE_USERS = 'SAVE_USERS';
 const SAVE_PRODUCTS = 'SAVE_PRODUCTS';
+const SAVE_ORDERS = 'SAVE_ORDERS';
 
 const state = {
     pending: false,
     isLoggedIn: !!localStorage.getItem(USER_LS),
     user: JSON.parse(localStorage.getItem('user')) || null,
     products: [],
+    orders: [],
     users: [],
 };
 
@@ -52,6 +54,9 @@ const mutations = {
 
     [SAVE_PRODUCTS](state, payload) {
         state.products = payload
+    },
+    [SAVE_ORDERS](state, payload) {
+        state.orders = payload
     },
     [SAVE_USERS](state, payload) {
         state.users = payload
@@ -180,6 +185,20 @@ const actions = {
             resolve(path)
         });
     },
+    /**
+     * Action создания ордера
+     */
+    createOrder(_, payload) {
+        return new Promise((resolve) => {
+            let databaseRef = firebase.database().ref('/orders');
+            let newOrderRef = databaseRef.push();
+
+            newOrderRef.set(payload);
+            let path = newOrderRef.toString();
+
+            resolve(path)
+        });
+    },
 
     /**
      * Action редактирования продукта
@@ -187,6 +206,16 @@ const actions = {
     editProduct(_, payload) {
         return new firebase.database()
             .ref(`/products/${payload.editElement}`)
+            .update(payload.editedResults)
+            .then(() => payload.editedResults)
+    },
+
+    /**
+     * Action редактирования продукта
+     */
+    editOrder(_, payload) {
+        return new firebase.database()
+            .ref(`/orders/${payload.editElement}`)
             .update(payload.editedResults)
             .then(() => payload.editedResults)
     },
@@ -217,7 +246,21 @@ const actions = {
                 return snapshot.val();
             })
     },
+    /**
+     * Action получение снимка (списка) продуктов
+     */
+    getOrderList({commit}) {
+        commit(PENDING_STATUS_ON);
 
+        return new firebase.database()
+            .ref('/orders')
+            .once("value")
+            .then((snapshot) => {
+                commit(SAVE_ORDERS, snapshot.val());
+                commit(PENDING_STATUS_OFF);
+                return snapshot.val();
+            })
+    },
     /**
      * Action получение снимка (списка) всех пользователей
      */
@@ -228,6 +271,7 @@ const actions = {
                 return snapshot.val();
             })
     },
+
 };
 
 export default new Vuex.Store({

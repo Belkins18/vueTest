@@ -12,19 +12,21 @@
                 <tr slot="tableHead">
                     <th v-for="(headName, index) in table.data.headNames" :key='index'>{{headName}}</th>
                 </tr>
-                <tr v-for="(order, index) in table.data.bodyContent" :key='order.id' slot="tableBody">
+                <tr v-for="(order, index) in orders" :key='order.id' slot="tableBody">
                     <td>{{ order.id }}</td>
                     <td>{{ order.date }}</td>
                     <td>
                         <ul class="orders__product-list productList">
-                            <li v-for="product in products" :key='product.id' class="productList__item">{{ product.name }} x {{ product.stock }}</li>
+                            <li v-for="product in products" :key='product.id' class="productList__item">{{ product.name
+                                }} x {{ product.stock }}
+                            </li>
                         </ul>
                     </td>
                     <td>{{ order.clientName }}</td>
                     <td>{{ order.phone }}</td>
                     <td>{{ order.total }}</td>
-                    <td>{{ order.paid }}</td>
-                    <td>{{ order.sent }}</td>
+                    <td>{{ order.checkboxPaid }}</td>
+                    <td>{{ order.checkboxSent }}</td>
                     <td>
                         <div style="display: flex; align-items: center">
                             <BaseButton classes="orders__btn"
@@ -49,7 +51,7 @@
                     @close="closeModal"
                     classes="orders__modal"
                     :isVisible.sync="orderModal.isVisible"
-                    :title="(orderModal.status === 'edit' ? 'Save changes' : orderModal.status === 'create' ? 'Create order' : null)">
+                    :title="(orderModal.status === 'edit' ? 'Edit order' : orderModal.status === 'create' ? 'Create order' : null)">
                 <div slot="modal-body">
                     <form autocomplete="off">
                         <input autocomplete="false" name="hidden" type="text" style="display:none;">
@@ -141,25 +143,25 @@
                             <div class="col-sm-10 offset-sm-2">
                                 <ul class="checkboxList">
                                     <li class="checkboxList__item">
-                                        <BaseCheckbox id='paidCheckbox'
-                                                      name="paidCheckbox"
-                                                      aria-describedby="paidCheckboxHelp"
+                                        <BaseCheckbox id='checkboxPaid'
+                                                      name="checkboxPaid"
+                                                      aria-describedby="checkboxPaidHelp"
                                                       :isMargin="false"
-                                                      v-model="orderModal.formFields.paidCheckbox">Paid
+                                                      v-model="orderModal.formFields.checkboxPaid">Paid
                                         </BaseCheckbox>
-                                        <small id="paidCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
-                                            errors.first('paidCheckbox') }}
+                                        <small id="checkboxPaidHelp" class="checkboxList__error invalid-feedback"> {{
+                                            errors.first('checkboxPaid') }}
                                         </small>
                                     </li>
                                     <li class="checkboxList__item">
-                                        <BaseCheckbox id='sentCheckbox'
-                                                      name="sentCheckbox"
-                                                      aria-describedby="sentCheckboxHelp"
+                                        <BaseCheckbox id='checkboxSent'
+                                                      name="checkboxSent"
+                                                      aria-describedby="checkboxSentHelp"
                                                       :isMargin="false"
-                                                      v-model="orderModal.formFields.sentCheckbox">Sent
+                                                      v-model="orderModal.formFields.checkboxSent">Sent
                                         </BaseCheckbox>
-                                        <small id="sentCheckboxHelp" class="checkboxList__error invalid-feedback"> {{
-                                            errors.first('sentCheckbox') }}
+                                        <small id="checkboxSentHelp" class="checkboxList__error invalid-feedback"> {{
+                                            errors.first('checkboxSent') }}
                                         </small>
                                     </li>
                                 </ul>
@@ -189,6 +191,7 @@
     import VeeValidate from 'vee-validate';
     import MaskedInput from 'vue-masked-input'
     import {mapActions} from 'vuex';
+    import {cloneDeep} from "lodash";
 
     import BaseButton from '@/components/_shared/BaseButton';
     import BaseTable from '@/components/_shared/BaseTable';
@@ -238,10 +241,12 @@
                     },
                     status: '',
                     formFields: {
+                        id: '',
+                        key: '',
                         clientName: '',
                         phone: '',
-                        paidCheckbox: false,
-                        sentCheckbox: false
+                        checkboxPaid: false,
+                        checkboxSent: false
                     },
                     productList: [],
                 },
@@ -278,6 +283,9 @@
             products() {
                 return this.$store.state.products;
             },
+            orders() {
+                return this.$store.state.orders;
+            },
             ordersProductsList() {
                 let items = this.orderModal.productList;
                 return items.length
@@ -290,7 +298,10 @@
         },
         methods: {
             ...mapActions([
+                'createOrder',
+                'editOrder',
                 'getProductList',
+                'getOrderList',
             ]),
             // ОТКРыВАНИЕ МОДАЛЬНыХ ОКОН
             /**
@@ -332,11 +343,33 @@
                 orderModal.confirmChangesBtn.isDisabled = false;
                 orderModal.productList = [{}];
                 orderModal.status = '';
+                orderModal.data = {};
 
+                formFields.id = '';
+                formFields.key = '';
                 formFields.clientName = '';
                 formFields.phone = '';
-                formFields.paidCheckbox = false;
-                formFields.sentCheckbox = false;
+                formFields.checkboxPaid = false;
+                formFields.checkboxSent = false;
+            },
+
+
+            getKeyInDBPath(path) {
+                let routePath = `/${this.$route.name}/`;
+                let startnum = path.indexOf(routePath) + routePath.length;
+                let key = path.slice(startnum, path.length);
+
+                return key;
+            },
+            getProductCalcAttribute(products) {
+                Object.values(JSON.parse(JSON.stringify(products)))
+                    .forEach((product) => {
+                        return {
+                            productKey: product.key,
+                            productPrice: product.price,
+                            productStock: product.stock,
+                        };
+                    });
             },
             hasDuplicate(values) {
                 let isDuplicate = false;
@@ -352,15 +385,79 @@
 
                 return isDuplicate;
             },
+            calculateTotal(key) {
+                let formFields = this.orderModal.formFields;
+                let total = (count, price) => count * price;
+
+                this.getOrderList()
+                    .then(() => {
+                        let array = this.orders[key].productList;
+                        const sum = (...values) => {
+                            return values.reduce((total, value) => {
+                                return total + value;
+                            }, 0);
+                        };
+
+                        array.forEach((order) => {
+                            let productObj;
+
+                            Object.values(JSON.parse(JSON.stringify(this.products)))
+                                .forEach((product) => {
+                                    if (product.id === order.selected) {
+                                        productObj = {
+                                            productKey: product.key,
+                                            productPrice: product.price,
+                                            productStock: product.stock,
+                                        };
+                                        return productObj;
+                                    }
+                                });
+
+                            console.log(sum(...total(order.productCount, productObj.productPrice)));
+
+                        });
+                        // this.$set(formFields, 'total', total(order.productCount, productObj.productPrice));
+
+                        // let updatedData = {
+                        //     editedResults: cloneDeep(formFields),
+                        //     editElement:  key
+                        // };
+                        //
+                        // this.editOrder(updatedData)
+                    });
+            },
 
             onCreateOrder() {
                 console.log("allGood");
                 let orderModal = this.orderModal;
                 let formFields = this.orderModal.formFields;
-                let data = this.orderModal.data;
 
+                formFields.id = 'order@_' + Math.random().toString(36).substr(2, 6);
+                this.$set(formFields, 'productList', cloneDeep(orderModal.productList));
                 orderModal.confirmChangesBtn.isDisabled = true;
 
+
+                this.createOrder(formFields)
+                    .then((path) => {
+                        return this.getKeyInDBPath(path);
+                    })
+                    .then((key) => {
+                        this.$set(formFields, 'key', key);
+
+                        let updatedData = {
+                            editedResults: cloneDeep(formFields),
+                            editElement: formFields.key
+                        };
+
+                        this.editOrder(updatedData)
+                            .then(() => {
+                                this.calculateTotal(key);
+                            });
+
+                        return key;
+                    })
+
+                // console.log(Object.values(JSON.parse(JSON.stringify(this.products))));
             },
             onEditOrder() {
 
@@ -413,6 +510,7 @@
         },
         created() {
             this.getProductList();
+            this.getOrderList();
         },
     }
 </script>
@@ -428,6 +526,13 @@
         }
         &__btn + &__btn {
             margin: rem(5);
+        }
+    }
+
+    .table {
+        .productList {
+            margin: 0;
+            padding: 0;
         }
     }
 

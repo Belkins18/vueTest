@@ -484,7 +484,7 @@
                 let formFields = this.productModal.formFields;
                 let fileLoadInfo = this.productModal.fileLoadInfo;
 
-                formFields.id = '_' + Math.random().toString(36).substr(2, 9);
+                formFields.id = 'product@_' + Math.random().toString(36).substr(2, 6);
                 productModal.confirmChangesBtn.isDisabled = true;
 
                 const addProductFunc = () => {
