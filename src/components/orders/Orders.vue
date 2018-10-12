@@ -19,8 +19,9 @@
 					<td>{{ order.date }}</td>
 					<td>
 						<ul class="orders__product-list productList">
-							<li v-for="product in products" :key='product.id' class="productList__item">{{ product.name
-								}} x {{ product.stock }}
+							<li v-for="product in order.productList" :key='product.selected.id' class="productList__item">
+								<span class="productList__val">{{ product.selected.text }} <small>x</small> {{ product.productCount }}</span>
+								<span class="productList__cur">({{'₴ ' + parseInt(product.selected.price, 10) * parseInt(product.productCount, 10) }})</span>
 							</li>
 						</ul>
 					</td>
@@ -329,6 +330,9 @@
 					return this.orderModal.formFields.phone.replace(/[^0-9a-zA-Z+]/g, '')
 				}
 			},
+			calcPriceProduct (price, count) {
+				return price * count;
+			}
 		},
 		methods: {
 			...mapActions([
@@ -619,10 +623,29 @@
 			padding: 0;
 			margin: 0;
 			display: flex;
-			flex-direction: column;
+			flex-wrap: wrap;
+			align-items: center;
+			/*flex-direction: column;*/
+		}
+		&__val{
+			display: inline-flex;
+			align-items: center;
+			small {
+				display: inline-flex;
+				line-height: 1;
+				font-size: rem(10);
+				margin: 0 rem(2);
+			}
+		}
+		&__cur {
+			font-size: rem(12);
+			color: $gray-400;
+		}
+		* + &__cur {
+			margin-left: rem(5);
 		}
 		&__item + &__item {
-			margin-top: rem(5);
+			margin-top: rem(0);
 		}
 	}
 
