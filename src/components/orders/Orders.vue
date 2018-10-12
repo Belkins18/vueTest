@@ -19,7 +19,8 @@
 					<td>{{ order.date }}</td>
 					<td>
 						<ul class="orders__product-list productList">
-							<li v-for="product in order.productList" :key='product.selected.id' class="productList__item">
+							<li v-for="product in order.productList" :key='product.selected.id'
+								class="productList__item">
 								<span class="productList__val">{{ product.selected.text }} <small>x</small> {{ product.productCount }}</span>
 								<span class="productList__cur">({{'₴ ' + parseInt(product.selected.price, 10) * parseInt(product.productCount, 10) }})</span>
 							</li>
@@ -60,6 +61,20 @@
 				<div slot="modal-body">
 					<form autocomplete="off">
 						<input autocomplete="false" name="hidden" type="text" style="display:none;">
+						<div class="form-group row">
+							<label class="col-sm-2 col-form-label">Date</label>
+							<div class="col-sm-10">
+								<Datepicker
+										name="datepicker"
+										:class="{'is-invalid': errors.has('datepicker')}"
+										:input-class="{'form-control': true, 'is-invalid': errors.has('datepicker')}"
+										:disabledDates="state.disabledDates"
+										:format="'yyyy-MM-dd'"
+										v-model="orderModal.formFields.date">
+								</Datepicker>
+								<!--<small class="invalid-feedback"> {{ errors.first('datepicker') }}</small>-->
+							</div>
+						</div>
 						<div class="form-group ">
 							<div class="row">
 								<label class="col-sm-2 col-form-label">Product</label>
@@ -67,19 +82,6 @@
 									<li class='productList__item'
 										v-for='(item, index) in orderModal.formFields.productList'
 										:key='item + "__" + index'>
-										<!--<BaseSelect-->
-										<!--:options="products"-->
-										<!--:class="{'hasError': errors.has('baseSelect_'+ index) }"-->
-										<!--:id="'baseSelect_' + index"-->
-										<!--:name="'baseSelect_' + index"-->
-										<!--:aria-describedby="'baseSelectHelp_' + index"-->
-										<!--customData="products"-->
-										<!--v-validate="'required'"-->
-										<!--v-model="item.selected">-->
-										<!--</BaseSelect>-->
-										<!--<small :id="'baseSelectHelp_'+ index" class="invalid-feedback">{{-->
-										<!--errors.first('baseSelect_'+ index)}}-->
-										<!--</small>-->
 										<div class="input-group">
 											<div class="input-group__select-wraper">
 												<Multiselect
@@ -99,7 +101,6 @@
 												<small :id="'multiselectHelp_'+ index" class="invalid-feedback">{{
 													errors.first('multiselect_'+ index)}}
 												</small>
-
 											</div>
 											<div class="input-group-append">
 												<input
@@ -222,7 +223,8 @@
 	import Vue from 'vue'
 	import VeeValidate from 'vee-validate';
 	import MaskedInput from 'vue-masked-input'
-	import Multiselect from 'vue-multiselect'
+	import Multiselect from 'vue-multiselect';
+	import Datepicker from 'vuejs-datepicker';
 	import {mapActions} from 'vuex';
 	// import {cloneDeep} from "lodash";
 
@@ -264,6 +266,7 @@
 			Multiselect,
 			BaseCheckbox,
 			MaskedInput,
+			Datepicker,
 		},
 		data() {
 			return {
@@ -276,6 +279,7 @@
 					},
 					status: '',
 					formFields: {
+						date: '',
 						id: '',
 						key: '',
 						clientName: '',
@@ -303,6 +307,36 @@
 
 					}
 				},
+				state: {
+					disabledDates: {
+						to: new Date(2018, 9, 12), // Disable all dates up to specific date
+						// from: new Date(2016, 0, 26), // Disable all dates after specific date
+						// days: [6, 0], // Disable Saturday's and Sunday's
+						// daysOfMonth: [29, 30, 31], // Disable 29th, 30th and 31st of each month
+						// dates: [ // Disable an array of dates
+						// 	new Date(2016, 9, 16),
+						// 	new Date(2016, 9, 17),
+						// 	new Date(2016, 9, 18)
+						// ],
+						// ranges: [{ // Disable dates in given ranges (exclusive).
+						// 	from: new Date(2016, 11, 25),
+						// 	to: new Date(2016, 11, 30)
+						// }, {
+						// 	from: new Date(2017, 1, 12),
+						// 	to: new Date(2017, 2, 25)
+						// }],
+						// // a custom function that returns true if the date is disabled
+						// // this can be used for wiring you own logic to disable a date if none
+						// // of the above conditions serve your purpose
+						// // this function should accept a date and return true if is disabled
+						// customPredictor: function (date) {
+						// 	// disables the date if it is a multiple of 5
+						// 	if (date.getDate() % 7 == 0) {
+						// 		return true
+						// 	}
+						// }
+					}
+				}
 			}
 		},
 		// watch: {
@@ -330,9 +364,7 @@
 					return this.orderModal.formFields.phone.replace(/[^0-9a-zA-Z+]/g, '')
 				}
 			},
-			calcPriceProduct (price, count) {
-				return price * count;
-			}
+
 		},
 		methods: {
 			...mapActions([
@@ -400,6 +432,7 @@
 
 				formFields.id = '';
 				formFields.key = '';
+				formFields.date = '';
 				formFields.clientName = '';
 				formFields.phone = '';
 				formFields.checkboxPaid = false;
@@ -627,7 +660,7 @@
 			align-items: center;
 			/*flex-direction: column;*/
 		}
-		&__val{
+		&__val {
 			display: inline-flex;
 			align-items: center;
 			small {
@@ -645,7 +678,7 @@
 			margin-left: rem(5);
 		}
 		&__item + &__item {
-			margin-top: rem(0);
+			margin-top: rem(5);
 		}
 	}
 
@@ -716,19 +749,24 @@
 			}
 		}
 	}
+
 	.multiselect.hasError.is-invalid {
 		& /deep/ .multiselect__tags {
 			border-color: $red;
 		}
-		+ .invalid-feedback {
+		~ .invalid-feedback {
 			display: block;
 		}
 	}
+
 	.multiselect.multiselect--active {
 		& /deep/ .multiselect__tags {
 			border-bottom-left-radius: 0
 		}
 	}
 
+	.vdp-datepicker.is-invalid ~ .invalid-feedback {
+		display: block;
+	}
 
 </style>
