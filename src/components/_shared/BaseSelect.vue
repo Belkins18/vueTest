@@ -5,7 +5,8 @@
             }"
             :customData="customData"
             :name="name"
-            :multiple="multiple"></select>
+            :multiple="multiple">
+    </select>
 </template>
 
 <script>
