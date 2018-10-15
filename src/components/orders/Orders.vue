@@ -73,7 +73,7 @@
 										v-validate="'required'"
 										v-model="orderModal.formFields.date">
 								</Datepicker>
-								<!--<small class="invalid-feedback"> {{ errors.first('datepicker') }}</small>-->
+								<small class="invalid-feedback"> {{ errors.first('datepicker') }}</small>
 							</div>
 						</div>
 						<div class="form-group ">
@@ -456,7 +456,9 @@
 				formFields.productList = [{}];
 			},
 
-
+			getNthParent(elem, n) {
+				return n === 0 ? elem : this.getNthParent(elem.parentNode, n - 1);
+			},
 			getKeyInDBPath(path) {
 				let routePath = `/${this.$route.name}/`;
 				let startnum = path.indexOf(routePath) + routePath.length;
@@ -471,11 +473,10 @@
 					.map(v => v.selected)
 					.sort()
 					.sort((a, b) => {
-						if (a === b) {
+						if (a === b)
 							return isDuplicate = true
-						}
 					});
-				console.log(isDuplicate);
+
 				return isDuplicate;
 			},
 			/*
@@ -569,53 +570,69 @@
 			onConfirm() {
 				let status = this.orderModal.status;
 				let vm = this;
+
 				this.$validator.validateAll()
 					.then((result) => {
-						let productList = document.querySelector('.productList');
-						let inputGroup = productList.querySelectorAll('.input-group');
-						let selectList = productList.querySelectorAll('.multiselect');
+						let inputGroup = document.querySelectorAll('.productList .input-group');
+						let selectList = document.querySelectorAll('.productList .input-group .multiselect');
 
 						if (this.hasDuplicate(this.orderModal.formFields.productList) === true || this.errors.items.length !== 0) {
+							(this.hasDuplicate(this.orderModal.formFields.productList) === true)
+								? (
+									selectList.forEach((item) => {
+										item.classList.add('is-invalid')
+									}))
+								: (
+									selectList.forEach((item) => {
+										item.classList.remove('is-invalid')
+									}));
 
-							if (this.hasDuplicate(this.orderModal.formFields.productList) === true) {
-								selectList.forEach((item) => {
-									item.classList.add('is-invalid');
-								});
-							} else {
-								selectList.forEach((item) => {
-									item.classList.remove('is-invalid');
-								});
-							}
-
-							if (this.errors.items.length !== 0) {
+							if (this.errors.items.length !== 0)
 								selectList.forEach((item, index) => {
-									if (item.classList.contains('hasError')) {
+									if (item.classList.contains('hasError'))
 										selectList[index].classList.add('is-invalid');
-									}
 								});
-							}
+
+							inputGroup.forEach((item) => {
+								let input = item.querySelector('.input-group-append > input');
+
+								(input.classList.contains('is-invalid'))
+									? this.getNthParent(input, 2).classList.add('is-invalid')
+									: this.getNthParent(input, 2).classList.remove('is-invalid')
+							});
 						} else {
 							if (result && status === 'create') {
 								let error = false;
+
 								inputGroup.forEach((item) => {
 									let input = item.querySelector('.input-group-append > input');
 									let stock = vm.$data.orderModal.formFields.productList[item.dataset.index].selected.stock;
-									console.log();
-									console.log(item.querySelector('.input-group-append > input'));
-									if (input.value > stock) {
-										input.classList.add('is-invalid');
-										error = true;
-										return error;
+
+
+									console.log(input);
+									console.log(input.value);
+									console.log(stock);
+									debugger;
+									while (error !== true) {
+										debugger;
+
+										if (parseInt(input.value) <= parseInt(stock)) {
+											this.getNthParent(input, 2).classList.remove('is-invalid');
+											debugger;
+											return error = true;
+										} else {
+											this.getNthParent(input, 2).classList.add('is-invalid');
+											debugger;
+											return error = false;
+										}
 									}
 								});
-								// debugger;
-
-								if (!error) {
+								debugger;
+								if (error) {
 									this.onCreateOrder();
 								}
 							}
 
-							// this.onCreateOrder();
 							if (result && status === 'edit')
 								this.onEditOrder();
 						}
@@ -671,7 +688,11 @@
 			input {
 				border-radius: 0;
 			}
-
+			&.is-invalid {
+				~ .invalid-feedback {
+					display: block;
+				}
+			}
 			.input-group-append {
 				flex-wrap: wrap;
 				flex-shrink: 0;
