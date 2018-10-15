@@ -16,7 +16,7 @@
 				</tr>
 				<tr v-for="(order, index) in orders" :key='order.id' slot="tableBody">
 					<td>{{ order.id }}</td>
-					<td>{{ order.date }}</td>
+					<td>{{ order.dateFormat }}</td>
 					<td>
 						<ul class="orders__product-list productList">
 							<li v-for="product in order.productList" :key='product.selected.id'
@@ -70,6 +70,7 @@
 										:input-class="{'form-control': true, 'is-invalid': errors.has('datepicker')}"
 										:disabledDates="state.disabledDates"
 										:format="'yyyy-MM-dd'"
+										v-validate="'required'"
 										v-model="orderModal.formFields.date">
 								</Datepicker>
 								<!--<small class="invalid-feedback"> {{ errors.first('datepicker') }}</small>-->
@@ -82,7 +83,7 @@
 									<li class='productList__item'
 										v-for='(item, index) in orderModal.formFields.productList'
 										:key='item + "__" + index'>
-										<div class="input-group">
+										<div class="input-group" :data-index="index">
 											<div class="input-group__select-wraper">
 												<Multiselect
 														class="multiselect_order"
@@ -109,7 +110,7 @@
 														:class="{'form-control': true, 'is-invalid': errors.has('productCount_'+ index) }"
 														:name="'productCount_'+ index"
 														:aria-describedby="'productCountHelp_'+ index"
-														v-validate="'required|numeric|notZero'"
+														v-validate="'required|numeric|min_value:1'"
 														v-model="item.productCount">
 											</div>
 											<BaseButton
@@ -279,7 +280,8 @@
 					},
 					status: '',
 					formFields: {
-						date: '',
+						date: null,
+						dateFormat: '',
 						id: '',
 						key: '',
 						clientName: '',
@@ -359,6 +361,19 @@
 				let items = this.orderModal.formFields.productList;
 				return items.length
 			},
+			dateFormat() {
+				let date = this.orderModal.formFields.date;
+				return {
+					toString: date.toString(),
+					toDate: date.toDateString(),
+					toISO: date.toISOString(),
+					toJSON: date.toJSON(),
+					toLocaleDate: date.toLocaleDateString(),
+					toLocaleTime: date.toLocaleTimeString(),
+					toTime: date.toTimeString(),
+					toUTC: date.toUTCString(),
+				}
+			},
 			phoneNumber() {
 				if (this.orderModal.formFields.phone) {
 					return this.orderModal.formFields.phone.replace(/[^0-9a-zA-Z+]/g, '')
@@ -432,7 +447,8 @@
 
 				formFields.id = '';
 				formFields.key = '';
-				formFields.date = '';
+				formFields.date = null;
+				formFields.dateFormat = '';
 				formFields.clientName = '';
 				formFields.phone = '';
 				formFields.checkboxPaid = false;
@@ -459,7 +475,7 @@
 							return isDuplicate = true
 						}
 					});
-
+				console.log(isDuplicate);
 				return isDuplicate;
 			},
 			/*
@@ -512,9 +528,9 @@
 				let formFields = this.orderModal.formFields;
 
 				formFields.id = 'order@_' + Math.random().toString(36).substr(2, 6);
-				// this.$set(formFields, 'productList', cloneDeep(orderModal.productList));
+				formFields.dateFormat = this.dateFormat.toLocaleDate;
 				orderModal.confirmChangesBtn.isDisabled = true;
-
+				debugger;
 
 				this.createOrder(formFields)
 					.then((path) => {
@@ -552,10 +568,12 @@
 			 */
 			onConfirm() {
 				let status = this.orderModal.status;
-
+				let vm = this;
 				this.$validator.validateAll()
 					.then((result) => {
-						let selectList = document.querySelectorAll('.productList .multiselect');
+						let productList = document.querySelector('.productList');
+						let inputGroup = productList.querySelectorAll('.input-group');
+						let selectList = productList.querySelectorAll('.multiselect');
 
 						if (this.hasDuplicate(this.orderModal.formFields.productList) === true || this.errors.items.length !== 0) {
 
@@ -573,13 +591,31 @@
 								selectList.forEach((item, index) => {
 									if (item.classList.contains('hasError')) {
 										selectList[index].classList.add('is-invalid');
-										console.log(selectList[index].previousElementSibling);
 									}
 								});
 							}
 						} else {
-							if (result && status === 'create')
-								this.onCreateOrder();
+							if (result && status === 'create') {
+								let error = false;
+								inputGroup.forEach((item) => {
+									let input = item.querySelector('.input-group-append > input');
+									let stock = vm.$data.orderModal.formFields.productList[item.dataset.index].selected.stock;
+									console.log();
+									console.log(item.querySelector('.input-group-append > input'));
+									if (input.value > stock) {
+										input.classList.add('is-invalid');
+										error = true;
+										return error;
+									}
+								});
+								// debugger;
+
+								if (!error) {
+									this.onCreateOrder();
+								}
+							}
+
+							// this.onCreateOrder();
 							if (result && status === 'edit')
 								this.onEditOrder();
 						}
