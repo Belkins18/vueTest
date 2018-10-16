@@ -230,7 +230,7 @@
 	import Multiselect from 'vue-multiselect';
 	import Datepicker from 'vuejs-datepicker';
 	import {mapActions} from 'vuex';
-	// import {cloneDeep} from "lodash";
+	import {cloneDeep} from "lodash";
 
 	import BaseButton from '@/components/_shared/BaseButton';
 	import BaseTable from '@/components/_shared/BaseTable';
@@ -398,7 +398,14 @@
 
 				console.log(this.products);
 			},
-			editOrderHandler() {
+
+			editOrderHandler(order, index) {
+				let orderModal = this.orderModal;
+
+				console.log(index);
+				orderModal.status = 'edit';
+				orderModal.isVisible = true;
+				orderModal.formFields = cloneDeep(order)
 
 			},
 			removeOrderHandler() {
@@ -442,6 +449,8 @@
 				(item.selected !== null)
 					? this.$set(formFields.productList[index], 'isSelect', true)
 					: this.$set(formFields.productList[index], 'isSelect', false);
+
+
 			},
 			getNthParent(elem, n) {
 				return n === 0 ? elem : this.getNthParent(elem.parentNode, n - 1);
@@ -466,50 +475,6 @@
 
 				return isDuplicate;
 			},
-			/*
-			calculateTotal(key) {
-				let formFields = this.orderModal.formFields;
-				let total = (count, price) => count * price;
-
-				this.getOrderList()
-					.then(() => {
-						let array = this.orders[key].productList;
-						const sum = (...values) => {
-							return values.reduce((total, value) => {
-								return total + value;
-							}, 0);
-						};
-
-						array.forEach((order) => {
-							let productObj;
-
-							Object.values(JSON.parse(JSON.stringify(this.products)))
-								.forEach((product) => {
-									if (product.id === order.selected) {
-										productObj = {
-											productKey: product.key,
-											productPrice: product.price,
-											productStock: product.stock,
-										};
-										return productObj;
-									}
-								});
-
-							console.log(sum(...total(order.productCount, productObj.productPrice)));
-
-						});
-						// this.$set(formFields, 'total', total(order.productCount, productObj.productPrice));
-
-						// let updatedData = {
-						//     editedResults: cloneDeep(formFields),
-						//     editElement:  key
-						// };
-						//
-						// this.editOrder(updatedData)
-					});
-			},
-			*/
-
 			onCreateOrder() {
 				console.log("allGood");
 				let orderModal = this.orderModal;
@@ -517,30 +482,44 @@
 
 				formFields.id = 'order@_' + Math.random().toString(36).substr(2, 6);
 				formFields.dateFormat = this.dateFormat.toLocaleDate;
+				formFields.totalResult = formFields.productList.reduce( function (sum, current) {
+					return sum + (current.productCount * current.selected.price);
+				}, 0);
+				formFields.total = formFields.totalResult + ' ₴';
+
 				orderModal.confirmChangesBtn.isDisabled = true;
 				debugger;
 
 				this.createOrder(formFields)
-					.then((path) => {
+						.then((path) => {
 						return this.getKeyInDBPath(path);
 					})
 					.then((key) => {
 						this.$set(formFields, 'key', key);
+						let updatedData = {
+							editedResults: cloneDeep(formFields),
+							editElement:  key
+						};
 
-						// let updatedData = {
-						// 	editedResults: cloneDeep(formFields),
-						// 	editElement: formFields.key
-						// };
+						let dataForModified = updatedData.editedResults.map((item) => {
+							let result = {};
+							result.key = item.selected.key;
+							result.count = item.productCount;
+							return result
+						});
 
-						// this.editOrder(updatedData)
-						// 	.then(() => {
-						// 		this.calculateTotal(key);
-						// 	});
+						// dataForModified.forEach((item) => {
+						//
+						// });
 
-						return key;
+						console.log(this.products[formFields.productList.selected.key]);
+						debugger;
+						this.editOrder(updatedData);
 					})
-
-				// console.log(Object.values(JSON.parse(JSON.stringify(this.products))));
+					.then(() => {
+						this.closeModal();
+						this.getOrderList();
+					})
 			},
 			onEditOrder() {
 
@@ -556,6 +535,7 @@
 			 */
 			onConfirm() {
 				let status = this.orderModal.status;
+				let d;
 
 				this.$validator.validateAll()
 					.then((result) => {
@@ -581,13 +561,15 @@
 								});
 						} else {
 							if (result && status === 'create')
-								this.onCreateOrder();
+								// this.onCreateOrder();
+								d = this.orderModal.formFields.productList;
+								console.log(d);
+								debugger;
 							if (result && status === 'edit')
 								this.onEditOrder();
 						}
 					});
-			}
-
+			},
 		},
 		created() {
 			this.getProductList();
