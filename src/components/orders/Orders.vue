@@ -97,7 +97,8 @@
 														placeholder="Select one"
 														:aria-describedby="'multiselectHelp_' + index"
 														label="text"
-														track-by="text">
+														track-by="text"
+														@input="onMultiselectChange(index, item)">
 												</Multiselect>
 												<small :id="'multiselectHelp_'+ index" class="invalid-feedback">{{
 													errors.first('multiselect_'+ index)}}
@@ -105,12 +106,14 @@
 											</div>
 											<div class="input-group-append">
 												<input
-														type="text"
+														type="number"
 														placeholder="Count"
 														:class="{'form-control': true, 'is-invalid': errors.has('productCount_'+ index) }"
 														:name="'productCount_'+ index"
 														:aria-describedby="'productCountHelp_'+ index"
-														v-validate="'required|numeric|min_value:1'"
+														:disabled="!item.isSelect"
+														v-validate="{required: true, numeric: true, min_value: 1,
+														max_value: (!item.isSelect) ? null : item.selected.stock}"
 														v-model="item.productCount">
 											</div>
 											<BaseButton
@@ -271,6 +274,7 @@
 		},
 		data() {
 			return {
+				val: 5,
 				options: [],
 				orderModal: {
 					data: {},
@@ -311,32 +315,7 @@
 				},
 				state: {
 					disabledDates: {
-						to: new Date(2018, 9, 12), // Disable all dates up to specific date
-						// from: new Date(2016, 0, 26), // Disable all dates after specific date
-						// days: [6, 0], // Disable Saturday's and Sunday's
-						// daysOfMonth: [29, 30, 31], // Disable 29th, 30th and 31st of each month
-						// dates: [ // Disable an array of dates
-						// 	new Date(2016, 9, 16),
-						// 	new Date(2016, 9, 17),
-						// 	new Date(2016, 9, 18)
-						// ],
-						// ranges: [{ // Disable dates in given ranges (exclusive).
-						// 	from: new Date(2016, 11, 25),
-						// 	to: new Date(2016, 11, 30)
-						// }, {
-						// 	from: new Date(2017, 1, 12),
-						// 	to: new Date(2017, 2, 25)
-						// }],
-						// // a custom function that returns true if the date is disabled
-						// // this can be used for wiring you own logic to disable a date if none
-						// // of the above conditions serve your purpose
-						// // this function should accept a date and return true if is disabled
-						// customPredictor: function (date) {
-						// 	// disables the date if it is a multiple of 5
-						// 	if (date.getDate() % 7 == 0) {
-						// 		return true
-						// 	}
-						// }
+						to: new Date,
 					}
 				}
 			}
@@ -348,6 +327,7 @@
 		//         this.$refs.baseselect.options = this.products;
 		//     }
 		// },
+		watch: {},
 		mounted() {
 		},
 		computed: {
@@ -456,6 +436,13 @@
 				formFields.productList = [{}];
 			},
 
+			onMultiselectChange(index, item) {
+				let formFields = this.orderModal.formFields;
+
+				(item.selected !== null)
+					? this.$set(formFields.productList[index], 'isSelect', true)
+					: this.$set(formFields.productList[index], 'isSelect', false);
+			},
 			getNthParent(elem, n) {
 				return n === 0 ? elem : this.getNthParent(elem.parentNode, n - 1);
 			},
@@ -608,14 +595,9 @@
 									let input = item.querySelector('.input-group-append > input');
 									let stock = vm.$data.orderModal.formFields.productList[item.dataset.index].selected.stock;
 
-
-									console.log(input);
-									console.log(input.value);
-									console.log(stock);
 									debugger;
 									while (error !== true) {
 										debugger;
-
 										if (parseInt(input.value) <= parseInt(stock)) {
 											this.getNthParent(input, 2).classList.remove('is-invalid');
 											debugger;
@@ -688,10 +670,8 @@
 			input {
 				border-radius: 0;
 			}
-			&.is-invalid {
-				~ .invalid-feedback {
-					display: block;
-				}
+			~ .invalid-feedback {
+				display: block;
 			}
 			.input-group-append {
 				flex-wrap: wrap;
