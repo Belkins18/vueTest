@@ -556,22 +556,22 @@
 			 */
 			onConfirm() {
 				let status = this.orderModal.status;
-				let vm = this;
 
 				this.$validator.validateAll()
 					.then((result) => {
-						let inputGroup = document.querySelectorAll('.productList .input-group');
 						let selectList = document.querySelectorAll('.productList .input-group .multiselect');
 
 						if (this.hasDuplicate(this.orderModal.formFields.productList) === true || this.errors.items.length !== 0) {
 							(this.hasDuplicate(this.orderModal.formFields.productList) === true)
 								? (
 									selectList.forEach((item) => {
-										item.classList.add('is-invalid')
+										item.classList.add('is-invalid');
+										item.classList.add('hasError');
 									}))
 								: (
 									selectList.forEach((item) => {
-										item.classList.remove('is-invalid')
+										item.classList.remove('is-invalid');
+										item.classList.remove('hasError');
 									}));
 
 							if (this.errors.items.length !== 0)
@@ -579,42 +579,9 @@
 									if (item.classList.contains('hasError'))
 										selectList[index].classList.add('is-invalid');
 								});
-
-							inputGroup.forEach((item) => {
-								let input = item.querySelector('.input-group-append > input');
-
-								(input.classList.contains('is-invalid'))
-									? this.getNthParent(input, 2).classList.add('is-invalid')
-									: this.getNthParent(input, 2).classList.remove('is-invalid')
-							});
 						} else {
-							if (result && status === 'create') {
-								let error = false;
-
-								inputGroup.forEach((item) => {
-									let input = item.querySelector('.input-group-append > input');
-									let stock = vm.$data.orderModal.formFields.productList[item.dataset.index].selected.stock;
-
-									debugger;
-									while (error !== true) {
-										debugger;
-										if (parseInt(input.value) <= parseInt(stock)) {
-											this.getNthParent(input, 2).classList.remove('is-invalid');
-											debugger;
-											return error = true;
-										} else {
-											this.getNthParent(input, 2).classList.add('is-invalid');
-											debugger;
-											return error = false;
-										}
-									}
-								});
-								debugger;
-								if (error) {
-									this.onCreateOrder();
-								}
-							}
-
+							if (result && status === 'create')
+								this.onCreateOrder();
 							if (result && status === 'edit')
 								this.onEditOrder();
 						}
