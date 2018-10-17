@@ -365,6 +365,7 @@
 			...mapActions([
 				'createOrder',
 				'editOrder',
+				'editProduct',
 				'getProductList',
 				'getOrderList',
 			]),
@@ -455,6 +456,12 @@
 			getNthParent(elem, n) {
 				return n === 0 ? elem : this.getNthParent(elem.parentNode, n - 1);
 			},
+			setUpdateData(res, el) {
+				return {
+					editedResults: cloneDeep(res),
+					editElement: el
+				};
+			},
 			getKeyInDBPath(path) {
 				let routePath = `/${this.$route.name}/`;
 				let startnum = path.indexOf(routePath) + routePath.length;
@@ -482,7 +489,7 @@
 
 				formFields.id = 'order@_' + Math.random().toString(36).substr(2, 6);
 				formFields.dateFormat = this.dateFormat.toLocaleDate;
-				formFields.totalResult = formFields.productList.reduce( function (sum, current) {
+				formFields.totalResult = formFields.productList.reduce(function (sum, current) {
 					return sum + (current.productCount * current.selected.price);
 				}, 0);
 				formFields.total = formFields.totalResult + ' ₴';
@@ -491,30 +498,33 @@
 				debugger;
 
 				this.createOrder(formFields)
-						.then((path) => {
+					.then((path) => {
 						return this.getKeyInDBPath(path);
 					})
 					.then((key) => {
 						this.$set(formFields, 'key', key);
-						let updatedData = {
-							editedResults: cloneDeep(formFields),
-							editElement:  key
-						};
 
-						let dataForModified = updatedData.editedResults.map((item) => {
+						let dataForModified = formFields.productList.map((item) => {
 							let result = {};
 							result.key = item.selected.key;
 							result.count = item.productCount;
 							return result
 						});
 
-						// dataForModified.forEach((item) => {
-						//
-						// });
+						this.editOrder(this.setUpdateData(formFields, key));
+						return dataForModified;
+					})
+					.then((updateData) => {
+						updateData.forEach((item) => {
+							try {
+								let stock = parseInt(this.products[item.key].stock) - parseInt(item.count);
 
-						console.log(this.products[formFields.productList.selected.key]);
-						debugger;
-						this.editOrder(updatedData);
+								this.products[item.key].stock = stock.toString();
+								this.editProduct(this.setUpdateData(this.products[item.key], item.key));
+							} catch (err) {
+								console.log(err);
+							}
+						});
 					})
 					.then(() => {
 						this.closeModal();
@@ -535,7 +545,7 @@
 			 */
 			onConfirm() {
 				let status = this.orderModal.status;
-				let d;
+				// let d;
 
 				this.$validator.validateAll()
 					.then((result) => {
@@ -561,10 +571,10 @@
 								});
 						} else {
 							if (result && status === 'create')
-								// this.onCreateOrder();
-								d = this.orderModal.formFields.productList;
-								console.log(d);
-								debugger;
+								this.onCreateOrder();
+							// d = this.orderModal.formFields.productList;
+							// console.log(d);
+							// debugger;
 							if (result && status === 'edit')
 								this.onEditOrder();
 						}
