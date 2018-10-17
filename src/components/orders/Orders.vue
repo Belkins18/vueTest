@@ -16,19 +16,20 @@
 					<th v-for="(headName, index) in table.data.headNames" :key='index'>
 						<div class="table-orders__head">
 							<span>{{(headName.text) || headName}}</span>
-							<BaseIcon v-if="headName.icon" style="margin-left: 5px" :iconName="headName.icon" :width="20" :height="24"></BaseIcon>
+							<BaseIcon v-if="headName.icon" style="margin-left: 5px" :iconName="headName.icon" :width="20" :height="24">
+							</BaseIcon>
 						</div>
 					</th>
 				</tr>
 				<tr v-for="(order, index) in orders" :key='order.id' slot="tableBody">
 					<td>{{ order.id }}</td>
-					<td>{{ order.dateFormat }}</td>
+					<td>{{ order.date.split('T')[0] }}</td>
 					<td>
 						<ul class="orders__product-list productList">
 							<li v-for="product in order.productList" :key='product.selected.id'
 								class="productList__item">
 								<span class="productList__val">{{ product.selected.text }} <small>x</small> {{ product.productCount }}</span>
-								<span class="productList__cur">({{'₴ ' + parseInt(product.selected.price, 10) * parseInt(product.productCount, 10) }})</span>
+								<span class="productList__cur">({{'₴ ' + parseFloat(product.selected.price) * parseInt(product.productCount, 10) }})</span>
 							</li>
 						</ul>
 					</td>
@@ -100,6 +101,7 @@
 														:options="options"
 														:close-on-select="true"
 														:clear-on-select="false"
+														:disabled="(orderModal.status === 'create' ? false : true)"
 														placeholder="Select one"
 														:aria-describedby="'multiselectHelp_' + index"
 														label="text"
@@ -127,7 +129,10 @@
 													type="danger"
 													icon="trash"
 													:square="true"
-													:disabled="ordersProductsList < 2"
+													:disabled="(
+													orderModal.status === 'create'
+														? (ordersProductsList < 2)
+														: (ordersProductsList >= Object.keys(orderModal.formFields.productList).length))"
 													@click="removeProductWithOrdersProductListHandler(index)">
 											</BaseButton>
 										</div>
@@ -143,7 +148,10 @@
 											:block="true"
 											:outline="true"
 											type="info"
-											:disabled="ordersProductsList >= Object.keys(this.products).length"
+											:disabled="(
+											orderModal.status === 'create'
+												? (ordersProductsList >= Object.keys(this.products).length)
+												: (ordersProductsList >= Object.keys(orderModal.formFields.productList).length))"
 											@click="addProductInOrdersProductListHandler">
 										Add One More Product
 									</BaseButton>
@@ -293,7 +301,6 @@
 					status: '',
 					formFields: {
 						date: null,
-						dateFormat: '',
 						id: '',
 						key: '',
 						clientName: '',
@@ -310,7 +317,7 @@
 							{text: 'id', icon: 'table_id'},
 							{text: 'Date', icon: 'table_calendar'},
 							{text: 'Products', icon: 'table_product'},
-							{text: 'Client Name', icon: 'table_user-name' },
+							{text: 'Client Name', icon: 'table_user-name'},
 							{text: 'Phone', icon: 'table_phone'},
 							{text: 'Total', icon: 'table_total'},
 							{text: 'Paid', icon: 'table_paid'},
@@ -332,7 +339,8 @@
 				},
 				state: {
 					disabledDates: {
-						to: new Date,
+						// to: new Date,
+						from: new Date
 					}
 				}
 			}
@@ -358,19 +366,7 @@
 				let items = this.orderModal.formFields.productList;
 				return items.length
 			},
-			dateFormat() {
-				let date = this.orderModal.formFields.date;
-				return {
-					toString: date.toString(),
-					toDate: date.toDateString(),
-					toISO: date.toISOString(),
-					toJSON: date.toJSON(),
-					toLocaleDate: date.toLocaleDateString(),
-					toLocaleTime: date.toLocaleTimeString(),
-					toTime: date.toTimeString(),
-					toUTC: date.toUTCString(),
-				}
-			},
+
 			phoneNumber() {
 				if (this.orderModal.formFields.phone) {
 					return this.orderModal.formFields.phone.replace(/[^0-9a-zA-Z+]/g, '')
@@ -399,6 +395,18 @@
 						price: element.price
 					})
 				});
+			},
+			dateFormat(date) {
+				return {
+					toString: date.toString(),
+					toDate: date.toDateString(),
+					toISO: date.toISOString(),
+					toJSON: date.toJSON(),
+					toLocaleDate: date.toLocaleDateString(),
+					toLocaleTime: date.toLocaleTimeString(),
+					toTime: date.toTimeString(),
+					toUTC: date.toUTCString(),
+				}
 			},
 			// ОТКРыВАНИЕ МОДАЛЬНыХ ОКОН
 			/**
@@ -453,7 +461,6 @@
 				formFields.id = '';
 				formFields.key = '';
 				formFields.date = null;
-				formFields.dateFormat = '';
 				formFields.clientName = '';
 				formFields.phone = '';
 				formFields.checkboxPaid = false;
@@ -508,11 +515,9 @@
 				}, 0);
 
 				formFields.id = 'order@_' + Math.random().toString(36).substr(2, 6);
-				formFields.dateFormat = this.dateFormat.toLocaleDate;
 				formFields.total = totalValue.toFixed(2);
 
 				orderModal.confirmChangesBtn.isDisabled = true;
-				debugger;
 
 				this.createOrder(formFields)
 					.then((path) => {
@@ -528,7 +533,11 @@
 							return result
 						});
 
-						this.editOrder(this.setUpdateData(formFields, key));
+						this.$set(formFields, 'modifiedData', dataForModified);
+
+						this.editOrder(
+							this.setUpdateData(formFields, key)
+						);
 						return dataForModified;
 					})
 					.then((updateData) => {
@@ -537,7 +546,9 @@
 								let stock = parseInt(this.products[item.key].stock) - parseInt(item.count);
 
 								this.products[item.key].stock = stock.toString();
-								this.editProduct(this.setUpdateData(this.products[item.key], item.key));
+								this.editProduct(
+									this.setUpdateData(this.products[item.key], item.key)
+								);
 							} catch (err) {
 								console.log(err);
 							}
@@ -549,7 +560,35 @@
 					})
 			},
 			onEditOrder() {
+				let orderModal = this.orderModal;
+				let formFields = this.orderModal.formFields;
+				let totalValue = formFields.productList.reduce(function (sum, current) {
+					return sum + (current.productCount * current.selected.price);
+				}, 0);
 
+				formFields.total = totalValue.toFixed(2);
+				orderModal.confirmChangesBtn.isDisabled = true;
+				this.editOrder(this.setUpdateData(formFields, formFields.key))
+					.then(() => {
+						formFields.modifiedData.forEach((item, index) => {
+							try {
+								let saldo = (formFields.productList[index].productCount - item.count);
+								let stock = parseInt(this.products[item.key].stock) - saldo;
+
+								this.products[item.key].stock = stock.toString();
+
+								this.editProduct(
+									this.setUpdateData(this.products[item.key], item.key)
+								);
+							} catch (err) {
+								console.log(err);
+							}
+						})
+					})
+					.then(() => {
+						this.closeModal();
+						this.getOrderList();
+					});
 			},
 
 			/**
@@ -621,6 +660,7 @@
 			padding: 0;
 		}
 	}
+
 	.table-orders {
 		&__head {
 			display: flex;
@@ -671,6 +711,14 @@
 		.input-group {
 			&__select-wraper {
 				width: calc(100% - 138px);
+			}
+		}
+	}
+
+	.table-orders {
+		.productList {
+			&__item {
+				flex-wrap: nowrap;
 			}
 		}
 	}
