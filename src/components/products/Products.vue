@@ -2,9 +2,10 @@
 	<div class="products">
 		<div class='container'>
 			<BaseButton classes="createProduct products__btn products__btn--showModal"
-						type="secondary"
+						type="warning"
 						@click="createProductHandler">
 				Create New Product
+				<BaseIcon :iconName="'create'"></BaseIcon>
 			</BaseButton>
 
 			<BaseTable
@@ -196,6 +197,7 @@
 	import BaseButton from "@/components/_shared/BaseButton";
 	import BaseTable from "@/components/_shared/BaseTable";
 	import BaseModal from "@/components/_shared/BaseModal";
+	import BaseIcon from '@/components/_shared/BaseIcon';
 
 
 	export default {
@@ -204,6 +206,7 @@
 			BaseButton,
 			BaseTable,
 			BaseModal,
+			BaseIcon
 		},
 		data() {
 			return {
@@ -473,7 +476,7 @@
 						formFields.imageBase64 = '';
 						formFields.imageName = '';
 						formFields.imageURL = '';
-						
+
 						this.editProduct(
 							this.setUpdateData(formFields, fileLoadInfo.productFbId)
 						);
@@ -578,7 +581,7 @@
 							this.closeModal();
 							this.getProductList();
 						})
-				} else if (formFields.imageName) {
+				} else if (formFields.imageName === "") {
 					let forRemoveData = {
 						editElement: fileLoadInfo.productFbId,
 						imageName: formFields.imageName
@@ -677,6 +680,16 @@
 		}
 		&__error {
 			color: $red;
+		}
+	}
+
+	button.createProduct {
+		.icon {
+			margin-left: rem(5);
+			&-create {
+				width: rem(22);
+				height: rem(22);
+			}
 		}
 	}
 

@@ -3,16 +3,22 @@
 		<div class='container'>
 			<BaseButton
 					classes="createOrder orders__btn orders__btn--showModal"
-					type="secondary"
+					type="warning"
 					@click="createOrdersHandler">
 				Create New Order
+				<BaseIcon :iconName="'create'"></BaseIcon>
 			</BaseButton>
 
 			<BaseTable
-					classes="orders__table"
+					classes="table-orders"
 					:responsive="table.isResponsive">
 				<tr slot="tableHead">
-					<th v-for="(headName, index) in table.data.headNames" :key='index'>{{headName}}</th>
+					<th v-for="(headName, index) in table.data.headNames" :key='index'>
+						<div class="table-orders__head">
+							<span>{{(headName.text) || headName}}</span>
+							<BaseIcon v-if="headName.icon" style="margin-left: 5px" :iconName="headName.icon" :width="20" :height="24"></BaseIcon>
+						</div>
+					</th>
 				</tr>
 				<tr v-for="(order, index) in orders" :key='order.id' slot="tableBody">
 					<td>{{ order.id }}</td>
@@ -28,7 +34,7 @@
 					</td>
 					<td>{{ order.clientName }}</td>
 					<td>{{ order.phone }}</td>
-					<td>{{ order.total }}</td>
+					<td>{{ order.total + ' ₴'}}</td>
 					<td>{{ order.checkboxPaid }}</td>
 					<td>{{ order.checkboxSent }}</td>
 					<td>
@@ -237,6 +243,7 @@
 	import BaseModal from '@/components/_shared/BaseModal';
 	import BaseSelect from '@/components/_shared/BaseSelect';
 	import BaseCheckbox from '@/components/_shared/BaseCheckbox';
+	import BaseIcon from '@/components/_shared/BaseIcon';
 
 	Vue.use(VeeValidate);
 	VeeValidate.Validator.extend('truthy', {
@@ -267,6 +274,7 @@
 			BaseTable,
 			BaseModal,
 			BaseSelect,
+			BaseIcon,
 			Multiselect,
 			BaseCheckbox,
 			MaskedInput,
@@ -298,7 +306,16 @@
 				table: {
 					isResponsive: true,
 					data: {
-						headNames: ['id', 'Date', 'Products', 'Client Name', 'Phone', 'Total', 'Paid', 'Sent', 'Actions'],
+						headNames: [
+							{text: 'id', icon: 'table_id'},
+							{text: 'Date', icon: 'table_calendar'},
+							{text: 'Products', icon: 'table_product'},
+							{text: 'Client Name', icon: 'table_user-name' },
+							{text: 'Phone', icon: 'table_phone'},
+							{text: 'Total', icon: 'table_total'},
+							{text: 'Paid', icon: 'table_paid'},
+							{text: 'Sent', icon: 'table_sent'},
+							{text: 'Actions', icon: ''}],
 						bodyContent: [
 							{
 								id: 1,
@@ -483,16 +500,16 @@
 				return isDuplicate;
 			},
 			onCreateOrder() {
-				console.log("allGood");
+				console.log('* onCreateOrder *');
 				let orderModal = this.orderModal;
 				let formFields = this.orderModal.formFields;
+				let totalValue = formFields.productList.reduce(function (sum, current) {
+					return sum + (current.productCount * current.selected.price);
+				}, 0);
 
 				formFields.id = 'order@_' + Math.random().toString(36).substr(2, 6);
 				formFields.dateFormat = this.dateFormat.toLocaleDate;
-				formFields.totalResult = formFields.productList.reduce(function (sum, current) {
-					return sum + (current.productCount * current.selected.price);
-				}, 0);
-				formFields.total = formFields.totalResult + ' ₴';
+				formFields.total = totalValue.toFixed(2);
 
 				orderModal.confirmChangesBtn.isDisabled = true;
 				debugger;
@@ -545,7 +562,6 @@
 			 */
 			onConfirm() {
 				let status = this.orderModal.status;
-				// let d;
 
 				this.$validator.validateAll()
 					.then((result) => {
@@ -572,9 +588,6 @@
 						} else {
 							if (result && status === 'create')
 								this.onCreateOrder();
-							// d = this.orderModal.formFields.productList;
-							// console.log(d);
-							// debugger;
 							if (result && status === 'edit')
 								this.onEditOrder();
 						}
@@ -606,6 +619,22 @@
 		.productList {
 			margin: 0;
 			padding: 0;
+		}
+	}
+	.table-orders {
+		&__head {
+			display: flex;
+			align-items: center;
+		}
+	}
+
+	button.createOrder {
+		.icon {
+			margin-left: rem(5);
+			&-create {
+				width: rem(22);
+				height: rem(22);
+			}
 		}
 	}
 
@@ -764,5 +793,4 @@
 	.vdp-datepicker.is-invalid ~ .invalid-feedback {
 		display: block;
 	}
-
 </style>

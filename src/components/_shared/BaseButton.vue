@@ -85,6 +85,11 @@
 </script>
 
 <style scoped lang="scss">
+    .btn {
+        span{
+            display: inline-flex;
+        }
+    }
     .btn.circle {
         @include is-circle(36, 1);
         display: inline-flex;
