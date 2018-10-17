@@ -413,7 +413,6 @@
 				fileLoadInfo.isFlag = false;
 
 				formFields.imageBase64 = '';
-				formFields.imageName = '';
 				formFields.imageURL = '';
 			},
 
@@ -471,8 +470,10 @@
 
 				this.deleteImgFromFbStorage(forRemoveData)
 					.then(() => {
+						formFields.imageBase64 = '';
 						formFields.imageName = '';
-
+						formFields.imageURL = '';
+						
 						this.editProduct(
 							this.setUpdateData(formFields, fileLoadInfo.productFbId)
 						);
