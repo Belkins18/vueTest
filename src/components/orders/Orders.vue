@@ -15,9 +15,8 @@
 				<tr slot="tableHead">
 					<th v-for="(headName, index) in table.data.headNames" :key='index'>
 						<div class="table-orders__head">
+							<BaseIcon v-if="headName.icon" style="margin-right: 5px" :iconName="headName.icon" :width="20" :height="24"></BaseIcon>
 							<span>{{(headName.text) || headName}}</span>
-							<BaseIcon v-if="headName.icon" style="margin-left: 5px" :iconName="headName.icon" :width="20" :height="24">
-							</BaseIcon>
 						</div>
 					</th>
 				</tr>
@@ -93,20 +92,45 @@
 										<div class="input-group" :data-index="index">
 											<div class="input-group__select-wraper">
 												<Multiselect
-														class="multiselect_order"
-														:class="{'hasError': errors.has('multiselect_'+ index) }"
 														v-model="item.selected"
 														v-validate="'required'"
+														placeholder="Select one"
+														class="multiselect_order"
+														:class="{'hasError': errors.has('multiselect_'+ index) }"
 														:name="'multiselect_' + index"
 														:options="options"
-														:close-on-select="true"
 														:clear-on-select="false"
 														:disabled="(orderModal.status === 'create' ? false : true)"
-														placeholder="Select one"
 														:aria-describedby="'multiselectHelp_' + index"
+														:custom-label="customLabel"
+														:show-labels="false"
 														label="text"
 														track-by="text"
+														@open="onMultiselectOpen"
 														@input="onMultiselectChange(index, item)">
+													<template
+															slot="singleLabel"
+															slot-scope="props">
+														<div style="display: flex; align-items: center;">
+															<span style="display: flex; align-items: center; justify-content: center;">
+																<img :src="props.option.image" class="" width="30px" />
+															</span>
+															<span style="margin-left: 5px;text-overflow: ellipsis;overflow: hidden; white-space: nowrap;">{{props.option.text}}</span>
+														</div>
+													</template>
+													<template
+															slot="option"
+															slot-scope="props"
+															slot-class="(props.option.stock > 0 ? '' : 'multiselect__option--disabled')">
+														<div style="display: flex; align-items: center;">
+															<span style="display: flex; align-items: center; justify-content: center;">
+																<img :src="props.option.image" class="" width="30px" />
+															</span>
+															<span style="margin-left: 5px">{{props.option.text}}
+																<span style="margin-left: 5px; color: #ced4da;">{{props.option.stock}}</span>
+															</span>
+														</div>
+													</template>
 												</Multiselect>
 												<small :id="'multiselectHelp_'+ index" class="invalid-feedback">{{
 													errors.first('multiselect_'+ index)}}
@@ -121,7 +145,7 @@
 														:aria-describedby="'productCountHelp_'+ index"
 														:disabled="!item.isSelect"
 														v-validate="{required: true, numeric: true, min_value: 1,
-														max_value: (!item.isSelect) ? null : item.selected.stock}"
+														max_value: (item.isSelect) ? options.stock : options.stock}"
 														v-model="item.productCount">
 											</div>
 											<BaseButton
@@ -290,7 +314,6 @@
 		},
 		data() {
 			return {
-				val: 5,
 				options: [],
 				orderModal: {
 					data: {},
@@ -387,14 +410,17 @@
 				let normalData = Object.values(parseData);
 				normalData.forEach((element) => {
 					newData.push({
-						key: element.key,
 						id: element.id,
 						image: element.imageURL,
+						key: element.key,
+						price: element.price,
 						text: element.name,
 						stock: element.stock,
-						price: element.price
 					})
 				});
+			},
+			customLabel ({ title, desc }) {
+				return `${title} – ${desc}`
 			},
 			dateFormat(date) {
 				return {
@@ -427,6 +453,8 @@
 
 			editOrderHandler(order, index) {
 				let orderModal = this.orderModal;
+
+				this.formatOptions(this.products, this.options);
 
 				console.log(index);
 				orderModal.status = 'edit';
@@ -467,6 +495,10 @@
 				formFields.checkboxSent = false;
 				formFields.productList = [{}];
 			},
+			onMultiselectOpen() {
+				console.log(this.options);
+				console.log(this.$el);
+			},
 
 			onMultiselectChange(index, item) {
 				let formFields = this.orderModal.formFields;
@@ -474,8 +506,6 @@
 				(item.selected !== null)
 					? this.$set(formFields.productList[index], 'isSelect', true)
 					: this.$set(formFields.productList[index], 'isSelect', false);
-
-
 			},
 			getNthParent(elem, n) {
 				return n === 0 ? elem : this.getNthParent(elem.parentNode, n - 1);
@@ -628,7 +658,8 @@
 							if (result && status === 'create')
 								this.onCreateOrder();
 							if (result && status === 'edit')
-								this.onEditOrder();
+								return
+								// this.onEditOrder();
 						}
 					});
 			},
